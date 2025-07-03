@@ -13,12 +13,12 @@ const HomePage = () => {
         setLoading(true);
         setError(null);
 
-        const response = await fetch("https://v958lpht-5000.inc1.devtunnels.ms/api/product/list");
+        const response = await fetch("https://v958lpht-2000.inc1.devtunnels.ms/api/product/list");
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setProducts(data);
+        setProducts(data.products);
       } catch (err) {
         console.error("Failed to fetch products:", err);
         setError(err.message);
@@ -30,7 +30,6 @@ const HomePage = () => {
     fetchProducts();
   }, []);
 
-  console.log('products', products)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -152,7 +151,7 @@ const HomePage = () => {
                   {/* Product image */}
                   <div className="relative overflow-hidden">
                     <img
-                      src={`https://v958lpht-5000.inc1.devtunnels.ms/api/uploads/${product.image}`}
+                      src={product.image}
                       alt={product.name}
                       onError={(e) =>
                         (e.currentTarget.src = "/src/image_22_3.jpeg")

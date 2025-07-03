@@ -12,7 +12,6 @@ const LoginPage = () => {
 
   const { accessToken, loading, error, user } = useSelector((state) => state.auth);
 
-  console.log('Redux State on LoginPage:', { accessToken, loading, error, user });
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -21,12 +20,10 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (accessToken && !user && !loading) {
-      console.log('Dispatching checkAdmin due to accessToken and no user in Redux.');
       dispatch(checkAdmin(accessToken));
     }
 
     if (user && user.role === 'admin') {
-      console.log('Login successful, navigating to admin dashboard.');
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("accessToken", accessToken);
       toast.success("Login Successful", {
@@ -36,7 +33,6 @@ const LoginPage = () => {
     }
 
     if (error) {
-      console.log('Login or Admin check failed:', error);
       toast.error("Login Failed", {
         description: error,
       });
@@ -51,7 +47,6 @@ const LoginPage = () => {
     const user = localStorage.getItem('user');
 
     if (storedAccessToken && !accessToken && !user && !loading) {
-      console.log('Found stored accessToken, re-validating session via checkAdmin.');
       dispatch(checkAdmin(storedAccessToken));
     }
   }, [dispatch, accessToken, user, loading]);

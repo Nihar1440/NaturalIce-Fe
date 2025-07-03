@@ -11,46 +11,96 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner"; 
+import { useDispatch, useSelector } from "react-redux";
+import { getCategories } from "@/features/category/categorySlice";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const AddProductFormContent = ({ onClose, onProductAdded, initialData, categories }) => {
+const AddProductFormContent = ({ onClose, onProductAdded, initialData }) => {
+  const dispatch = useDispatch();
+  const { categories } = useSelector((state) => state.category);
 
   const [form, setForm] = useState({
     name: "",
     description: "",
     price: "",
     category: "",
-    image: null,
-    imageUrl: "",
+    image: "",
   });
 
-  useEffect(() => {
-    if (initialData) {
-      // Trim category value to ensure exact match with SelectItem values
-      const trimmedCategory = initialData.category ? initialData.category.trim() : "";
-      console.log("Initial Data Category:", initialData.category); // For debugging
-      console.log("Setting form category to:", trimmedCategory); // For debugging
+  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
 
-      setForm({
-        name: initialData.name || "",
-        description: initialData.description || "",
-        price: initialData.price ? initialData.price.toString() : "",
-        category: trimmedCategory,
-        image: null,
-        imageUrl: initialData.imageUrl || "",
-      });
-    } else {
-      setForm({
-        name: "",
-        description: "",
-        price: "",
-        category: "",
-        image: null,
-        imageUrl: "",
-      });
+  // Load categories when component mounts
+  useEffect(() => {
+    dispatch(getCategories());
+  }, [dispatch]);
+
+  useEffect(() => {
+    // Only process initialData if we have categories loaded OR if it's not edit mode
+    if (!initialData || (initialData && categories?.length > 0)) {
+      if (initialData) {
+     
+        
+        // Determine category ID
+        let categoryToSet = "";
+        
+        if (initialData.category) {
+          if (typeof initialData.category === 'object' && initialData.category._id) {
+            // Category is an object with _id
+            categoryToSet = initialData.category._id;
+          } else if (typeof initialData.category === 'string') {
+            // Category is a string (could be ID or name)
+            // First check if it's already an ID that exists in categories
+            const existingCategoryById = categories.find(cat => cat._id === initialData.category);
+            if (existingCategoryById) {
+              categoryToSet = initialData.category;
+            } else {
+              // Try to find by name
+              const existingCategoryByName = categories.find(cat => 
+                cat.name.toLowerCase() === initialData.category.toLowerCase()
+              );
+              if (existingCategoryByName) {
+                categoryToSet = existingCategoryByName._id;
+              }
+            }
+          }
+        }
+
+
+        setForm({
+          name: initialData.name || "",
+          description: initialData.description || "",
+          price: initialData.price ? initialData.price.toString() : "",
+          category: categoryToSet,
+          image: initialData.image || "",
+        });
+      } else {
+        // New product form
+        setForm({
+          name: "",
+          description: "",
+          price: "",
+          category: "",
+          image: null,
+        });
+      }
     }
-  }, [initialData]);
+  }, [initialData, categories]);
+
+  useEffect(() => {
+    if (form.image) {
+      if (typeof form.image === 'string') {
+        setImagePreviewUrl(form.image);
+      } else if (form.image instanceof File) {
+        const objectUrl = URL.createObjectURL(form.image);
+        setImagePreviewUrl(objectUrl);
+
+        return () => URL.revokeObjectURL(objectUrl);
+      }
+    } else {
+      setImagePreviewUrl(null);
+    }
+  }, [form.image]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -71,16 +121,16 @@ const AddProductFormContent = ({ onClose, onProductAdded, initialData, categorie
     e.preventDefault();
     const token = localStorage.getItem("accessToken");
     if (!token) {
-      toast.error("Authentication Required", { // Use toast.error for destructive variant
+      toast.error("Authentication Required", {
         description: "Please log in to perform this action.",
       });
-      onClose(); // Close dialog immediately
+      onClose();
       return;
     }
 
     const formData = new FormData();
     for (const key in form) {
-      if (key !== "image" && key !== "imageUrl") {
+      if (key !== "image") {
         formData.append(key, form[key]);
       }
     }
@@ -115,23 +165,30 @@ const AddProductFormContent = ({ onClose, onProductAdded, initialData, categorie
         description: "",
         price: "",
         category: "",
-        image: null,
-        imageUrl: "",
-      }); 
+        image: "",
+      });
       onProductAdded();
       onClose();
     } catch (err) {
       console.error(`Error ${initialData ? 'updating' : 'adding'} product:`, err);
-      toast.error("Error", { 
+      toast.error("Error", {
         description: err.message || `An unexpected error occurred while ${initialData ? 'updating' : 'adding'} the product.`,
       });
-      onClose(); 
+      onClose();
     }
   };
 
+  const handleCategorySelectOpenChange = (open) => {
+    if (open && categories?.length === 0) {
+      dispatch(getCategories());
+    }
+  };
+
+  // Get the selected category name for display
+  const selectedCategoryName = categories?.find(cat => cat._id === form.category)?.name || "";
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-2">
-      {" "}
       <div>
         <label htmlFor="name">Product Name</label>
         <Input
@@ -175,41 +232,30 @@ const AddProductFormContent = ({ onClose, onProductAdded, initialData, categorie
           value={form.category}
           onValueChange={handleSelectChange}
           required
-          key={initialData ? initialData._id : "add-new-product-key"}
+          onOpenChange={handleCategorySelectOpenChange}
         >
           <SelectTrigger className="w-full">
-            {form.category ? (
-              <SelectValue>{form.category}</SelectValue>
-            ) : (
-              <SelectValue placeholder="Select Category" />
-            )}
+            <SelectValue placeholder="Select Category">
+              {selectedCategoryName || "Select Category"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {categories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
+            {categories?.map((category) => (
+              <SelectItem key={String(category._id)} value={category._id}>
+                {category.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
       <div>
-        <label htmlFor="image">Product Image</label>
-        <Input
-          type="file"
-          id="image"
-          name="image"
-          accept="image/*"
-          onChange={handleChange}
-          required={!initialData || !initialData.imageUrl}
-        />
-        {form.imageUrl && !form.image && (
+        {imagePreviewUrl && (
           <div className="mt-2">
             <span className="block text-sm text-gray-700 mb-1">Current Image:</span>
-            <a href={form.imageUrl} target="_blank" rel="noopener noreferrer" 
+            <a href={imagePreviewUrl} target="_blank" rel="noopener noreferrer"
                className="inline-block border border-gray-300 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
               <img
-                src={form.imageUrl}
+                src={imagePreviewUrl}
                 alt="Current Product Image"
                 className="w-24 h-24 object-cover object-center rounded-md"
               />
@@ -217,9 +263,17 @@ const AddProductFormContent = ({ onClose, onProductAdded, initialData, categorie
             <p className="text-sm text-gray-500 mt-1">Upload new to replace</p>
           </div>
         )}
+        <label htmlFor="image">{imagePreviewUrl ? "Update image" : "Add Image"}</label>
+        <Input
+          type="file"
+          id="image"
+          name="image"
+          accept="image/*"
+          onChange={handleChange}
+          required={!initialData || !initialData.image}
+        />
       </div>
       <div className="flex justify-end space-x-2 pt-4">
-        {" "}
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>

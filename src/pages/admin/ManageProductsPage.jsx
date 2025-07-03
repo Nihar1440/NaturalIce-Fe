@@ -33,7 +33,8 @@ import { fetchProducts, deleteProduct } from "../../features/product/productSlic
 const ManageProductsPage = () => {
   const dispatch = useDispatch();
   const { products, loading, error } = useSelector((state) => state.product.products);
-  console.log('products', products)
+  const {categories} = useSelector((state) => state.category)
+
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("All");
@@ -66,23 +67,23 @@ const ManageProductsPage = () => {
     }
   }, [searchTerm, filterCategory, dispatch, error]);
 
-  const productCategories = [
-    "Ice Tubes",
-    "Ice Cubes",
-    "Crushed Ice",
-    "Flakes Ice",
-    "Solid Ice",
-    "Ice Ball",
-    "Ice Sculpture",
-    "Custom Ice",
-    "Ice Cup",
-    "Dry Ice",
-    "Block Ice",
-    "Arctic Ice",
-    "Luxury Box",
-    "Freezers",
-    "Machines",
-  ].sort();
+  // const productCategories = [
+  //   "Ice Tubes",
+  //   "Ice Cubes",
+  //   "Crushed Ice",
+  //   "Flakes Ice",
+  //   "Solid Ice",
+  //   "Ice Ball",
+  //   "Ice Sculpture",
+  //   "Custom Ice",
+  //   "Ice Cup",
+  //   "Dry Ice",
+  //   "Block Ice",
+  //   "Arctic Ice",
+  //   "Luxury Box",
+  //   "Freezers",
+  //   "Machines",
+  // ].sort();
 
   const handleSearch = () => {
     fetchProductsData();
@@ -184,9 +185,9 @@ const ManageProductsPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="All">All Categories</SelectItem>
-                  {productCategories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
+                  {categories?.map((item) => (
+                    <SelectItem key={item._id} value={item._id}>
+                      {item.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -226,7 +227,7 @@ const ManageProductsPage = () => {
                     onClose={handleCloseModal}
                     onProductAdded={fetchProductsData}
                     initialData={editingProduct}
-                    categories={productCategories}
+                    categories={categories}
                   />
                 </DialogContent>
               </Dialog>
@@ -286,7 +287,7 @@ const ManageProductsPage = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 text-gray-700">
-                          {product.category}
+                          {product?.category?.name}
                         </td>
                         <td className="px-6 py-4 font-medium text-gray-900">
                           ${product.price.toFixed(2)}
@@ -344,7 +345,7 @@ const ManageProductsPage = () => {
                           <div>
                             <span className="text-gray-500">Category:</span>
                             <span className="ml-1 text-gray-900">
-                              {product.category}
+                              {product.category.name}
                             </span>
                           </div>
                           <div>

@@ -41,7 +41,6 @@ export const fetchProductById = createAsyncThunk(
 export const createProduct = createAsyncThunk(
   "product/createProduct",
   async ({ formData, accessToken }) => {
-    console.log('accessToken', accessToken)
     const response = await axios.post(`${API_URL}/api/product/create`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",

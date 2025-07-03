@@ -3,12 +3,25 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Helper function to get the authorization header
+const getConfig = () => {
+  const token = localStorage.getItem('accessToken'); 
+  if (token) {
+    return {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+  }
+  return {};
+};
+
 // Async Thunk to fetch all categories
 export const getCategories = createAsyncThunk(
   "category/getCategories",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/category`);
+      const response = await axios.get(`${API_URL}/api/category`, getConfig());
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -29,7 +42,7 @@ export const getCategoryById = createAsyncThunk(
   "category/getCategoryById",
   async (categoryId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/category/${categoryId}`);
+      const response = await axios.get(`${API_URL}/api/category/${categoryId}`, getConfig());
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -51,7 +64,7 @@ export const createCategory = createAsyncThunk(
   async (categoryData, { rejectWithValue }) => {
     // categoryData should contain { name, description, status }
     try {
-      const response = await axios.post(`${API_URL}/category/create`, categoryData);
+      const response = await axios.post(`${API_URL}/api/category/create`, categoryData, getConfig());
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -70,10 +83,10 @@ export const createCategory = createAsyncThunk(
 // Async Thunk to update an existing category
 export const updateCategory = createAsyncThunk(
   "category/updateCategory",
-  async ({ categoryId, updateData }, { rejectWithValue }) => {
+  async ({ _id, updateData }, { rejectWithValue }) => {
     // updateData can contain { name, description, status }
     try {
-      const response = await axios.put(`${API_URL}/category/update/${categoryId}`, updateData);
+      const response = await axios.put(`${API_URL}/api/category/update/${_id}`, updateData, getConfig());
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -92,9 +105,9 @@ export const updateCategory = createAsyncThunk(
 // Async Thunk to delete a category
 export const deleteCategory = createAsyncThunk(
   "category/deleteCategory",
-  async (categoryId, { rejectWithValue }) => {
+  async (_id, { rejectWithValue }) => {
     try {
-      const response = await axios.delete(`${API_URL}/category/delete/${categoryId}`);
+      const response = await axios.delete(`${API_URL}/api/category/delete/${_id}`, getConfig());
       return response.data; // Backend returns { message: 'Category deleted successfully' }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -111,8 +124,8 @@ export const deleteCategory = createAsyncThunk(
 );
 
 const initialState = {
-  categories: [], // Array to store all categories
-  currentCategory: null, // To store a single category when fetched by ID or created/updated
+  categories: [], 
+  currentCategory: null, 
   loading: false,
   error: null,
 };
@@ -146,7 +159,6 @@ const categorySlice = createSlice({
       .addCase(getCategories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to fetch categories";
-        state.categories = [];
       })
       // Get Category By ID
       .addCase(getCategoryById.pending, (state) => {
@@ -185,15 +197,13 @@ const categorySlice = createSlice({
       .addCase(updateCategory.fulfilled, (state, action) => {
         state.loading = false;
         // Update the category in the 'categories' array
-        const index = state.categories.findIndex(
-          (cat) => cat._id === action.payload._id
+        const updatedCategory = action.payload;
+        state.categories = state.categories.map((cat) =>
+          cat._id === updatedCategory._id ? updatedCategory : cat
         );
-        if (index !== -1) {
-          state.categories[index] = action.payload;
-        }
         // Update currentCategory if it was the one being updated
-        if (state.currentCategory && state.currentCategory._id === action.payload._id) {
-          state.currentCategory = action.payload;
+        if (state.currentCategory && state.currentCategory._id === updatedCategory._id) {
+          state.currentCategory = updatedCategory;
         }
       })
       .addCase(updateCategory.rejected, (state, action) => {
@@ -209,11 +219,12 @@ const categorySlice = createSlice({
         state.loading = false;
         // Remove the deleted category from the 'categories' array
         // Assuming action.meta.arg contains the categoryId that was deleted
+        const deletedCategoryId = action.meta.arg;
         state.categories = state.categories.filter(
-          (cat) => cat._id !== action.meta.arg
+          (cat) => cat._id !== deletedCategoryId
         );
         // Clear currentCategory if it was the one deleted
-        if (state.currentCategory && state.currentCategory._id === action.meta.arg) {
+        if (state.currentCategory && state.currentCategory._id === deletedCategoryId) {
           state.currentCategory = null;
         }
         // You might want to store the success message from action.payload if needed
