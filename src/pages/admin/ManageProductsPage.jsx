@@ -395,7 +395,7 @@ const ManageProductsPage = () => {
         open={showDeleteConfirmDialog}
         onOpenChange={setShowDeleteConfirmDialog}
       >
-        <DialogContent>
+        <DialogContent  className="w-96">
           <DialogHeader>
             <DialogTitle>Are you absolutely sure?</DialogTitle>
             <DialogDescription>

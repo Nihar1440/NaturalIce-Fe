@@ -21,10 +21,13 @@ import RegisterPage from "./pages/user/RegisterPage";
 import WishlistPage from "./pages/user/WishlistPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManageCategory from "./pages/admin/ManageCategory";
+import RequestResetPasswordPage from "./pages/user/RequestResetPasswordPage";
+import SetNewPasswordPage from "./pages/user/SetNewPasswordPage";
 
 const App = () => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isCartPage = location.pathname === '/cart';
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gray-100">
@@ -35,6 +38,8 @@ const App = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<RequestResetPasswordPage />} />
+          <Route path="/reset-password/:token" element={<SetNewPasswordPage />} />
           <Route path="/create-superadmin" element={<CreateSuperAdminPage />} />
           <Route path="/about" element={<AboutAllFixPage />} />
           <Route path="/cart" element={<CartPage />} />
@@ -65,7 +70,7 @@ const App = () => {
         </Routes>
       </div>
 
-      {!isAdminRoute && <Footer />}
+      {!isAdminRoute && !isCartPage && <Footer />}
       <Toaster />
     </div>
   );

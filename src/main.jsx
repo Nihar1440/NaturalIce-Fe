@@ -54,6 +54,11 @@ axiosToIntercept.interceptors.response.use(
       error.response.status === 401 &&
       !originalRequest._retry
     ) {
+      if (originalRequest.url.endsWith('/api/user/login')) {
+        store.dispatch(logout());
+        return Promise.reject(error);
+      }
+      
       originalRequest._retry = true;
       originalRequest._refreshAttempted = true;
 

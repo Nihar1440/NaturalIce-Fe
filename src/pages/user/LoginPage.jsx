@@ -33,8 +33,9 @@ const LoginPage = () => {
     }
 
     if (error) {
+      console.log('error', error)
       toast.error("Login Failed", {
-        description: error,
+        description: error?.message || "An unknown error occurred. Please try again.",
       });
       dispatch(logout());
       localStorage.removeItem("accessToken");
@@ -43,13 +44,16 @@ const LoginPage = () => {
   }, [accessToken, user, error, loading, navigate, dispatch]);
 
   useEffect(() => {
+    if (error) {
+      return;
+    }
+
     const storedAccessToken = localStorage.getItem('accessToken');
-    const user = localStorage.getItem('user');
 
     if (storedAccessToken && !accessToken && !user && !loading) {
       dispatch(checkAdmin(storedAccessToken));
     }
-  }, [dispatch, accessToken, user, loading]);
+  }, [dispatch, accessToken, user, loading, error]);
 
   const handleSocialLogin = (provider) => {
     toast.info(`Attempting to log in with ${provider}...`, {
@@ -95,6 +99,13 @@ const LoginPage = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
+          <div className="flex items-center justify-end">
+            <div className="text-sm">
+              <Link to="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
+                Forgot password?
+              </Link>
+            </div>
+          </div>
           <button
             type="submit"
             disabled={loading}
@@ -112,7 +123,6 @@ const LoginPage = () => {
             <span className="bg-white px-2 text-gray-500">Or continue with</span>
           </div>
         </div>
-
         <div className="space-y-3">
           <button
             type="button"

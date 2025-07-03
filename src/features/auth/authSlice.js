@@ -22,14 +22,23 @@ export const registerUser = createAsyncThunk(
 
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
-  async (credentials) => {
-    const response = await axios.post(`${API_URL}/api/user/login`, credentials, {
-      withCredentials: true,
-    });
-    // Backend login returns { userProfile, accessToken }
-    return { user: response.data.userProfile, accessToken: response.data.accessToken };
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/api/user/login`, credentials, {
+        withCredentials: true,
+      });
+      return {
+        user: response.data.userProfile,
+        accessToken: response.data.accessToken,
+      };
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Login failed. Please try again.'
+      );
+    }
   }
 );
+
 
 // New async thunk for checking admin status
 export const checkAdmin = createAsyncThunk(
@@ -144,6 +153,39 @@ export const updateUserProfile = createAsyncThunk(
   }
 );
 
+// New async thunk for forgot password request
+export const forgotPasswordRequest = createAsyncThunk(
+  'auth/forgotPasswordRequest',
+  async (email, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/api/user/forgot-password`, { email });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Failed to send reset link');
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  }
+);
+
+// New async thunk for resetting password
+export const resetPasswordConfirm = createAsyncThunk(
+  'auth/resetPasswordConfirm',
+  async ({ token, password }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/api/user/reset-password/${token}`, { password });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Failed to reset password');
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  }
+);
 
 const authSlice = createSlice({
   name: 'auth',
@@ -189,8 +231,9 @@ const authSlice = createSlice({
         state.isSuperAdmin = action.payload.user?.isSuperAdmin || false; 
       })
       .addCase(loginUser.rejected, (state, action) => {
+        console.log('action', action)
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.payload;
         state.user = null;
         state.accessToken = null;
         state.isSuperAdmin = false;
@@ -208,9 +251,9 @@ const authSlice = createSlice({
       })
       .addCase(checkAdmin.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload; 
-        state.user = null; 
-        state.accessToken = null; 
+        state.error = action.payload;
+        state.user = null;
+        state.accessToken = null;
         state.isSuperAdmin = false;
       })
       // Handlers for logoutUser
@@ -280,6 +323,32 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Handlers for forgotPasswordRequest
+      .addCase(forgotPasswordRequest.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(forgotPasswordRequest.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(forgotPasswordRequest.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Handlers for resetPasswordConfirm
+      .addCase(resetPasswordConfirm.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(resetPasswordConfirm.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(resetPasswordConfirm.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
