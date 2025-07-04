@@ -23,6 +23,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManageCategory from "./pages/admin/ManageCategory";
 import RequestResetPasswordPage from "./pages/user/RequestResetPasswordPage";
 import SetNewPasswordPage from "./pages/user/SetNewPasswordPage";
+import ProductDetailsPage from './pages/user/ProductDetailsPage';
 
 const App = () => {
   const location = useLocation();
@@ -48,6 +49,7 @@ const App = () => {
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
+          <Route path="/product/:id" element={<ProductDetailsPage />} />
           {/* <Route path="/add-product" element={<AddProductPage />} /> */}
 
           <Route

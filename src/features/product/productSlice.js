@@ -8,7 +8,7 @@ export const fetchProducts = createAsyncThunk(
   "product/fetchProducts",
   async ({ accessToken, searchTerm = "", category = "All" }) => {
     const query = new URLSearchParams();
-    if (searchTerm) query.append("search", searchTerm);
+    if (searchTerm) query.append("name", searchTerm);
     if (category && category !== "All") query.append("category", category);
 
     const response = await axios.get(
@@ -20,7 +20,7 @@ export const fetchProducts = createAsyncThunk(
       }
     );
 
-    return response.data;
+    return response.data.products;
   }
 );
 
@@ -68,15 +68,33 @@ export const updateProduct = createAsyncThunk(
 // DELETE product
 export const deleteProduct = createAsyncThunk(
   "product/deleteProduct",
-  async ({ id, accessToken }) => {
-    await axios.delete(`${API_URL}/api/product/delete/${id}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    return id;
+  async ({ id, accessToken }, { rejectWithValue }) => {
+    try {
+      await axios.delete(`${API_URL}/api/product/delete/${id}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        transformResponse: [(data) => {
+          if (data === '') {
+            return null;
+          }
+          try {
+            return JSON.parse(data);
+          } catch (e) {
+            console.error("JSON parsing error for non-empty response:", e, "Data:", data);
+            throw e;
+          }
+        }]
+      });
+      return id;
+    } catch (error) {
+      console.error("Error during product deletion in thunk:", error);
+      const errorMessage = error?.response?.data?.message || error?.message || "Failed to delete product";
+      return rejectWithValue(errorMessage);
+    }
   }
 );
+
 
 const productSlice = createSlice({
   name: "product",
@@ -154,10 +172,11 @@ const productSlice = createSlice({
       .addCase(deleteProduct.fulfilled, (state, action) => {
         state.loading = false;
         state.products = state.products.filter((p) => p._id !== action.payload);
+        state.error = null;
       })
       .addCase(deleteProduct.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.payload;
       });
   },
 });

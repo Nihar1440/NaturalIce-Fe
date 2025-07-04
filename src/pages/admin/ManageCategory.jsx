@@ -30,6 +30,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../../components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../components/ui/alert-dialog";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
 
@@ -39,10 +49,12 @@ import {
   updateCategory,
   deleteCategory,
 } from "../../features/category/categorySlice";
+import useDebounce from "../../lib/useDebounce";
 
 const ManageCategory = () => {
   const dispatch = useDispatch();
   const { categories, loading, error } = useSelector((state) => state.category);
+  console.log("loading", loading);
   console.log("categories", categories);
 
   const [isAddEditModalOpen, setIsAddEditModalOpen] = React.useState(false);
@@ -50,14 +62,31 @@ const ManageCategory = () => {
     React.useState(false);
   const [editingCategory, setEditingCategory] = React.useState(null);
   const [categoryToDelete, setCategoryToDelete] = React.useState(null);
-
   const [categoryName, setCategoryName] = React.useState("");
   const [categoryDescription, setCategoryDescription] = React.useState("");
   const [categoryStatus, setCategoryStatus] = React.useState("Active");
+  const [searchInput, setSearchInput] = React.useState("");
+  const debouncedSearchTerm = useDebounce(searchInput, 500);
+  const [filterStatus, setFilterStatus] = React.useState("all");
+
+  const fetchCategoriesData = async () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      console.warn("No access token found for fetching categories.");
+      return;
+    }
+    dispatch(
+      getCategories({
+        accessToken: token,
+        searchTerm: debouncedSearchTerm,
+        status: filterStatus,
+      })
+    );
+  };
 
   useEffect(() => {
-    dispatch(getCategories());
-  }, [dispatch]);
+    fetchCategoriesData();
+  }, [dispatch, debouncedSearchTerm, filterStatus]);
 
   const hasCategories = categories && categories.length > 0;
 
@@ -71,13 +100,19 @@ const ManageCategory = () => {
 
   const handleEdit = (category) => {
     setEditingCategory(category);
-    setCategoryName(category.category);
+    setCategoryName(category.name);
     setCategoryDescription(category.description);
     setCategoryStatus(category.status);
     setIsAddEditModalOpen(true);
   };
 
   const handleSubmitCategory = () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      console.warn("No access token found for creating/updating category.");
+      return;
+    }
+
     const categoryData = {
       name: categoryName,
       description: categoryDescription,
@@ -86,20 +121,26 @@ const ManageCategory = () => {
 
     if (editingCategory) {
       dispatch(
-        updateCategory({ _id: editingCategory._id, updateData: categoryData })
+        updateCategory({
+          _id: editingCategory._id,
+          updateData: categoryData,
+          accessToken: token,
+        })
       )
         .unwrap()
         .then(() => {
           setIsAddEditModalOpen(false);
+          fetchCategoriesData();
         })
         .catch((err) => {
           console.error("Failed to update category:", err);
         });
     } else {
-      dispatch(createCategory(categoryData))
+      dispatch(createCategory({ categoryData, accessToken: token }))
         .unwrap()
         .then(() => {
           setIsAddEditModalOpen(false);
+          fetchCategoriesData();
         })
         .catch((err) => {
           console.error("Failed to create category:", err);
@@ -114,11 +155,19 @@ const ManageCategory = () => {
 
   const confirmDelete = () => {
     if (categoryToDelete) {
-      dispatch(deleteCategory(categoryToDelete._id))
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        console.warn("No access token found for deleting category.");
+        return;
+      }
+      dispatch(
+        deleteCategory({ _id: categoryToDelete._id, accessToken: token })
+      )
         .unwrap()
         .then(() => {
           setCategoryToDelete(null);
           setIsDeleteConfirmModalOpen(false);
+          fetchCategoriesData();
         })
         .catch((err) => {
           console.error("Failed to delete category:", err);
@@ -128,11 +177,22 @@ const ManageCategory = () => {
 
   const handleToggleStatus = (category) => {
     const newStatus = category.status === "Active" ? "Inactive" : "Active";
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      console.warn("No access token found for updating category status.");
+      return;
+    }
     dispatch(
-      updateCategory({ _id: category._id, updateData: { status: newStatus } })
+      updateCategory({
+        _id: category._id,
+        updateData: { status: newStatus },
+        accessToken: token,
+      })
     )
       .unwrap()
-      .then(() => {})
+      .then(() => {
+        fetchCategoriesData();
+      })
       .catch((err) => {
         console.error("Failed to toggle category status:", err);
       });
@@ -144,6 +204,15 @@ const ManageCategory = () => {
     }
   }, [error]);
 
+  const handleSearch = () => {
+    fetchCategoriesData();
+  };
+
+  const resetFilters = () => {
+    setSearchInput("");
+    setFilterStatus("all");
+  };
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-md">
@@ -153,32 +222,39 @@ const ManageCategory = () => {
           </h2>
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
-            <div className="flex-grow flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
-              <div className="relative flex-grow w-full sm:w-auto">
+            <div className="flex-1 min-w-[250px]">
+              <div className="flex">
                 <Input
+                  type="text"
                   placeholder="Search by name or description..."
-                  className="pl-10 pr-2 w-full"
+                  className="flex-1 rounded-r-none border-r-0"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
                 />
-                <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Button
+                  onClick={handleSearch}
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-l-none px-4"
+                >
+                  <Search className="h-4 w-4" />
+                  <span className="hidden sm:inline ml-2">Search</span>
+                </Button>
               </div>
-              <Button className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
-                <Search className="mr-2 h-4 w-4" /> Search
-              </Button>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
-              <Select>
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger className="w-full md:w-[180px]">
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Inactive">Inactive</SelectItem>
                 </SelectContent>
               </Select>
               <Button
                 variant="outline"
+                onClick={resetFilters}
                 className="bg-yellow-500 hover:bg-yellow-600 text-white w-full sm:w-auto"
               >
                 <RotateCcw className="mr-2 h-4 w-4" /> Reset Filters
@@ -321,16 +397,13 @@ const ManageCategory = () => {
                               category.name.slice(1)}
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 hidden md:table-cell">
                           <div className="text-sm text-gray-700 max-w-xs truncate">
                             {category.description
                               ? category.description.charAt(0).toUpperCase() +
                                 category.description.slice(1)
                               : "No description"}
                           </div>
-                        </td>
-                        <td className="px-6 py-4 text-gray-700 hidden md:table-cell">
-                          {/* This column is now empty/hidden as description is merged */}
                         </td>
                         <td className="px-6 py-4">
                           <span
@@ -395,28 +468,29 @@ const ManageCategory = () => {
         </div>
       </div>
 
-      <Dialog
+      <AlertDialog
         open={isDeleteConfirmModalOpen}
         onOpenChange={setIsDeleteConfirmModalOpen}
       >
-        <DialogContent className="w-96">
-          <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-            <DialogDescription>
+        <AlertDialogContent className="w-96">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+            <AlertDialogDescription>
               Are you sure you want to delete the category "
-              {categoryToDelete?.category}"? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button variant="destructive" onClick={confirmDelete}>
+              {categoryToDelete?.name}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel variant="default">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-500"
+              onClick={confirmDelete}
+            >
               Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

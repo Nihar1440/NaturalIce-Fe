@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Star, ArrowRight, Snowflake } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 const HomePage = () => {
   const [products, setProducts] = useState([]);
@@ -23,7 +24,9 @@ const HomePage = () => {
         setLoading(true);
         setProductsError(null);
 
-        const response = await fetch("https://v958lpht-2000.inc1.devtunnels.ms/api/product/list");
+        const response = await fetch(
+          "https://v958lpht-2000.inc1.devtunnels.ms/api/product/list"
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -47,23 +50,28 @@ const HomePage = () => {
     setContactFormSuccess(false);
 
     try {
-      const response = await fetch("https://v958lpht-2000.inc1.devtunnels.ms/api/contact/send-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: contactName,
-          email: contactEmail,
-          phone: contactPhone,
-          subject: contactSubject,
-          message: contactMessage,
-        }),
-      });
+      const response = await fetch(
+        "https://v958lpht-2000.inc1.devtunnels.ms/api/contact/send-email",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: contactName,
+            email: contactEmail,
+            phone: contactPhone,
+            subject: contactSubject,
+            message: contactMessage,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        throw new Error(
+          errorData.message || `HTTP error! status: ${response.status}`
+        );
       }
 
       const result = await response.json();
@@ -201,50 +209,55 @@ const HomePage = () => {
                     animationDelay: `${index * 100}ms`,
                   }}
                 >
-                  {/* Product image */}
-                  <div className="relative overflow-hidden">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      onError={(e) =>
-                        (e.currentTarget.src = "/src/image_22_3.jpeg")
-                      }
-                      className="w-full h-48 sm:h-56 lg:h-64 object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  {/* Wrap the image and text details with Link */}
+                  <Link to={`/product/${product._id}`} className="block">
+                    <div className="relative overflow-hidden">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        onError={(e) =>
+                          (e.currentTarget.src = "/src/image_22_3.jpeg")
+                        }
+                        className="w-full h-48 sm:h-56 lg:h-64 object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                    {/* Floating badge */}
-                    <div className="absolute top-3 sm:top-4 right-3 sm:right-4 bg-blue-600 text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold flex items-center gap-1">
-                      <Star className="w-2 h-2 sm:w-3 sm:h-3 fill-current" />
-                      Premium
-                    </div>
-                  </div>
-
-                  {/* Product details */}
-                  <div className="p-4 sm:p-6">
-                    <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">
-                      {product.name}
-                    </h3>
-                    <p className="text-slate-600 mb-3 sm:mb-4 text-sm leading-relaxed line-clamp-2">
-                      {product.description}
-                    </p>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <span className="text-xl sm:text-2xl font-bold text-blue-600">
-                          {product.price}
-                        </span>
-                        <span className="text-xs sm:text-sm text-slate-500">
-                          AED
-                        </span>
+                      {/* Floating badge */}
+                      <div className="absolute top-3 sm:top-4 right-3 sm:right-4 bg-blue-600 text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold flex items-center gap-1">
+                        <Star className="w-2 h-2 sm:w-3 sm:h-3 fill-current" />
+                        Premium
                       </div>
-
-                      <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-4 sm:px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-xs sm:text-sm">
-                        <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                        <span className="hidden xs:inline">Add to Cart</span>
-                        <span className="xs:hidden">Add</span>
-                      </Button>
                     </div>
+
+                    {/* Product details */}
+                    <div className="p-4 sm:p-6 pb-2">
+                      {" "}
+                      {/* Adjusted padding to accommodate the button */}
+                      <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">
+                        {product.name}
+                      </h3>
+                      <p className="text-slate-600 mb-3 sm:mb-4 text-sm leading-relaxed line-clamp-2">
+                        {product.description}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-xl sm:text-2xl font-bold text-blue-600">
+                            {product.price}
+                          </span>
+                          <span className="text-xs sm:text-sm text-slate-500">
+                            AED
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                  {/* The Add to Cart Button is kept outside the Link so it remains independently clickable */}
+                  <div className="p-4 pt-0 sm:p-6 sm:pt-0 flex justify-end">
+                    <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-4 sm:px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-xs sm:text-sm">
+                      <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      <span className="hidden xs:inline">Add to Cart</span>
+                      <span className="xs:hidden">Add</span>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -280,10 +293,16 @@ const HomePage = () => {
           </div>
 
           <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-8 lg:p-12">
-            <form onSubmit={handleSubmitContactForm} className="space-y-4 sm:space-y-6">
+            <form
+              onSubmit={handleSubmitContactForm}
+              className="space-y-4 sm:space-y-6"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                  <label htmlFor="contactName" className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label
+                    htmlFor="contactName"
+                    className="block text-sm font-semibold text-slate-700 mb-2"
+                  >
                     Name
                   </label>
                   <input
@@ -297,7 +316,10 @@ const HomePage = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="contactEmail" className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label
+                    htmlFor="contactEmail"
+                    className="block text-sm font-semibold text-slate-700 mb-2"
+                  >
                     Email
                   </label>
                   <input
@@ -314,7 +336,10 @@ const HomePage = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                  <label htmlFor="contactPhone" className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label
+                    htmlFor="contactPhone"
+                    className="block text-sm font-semibold text-slate-700 mb-2"
+                  >
                     Phone
                   </label>
                   <input
@@ -327,7 +352,10 @@ const HomePage = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="contactSubject" className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label
+                    htmlFor="contactSubject"
+                    className="block text-sm font-semibold text-slate-700 mb-2"
+                  >
                     Subject
                   </label>
                   <input
@@ -343,7 +371,10 @@ const HomePage = () => {
               </div>
 
               <div>
-                <label htmlFor="contactMessage" className="block text-sm font-semibold text-slate-700 mb-2">
+                <label
+                  htmlFor="contactMessage"
+                  className="block text-sm font-semibold text-slate-700 mb-2"
+                >
                   Message
                 </label>
                 <textarea
@@ -358,10 +389,14 @@ const HomePage = () => {
               </div>
 
               {contactFormError && (
-                <p className="text-red-500 text-sm text-center">{contactFormError}</p>
+                <p className="text-red-500 text-sm text-center">
+                  {contactFormError}
+                </p>
               )}
               {contactFormSuccess && (
-                <p className="text-green-600 text-sm text-center">Message sent successfully!</p>
+                <p className="text-green-600 text-sm text-center">
+                  Message sent successfully!
+                </p>
               )}
 
               <div className="text-center">

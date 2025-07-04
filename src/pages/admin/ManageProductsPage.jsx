@@ -18,6 +18,14 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import AddProductFormContent from "../../component/AddProductFormContent";
 import {
   Select,
@@ -28,15 +36,20 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProducts, deleteProduct } from "../../features/product/productSlice";
+import {
+  fetchProducts,
+  deleteProduct,
+} from "../../features/product/productSlice";
+import useDebounce from "../../lib/useDebounce";
 
 const ManageProductsPage = () => {
   const dispatch = useDispatch();
-  const { products, loading, error } = useSelector((state) => state.product.products);
-  const {categories} = useSelector((state) => state.category)
+  const { products, loading, error } = useSelector((state) => state.product);
+  const { categories } = useSelector((state) => state.category);
 
+  const [searchInput, setSearchInput] = useState("");
+  const debouncedSearchTerm = useDebounce(searchInput, 500);
 
-  const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("All");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -54,7 +67,7 @@ const ManageProductsPage = () => {
     dispatch(
       fetchProducts({
         accessToken: token,
-        searchTerm,
+        searchTerm: debouncedSearchTerm,
         category: filterCategory,
       })
     );
@@ -65,7 +78,7 @@ const ManageProductsPage = () => {
     if (error) {
       toast.error("Error fetching products", { description: error });
     }
-  }, [searchTerm, filterCategory, dispatch, error]);
+  }, [debouncedSearchTerm, filterCategory, dispatch, error]);
 
   // const productCategories = [
   //   "Ice Tubes",
@@ -90,7 +103,7 @@ const ManageProductsPage = () => {
   };
 
   const resetFilters = () => {
-    setSearchTerm("");
+    setSearchInput("");
     setFilterCategory("All");
   };
 
@@ -117,19 +130,20 @@ const ManageProductsPage = () => {
       return;
     }
     try {
-      // Dispatch the deleteProduct thunk
       await dispatch(
         deleteProduct({ id: productToDelete._id, accessToken: token })
       ).unwrap();
+
       toast.success("Product Deleted", {
         description: `Product "${productToDelete.name}" has been deleted successfully.`,
       });
       setProductToDelete(null);
+
+      fetchProductsData();
     } catch (err) {
       console.error("Error deleting product:", err);
       toast.error("Error deleting product", {
-        description:
-          err.message || "An error occurred while deleting the product.",
+        description: typeof err === "string" ? err : err.message || String(err),
       });
       setProductToDelete(null);
     }
@@ -159,8 +173,8 @@ const ManageProductsPage = () => {
                   type="text"
                   placeholder="Search by name or description..."
                   className="flex-1 rounded-r-none border-r-0"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
                   onKeyPress={(e) => {
                     if (e.key === "Enter") {
                       handleSearch();
@@ -175,23 +189,6 @@ const ManageProductsPage = () => {
                   <span className="hidden sm:inline ml-2">Search</span>
                 </Button>
               </div>
-            </div>
-
-            {/* Filter Dropdown */}
-            <div className="min-w-[200px]">
-              <Select value={filterCategory} onValueChange={setFilterCategory}>
-                <SelectTrigger className="w-full h-10">
-                  <SelectValue placeholder="All Categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="All">All Categories</SelectItem>
-                  {categories?.map((item) => (
-                    <SelectItem key={item._id} value={item._id}>
-                      {item.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
             {/* Reset Filters Button */}
@@ -228,6 +225,8 @@ const ManageProductsPage = () => {
                     onProductAdded={fetchProductsData}
                     initialData={editingProduct}
                     categories={categories}
+                    loading={loading}
+                    error={error}
                   />
                 </DialogContent>
               </Dialog>
@@ -391,22 +390,22 @@ const ManageProductsPage = () => {
         </div>
       </div>
 
-      <Dialog
+      <AlertDialog
         open={showDeleteConfirmDialog}
         onOpenChange={setShowDeleteConfirmDialog}
       >
-        <DialogContent  className="w-96">
-          <DialogHeader>
-            <DialogTitle>Are you absolutely sure?</DialogTitle>
-            <DialogDescription>
+        <AlertDialogContent className="w-96">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
               This action cannot be undone. This will permanently delete{" "}
               <span className="font-medium text-foreground">
                 "{productToDelete?.name}"
               </span>{" "}
               and remove its data from our servers.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
             <Button
               variant="outline"
               onClick={() => {
@@ -419,9 +418,9 @@ const ManageProductsPage = () => {
             <Button variant="destructive" onClick={confirmDelete}>
               Delete
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
