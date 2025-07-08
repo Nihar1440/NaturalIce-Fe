@@ -33,6 +33,7 @@ export const fetchProductById = createAsyncThunk(
         Authorization: `Bearer ${accessToken}`,
       },
     });
+    console.log('response', response)
     return response.data;
   }
 );

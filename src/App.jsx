@@ -29,10 +29,15 @@ const App = () => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isCartPage = location.pathname === '/cart';
+  const isProductDetailsPage = location.pathname.startsWith('/product/');
+  const isLoginPage = location.pathname === '/login';
+  const isRegisterPage = location.pathname === '/register';
+  const isRequestResetPasswordPage = location.pathname === '/forgot-password';
+  const isSetNewPasswordPage = location.pathname.startsWith('/reset-password/');
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gray-100">
-      {!isAdminRoute && <Navbar />}
+      {!isAdminRoute && !isLoginPage && !isRegisterPage && !isRequestResetPasswordPage && !isSetNewPasswordPage && <Navbar />}
 
       <div className="flex-1">
         <Routes>
@@ -40,7 +45,7 @@ const App = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<RequestResetPasswordPage />} />
-          <Route path="/reset-password/:token" element={<SetNewPasswordPage />} />
+          <Route path="/forgot-password/:token" element={<SetNewPasswordPage />} />
           <Route path="/create-superadmin" element={<CreateSuperAdminPage />} />
           <Route path="/about" element={<AboutAllFixPage />} />
           <Route path="/cart" element={<CartPage />} />
@@ -72,7 +77,7 @@ const App = () => {
         </Routes>
       </div>
 
-      {!isAdminRoute && !isCartPage && <Footer />}
+      {!isAdminRoute && !isCartPage && !isProductDetailsPage && !isLoginPage && !isRegisterPage && !isRequestResetPasswordPage && !isSetNewPasswordPage && <Footer />}
       <Toaster />
     </div>
   );

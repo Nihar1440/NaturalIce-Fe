@@ -1,6 +1,6 @@
 // File: src/components/Navbar.jsx
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   Home,
@@ -15,24 +15,41 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose
-} from "@/components/ui/dialog";
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCartItems } from '../features/cart/cartSlice';
+import { logout } from "../features/auth/authSlice";
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const user = JSON.parse(localStorage.getItem("user"));
   const isLoggedIn = !!localStorage.getItem("accessToken");
   const isAdmin = user?.role === "admin";
+
+  const dispatch = useDispatch();
+  const { items: cartItems } = useSelector((state) => state.cart);
+  const { accessToken } = useSelector((state) => state.auth);
+
+  const totalCartItems = cartItems?.reduce((acc, item) => acc + item.quantity, 0);
+
+  useEffect(() => {
+    if (accessToken && user?._id) {
+      dispatch(fetchCartItems({ accessToken }));
+    }
+  }, [accessToken, user?._id, dispatch]);
 
   const navItems = isAdmin
     ? [
@@ -46,17 +63,16 @@ const Navbar = () => {
         { to: "/cart", label: "Cart", icon: <ShoppingCart className="w-5 h-5" /> },
         { to: "/wishlist", label: "Wishlist", icon: <Heart className="w-5 h-5" /> },
         { to: "/contactUs", label: "Contact Us", icon: <Mail className="w-5 h-5" /> },
-        { to: "/login", label: "Login", icon: <LogIn  className="w-5 h-5" /> },
-      ];
+        ...(!isLoggedIn ? [{ to: "/login", label: "Login", icon: <LogIn  className="w-5 h-5" /> }] : []),
+      ].filter(Boolean);
 
   const performLogout = () => {
+    dispatch(logout());
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
-    toast.success("Logged Out!", {
-      description: "You have been successfully logged out.",
-    });
-    setShowLogoutDialog(false);
-    window.location.href = "/";
+    toast.success("Logged out successfully!");
+    navigate("/");
+    setShowLogoutDialog(false); // Close the dialog after logout
   };
 
   return (
@@ -83,37 +99,42 @@ const Navbar = () => {
               >
                 {item.icon}
                 {item.label}
+                {item.to === "/cart" && totalCartItems > 0 && (
+                  <span className="ml-1 bg-gray-300 text-black rounded-full px-2 py-0.5 text-xs font-bold relative bottom-[10px] right-[10px]">
+                    {totalCartItems}
+                  </span>
+                )}
               </Link>
             </li>
           ))}
           {isLoggedIn && (
             <li>
-              <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
-                <DialogTrigger asChild>
+              <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+                <AlertDialogTrigger asChild>
                   <button
                     className="flex items-center gap-1 text-white text-base hover:text-blue-200 transition-colors"
                   >
                     <LogOut className="w-5 h-5" />
                     Logout
                   </button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Confirm Logout</DialogTitle>
-                    <DialogDescription>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="max-w-md">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                    <AlertDialogDescription>
                       Are you sure you want to log out of your account?
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <DialogClose asChild>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel asChild>
                       <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button onClick={performLogout} className="bg-red-500 hover:bg-red-600">
+                    </AlertDialogCancel>
+                    <AlertDialogAction onClick={performLogout} className="bg-red-500 hover:bg-red-600">
                       Logout
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </li>
           )}
         </ul>
@@ -142,13 +163,18 @@ const Navbar = () => {
                 >
                   {item.icon}
                   {item.label}
+                  {item.to === "/cart" && totalCartItems > 0 && (
+                    <span className="ml-1 bg-red-500 text-white rounded-full px-2 py-0.5 text-xs font-bold">
+                      {totalCartItems}
+                    </span>
+                  )}
                 </Link>
               </li>
             ))}
             {isLoggedIn && (
               <li>
-                <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
-                  <DialogTrigger asChild>
+                <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+                  <AlertDialogTrigger asChild>
                     <button
                       onClick={() => setMobileOpen(false)}
                       className="flex items-center gap-2 text-white text-base hover:text-blue-200 py-2"
@@ -156,24 +182,24 @@ const Navbar = () => {
                       <LogOut className="w-5 h-5" />
                       Logout
                     </button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Confirm Logout</DialogTitle>
-                      <DialogDescription>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="max-w-md">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                      <AlertDialogDescription>
                         Are you sure you want to log out of your account?
-                      </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                      <DialogClose asChild>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel asChild>
                         <Button variant="outline">Cancel</Button>
-                      </DialogClose>
-                      <Button onClick={performLogout} className="bg-red-500 hover:bg-red-600">
+                      </AlertDialogCancel>
+                      <AlertDialogAction onClick={performLogout} className="bg-red-500 hover:bg-red-600">
                         Logout
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </li>
             )}
           </ul>

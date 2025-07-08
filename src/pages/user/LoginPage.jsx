@@ -1,41 +1,80 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
 import { loginUser, checkAdmin, logout } from "../../features/auth/authSlice";
+import { registerUser, clearRegistrationStatus } from "../../features/user/userSlice";
+import { motion, AnimatePresence } from "framer-motion";
+import { Eye, EyeOff, User, Mail, Lock } from "lucide-react";
 
-const LoginPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+const AuthTogglePage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { accessToken, loading, error, user } = useSelector(
+    (state) => state.auth
+  );
+  // Destructure user-specific loading, error, and registration success from userSlice
+  const { loading: userLoading, error: userError, registrationSuccess } = useSelector(
+    (state) => state.user
+  );
 
-  const { accessToken, loading, error, user } = useSelector((state) => state.auth);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    address: "", // Add address field
+  });
 
+  const toggleMode = () => {
+    setIsSignUp((prev) => !prev);
+    setFormData({ name: "", email: "", password: "", address: "" });
+    dispatch(clearRegistrationStatus()); // Clear registration status when toggling mode
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleLogin = (e) => {
     e.preventDefault();
-    dispatch(loginUser({ email, password }));
+    dispatch(loginUser({ email: formData.email, password: formData.password }));
   };
 
+  // New handler for user registration
+  const handleRegister = async (e) => {
+    debugger
+    e.preventDefault();
+    await dispatch(registerUser(formData));
+  };
+
+  // Effect for handling login (authSlice)
   useEffect(() => {
     if (accessToken && !user && !loading) {
       dispatch(checkAdmin(accessToken));
     }
 
-    if (user && user.role === 'admin') {
+    if (user?.role === "admin") {
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("accessToken", accessToken);
       toast.success("Login Successful", {
         description: "Welcome to the Admin Dashboard!",
       });
       navigate("/admin");
+    } else if (user?.role === "user") {
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("accessToken", accessToken);
+      toast.success("Login Successful", {
+        description: "Welcome to the Website!",
+      });
+      navigate("/");
     }
 
     if (error) {
-      console.log('error', error)
       toast.error("Login Failed", {
-        description: error?.message || "An unknown error occurred. Please try again.",
+        description: error?.message || "An unknown error occurred.",
       });
       dispatch(logout());
       localStorage.removeItem("accessToken");
@@ -43,121 +82,224 @@ const LoginPage = () => {
     }
   }, [accessToken, user, error, loading, navigate, dispatch]);
 
+  // Effect for handling registration (userSlice)
   useEffect(() => {
-    if (error) {
-      return;
+    if (registrationSuccess) {
+      toast.success("Registration Successful!", {
+        description: "You can now sign in with your new account.",
+      });
+      setIsSignUp(false); // Switch to sign-in mode
+      setFormData({ name: "", email: "", password: "", address: "" }); // Clear the form
+      dispatch(clearRegistrationStatus()); // Clear registrationSuccess flag in Redux state
     }
-
-    const storedAccessToken = localStorage.getItem('accessToken');
-
-    if (storedAccessToken && !accessToken && !user && !loading) {
-      dispatch(checkAdmin(storedAccessToken));
+    if (userError) {
+      toast.error("Registration Failed", {
+        description: userError || "An unknown error occurred during registration.",
+      });
     }
-  }, [dispatch, accessToken, user, loading, error]);
+  }, [registrationSuccess, userError, dispatch]);
 
-  const handleSocialLogin = (provider) => {
-    toast.info(`Attempting to log in with ${provider}...`, {
-      description: `Please ensure your backend supports ${provider} OAuth integration.`,
-      duration: 3000,
-    });
-  };
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token && !accessToken && !user && !loading) {
+      dispatch(checkAdmin(token));
+    }
+  }, [dispatch, accessToken, user, loading]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-10">
-      <div className="max-w-2xl w-full bg-white shadow-xl rounded-xl p-2 transform transition-all duration-300 hover:scale-[1.01]">
-        <h2 className="text-3xl font-extrabold text-center text-gray-900 mb-2">
-          Welcome back!
-        </h2>
-        <p className="text-center text-gray-600 mb-6">Sign in to your account</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-6xl bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <div className="flex flex-col lg:flex-row min-h-[600px] relative">
+          {/* Left Panel */}
+          <div className="lg:w-1/2 bg-gradient-to-br from-black to-gray-600 p-8 lg:p-12 flex flex-col justify-center items-center text-white relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-full bg-black opacity-10 z-0"></div>
+            <div className="absolute top-10 right-10 w-32 h-32 bg-white opacity-10 rounded-full z-0"></div>
+            <div className="absolute bottom-10 left-10 w-24 h-24 bg-white opacity-10 rounded-full z-0"></div>
+            <div className="z-10 text-center">
+              <h1 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+                {isSignUp ? "Join Us Today!" : "Welcome Back!"}
+              </h1>
+              <p className="text-xl lg:text-2xl mb-8 opacity-90 leading-relaxed">
+                {isSignUp
+                  ? "Sign up to start your journey with us"
+                  : "To keep connected with us please login with your personal info"}
+              </p>
+              <button
+                onClick={toggleMode}
+                className="px-8 py-3 border-2 border-white text-white font-semibold rounded-full hover:bg-white hover:text-red-500 transition-all duration-300 transform hover:scale-105"
+              >
+                {isSignUp ? "SIGN IN" : "SIGN UP"}
+              </button>
+            </div>
+          </div>
 
-        <form onSubmit={handleLogin} className="space-y-5">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 sr-only">Email address</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              className="appearance-none relative block w-full px-4 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder="Email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 sr-only">Password</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              className="appearance-none relative block w-full px-4 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div className="flex items-center justify-end">
-            <div className="text-sm">
-              <Link to="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
-                Forgot password?
-              </Link>
-            </div>
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
-        </form>
+          {/* Right Panel */}
+          <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={isSignUp ? "signup" : "signin"}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.5 }}
+                className="w-full max-w-md mx-auto"
+              >
+                <div className="text-center mb-8">
+                  <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-2">
+                    {isSignUp ? "Create Account" : "Sign In"}
+                  </h2>
+                  <p className="text-gray-600">
+                    {isSignUp
+                      ? "Fill in your details to get started"
+                      : "Enter your credentials to access your account"}
+                  </p>
+                </div>
 
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-gray-300" />
+                <form
+                  onSubmit={isSignUp ? handleRegister : handleLogin}
+                >
+                  <div className="space-y-6">
+                    {isSignUp && (
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <User className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          placeholder="Name"
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-500"
+                          required
+                        />
+                      </div>
+                    )}
+
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Mail className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="Email"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-500"
+                        required
+                      />
+                    </div>
+
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Lock className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="Password"
+                        className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-500"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
+
+                    {isSignUp && (
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Mail className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="text"
+                          name="address"
+                          value={formData.address}
+                          onChange={handleChange}
+                          placeholder="Address"
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-500"
+                          required
+                        />
+                      </div>
+                    )}
+
+                    {!isSignUp && (
+                      <div className="text-right">
+                        <Link
+                          to="/forgot-password"
+                          className="text-red-500 hover:text-red-600 font-medium transition-colors"
+                        >
+                          Forgot your password?
+                        </Link>
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={isSignUp ? userLoading : loading}
+                      className="w-full py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white font-bold rounded-xl hover:from-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isSignUp
+                        ? userLoading
+                          ? "Registering..."
+                          : "SIGN UP"
+                        : loading
+                        ? "Processing..."
+                        : "SIGN IN"}
+                    </button>
+                  </div>
+                </form>
+
+                {/* Social Login */}
+                <div className="mt-8">
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-white text-gray-500">
+                        Or continue with
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex justify-center gap-4">
+                    {["google", "facebook", "github"].map((icon) => (
+                      <button
+                        key={icon}
+                        onClick={() =>
+                          toast.info(`Attempting ${icon} login...`)
+                        }
+                        className="w-12 h-12 rounded-full bg-white border border-gray-300 flex items-center justify-center shadow-sm hover:shadow-md hover:scale-110 transition"
+                        title={`Sign in with ${icon}`}
+                      >
+                        <img
+                          src={`/${icon}.svg`}
+                          alt={icon}
+                          className="w-6 h-6"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="bg-white px-2 text-gray-500">Or continue with</span>
-          </div>
-        </div>
-        <div className="space-y-3">
-          <button
-            type="button"
-            onClick={() => handleSocialLogin("Google")}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-          >
-            <div className="h-5 w-5">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Logo_2013_Google.png" alt="Google Logo" className="h-full w-full object-contain" />
-            </div>
-            Sign in with Google
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSocialLogin("Facebook")}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors"
-          >
-            <div className="h-5 w-5">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Facebook Logo" className="h-full w-full object-contain filter invert" />
-            </div>
-            Sign in with Facebook
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSocialLogin("GitHub")}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-800 hover:bg-gray-900 transition-colors"
-          >
-            <div className="h-5 w-5">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub Logo" className="h-full w-full object-contain filter invert" />
-            </div>
-            Sign in with GitHub
-          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default LoginPage;
+export default AuthTogglePage;

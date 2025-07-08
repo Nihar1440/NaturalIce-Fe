@@ -1,53 +1,153 @@
-import React, { useState } from 'react';
-import { ChevronLeft, Trash2, Minus, Plus, Lock } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import {
+  ChevronLeft,
+  Trash2,
+  Minus,
+  Plus,
+  Lock,
+  ShoppingCart,
+} from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
+import {
+  fetchCartItems,
+  removeCartItem,
+  updateItemQuantity,
+} from "../../features/cart/cartSlice";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 export default function CartPage() {
-  const [promoCode, setPromoCode] = useState('');
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: 'demand_room_01',
-      image: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=100&h=75&fit=crop',
-      price: 50,
-      originalPrice: 60,
-      quantity: 1,
-    },
-    {
-      id: 2,
-      name: 'Wireless Headphones',
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06f2e7?w=100&h=75&fit=crop',
-      price: 120,
-      originalPrice: 150,
-      quantity: 2,
-    },
-    {
-      id: 3,
-      name: 'Smartwatch Pro',
-      image: 'https://images.unsplash.com/photo-1546868871-70014b7e8ad5?w=100&h=75&fit=crop',
-      price: 200,
-      originalPrice: 220,
-      quantity: 1,
-    },
-  ]);
+  const dispatch = useDispatch();
+  const {
+    items: cartItems,
+    loading,
+    error,
+  } = useSelector((state) => state.cart);
+  const { accessToken } = useSelector((state) => state.auth);
 
-  const handleQuantityChange = (itemId, change) => {
-    setCartItems(prevItems =>
-      prevItems.map(item =>
-        item.id === itemId
-          ? { ...item, quantity: Math.max(1, item.quantity + change) }
-          : item
-      )
-    );
+  let isUser = null;
+  try {
+    const userString = localStorage.getItem("user");
+    if (userString) {
+      isUser = JSON.parse(userString);
+    }
+  } catch (e) {
+    console.error("Failed to parse user from localStorage:", e);
+    toast.error("User data corrupted. Please log in again.");
+  }
+
+  const [promoCode, setPromoCode] = useState("");
+
+  useEffect(() => {
+    if (accessToken && isUser?._id) {
+      dispatch(fetchCartItems({ accessToken }));
+    } else {
+      toast.info("Please log in to view your cart items.");
+    }
+  }, [accessToken, isUser?._id, dispatch]);
+
+  const handleQuantityChange = (productId, currentQuantity, change) => {
+    if (!isUser || !accessToken) {
+      toast.error("Please log in to modify cart items.");
+      return;
+    }
+
+    const newQuantity = currentQuantity + change;
+
+    if (newQuantity < 1) {
+      return;
+    }
+
+    try {
+      dispatch(
+        updateItemQuantity({
+          productId,
+          quantity: newQuantity,
+        })
+      );
+
+      const actionText = change > 0 ? "increased" : "decreased";
+      const updatedItem = cartItems.find(
+        (item) => item.productId._id === productId
+      );
+      toast.success(
+        `Quantity ${actionText} for ${updatedItem?.productId?.name || "item"}.`
+      );
+    } catch (err) {
+      toast.error("An unexpected error occurred while updating quantity.");
+      console.error("Unexpected error in handleQuantityChange:", err);
+    }
   };
 
-  const handleRemoveItem = (itemId) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== itemId));
+  const handleRemoveItem = async (productId) => {
+    if (!isUser || !accessToken) {
+      toast.error("Please log in to remove cart items.");
+      return;
+    }
+
+    try {
+      const resultAction = await dispatch(
+        removeCartItem({ productId, accessToken, userId: isUser._id })
+      );
+
+      if (removeCartItem.fulfilled.match(resultAction)) {
+        toast.success(
+          resultAction.payload.message || "Item removed from cart!"
+        );
+        dispatch(fetchCartItems({ accessToken }));
+      } else if (removeCartItem.rejected.match(resultAction)) {
+        const errorMessage =
+          resultAction.payload ||
+          resultAction.error.message ||
+          "Failed to remove item.";
+        toast.error(`Error: ${errorMessage}`);
+        console.error("Failed to remove from cart:", errorMessage);
+      }
+    } catch (err) {
+      toast.error("An unexpected error occurred while removing item.");
+      console.error("Unexpected error in handleRemoveItem:", err);
+    }
   };
 
-  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  const tax = subtotal * 0.08; // Example tax calculation
+  const subtotal = cartItems?.reduce(
+    (acc, item) => acc + item?.productId?.price * item?.quantity,
+    0
+  );
+  const totalItems = cartItems?.reduce((acc, item) => acc + item?.quantity, 0);
+  const tax = subtotal * 0.08;
   const total = subtotal + tax;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading cart items...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-red-50">
+        <p className="text-red-700 text-lg">Error loading cart: {error}</p>
+      </div>
+    );
+  }
+
+  if (!cartItems || cartItems.length === 0) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        <ShoppingCart className="w-16 h-16 text-gray-400 mb-4" />
+        <p className="text-xl text-gray-700 mb-4">Your cart is empty.</p>
+        <Link to="/" className="text-blue-600 hover:underline">
+          Start shopping!
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-16">
@@ -56,57 +156,86 @@ export default function CartPage() {
           {/* Left Column - Main Content */}
           <div className="flex-1">
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
+            <div
+              className="flex items-center justify-between mb-8 p-4 rounded-lg"
+              style={{ boxShadow: "rgba(0, 0, 0, 0.2) 0px 18px 50px -10px" }}
+            >
               <div className="flex items-center gap-3">
                 <ChevronLeft className="w-5 h-5 text-gray-600" />
-                <h1 className="text-2xl font-medium text-gray-900">Your Cart</h1>
+                <h1 className="text-2xl font-medium text-gray-500">
+                  Your Cart
+                </h1>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <span>{totalItems} items</span>
-                <span className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium">{totalItems}</span>
+                <span>Items :-</span>
+                <span className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium">
+                  {totalItems}
+                </span>
               </div>
             </div>
 
             {/* Product Cards */}
             {cartItems.map((item) => (
-              <div key={item.id} className="bg-white rounded-lg shadow-sm p-6 mb-8">
+              <div
+                key={item?.productId?._id}
+                className="bg-white rounded-lg shadow-sm p-6 mb-6"
+                style={{ boxShadow: "rgba(0, 0, 0, 0.2) 0px 18px 50px -10px" }}
+              >
                 <div className="flex items-center gap-4">
                   {/* Product Image with Badge */}
                   <div className="relative">
                     <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-24 h-18 object-cover rounded-lg"
+                      src={
+                        item?.productId?.image ||
+                        "https://via.placeholder.com/100x75?text=No+Image"
+                      }
+                      alt={item?.productId?.name}
+                      className="w-34 h-24 object-cover rounded-lg"
                     />
-                    <div className="absolute -top-2 -right-2 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-medium">
-                      {item.quantity}
-                    </div>
                   </div>
 
                   {/* Product Details */}
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-900 mb-2">{item.name}</h3>
+                    <h3 className="font-medium text-gray-900 mb-2">
+                      {item?.productId?.name}
+                    </h3>
                     <div className="flex items-center gap-2 mb-4">
-                      <span className="text-xl font-bold text-gray-900">${item.price}</span>
-                      <span className="text-sm text-gray-400 line-through">${item.originalPrice}</span>
-                      <span className="text-sm text-red-500">Save ${item.originalPrice - item.price}</span>
+                      <span className="text-xl font-bold text-gray-900">
+                        ${item?.productId?.price}
+                      </span>
                     </div>
 
                     {/* Quantity Controls */}
                     <div className="flex items-center gap-4">
-                      <button
-                        className="text-gray-600 hover:text-gray-800 font-medium"
-                        onClick={() => handleQuantityChange(item.id, -1)}
+                      <Button
+                        variant="ghost"
+                        className="cursor-pointer"
+                        onClick={() =>
+                          handleQuantityChange(
+                            item.productId._id,
+                            item.quantity,
+                            -1
+                          )
+                        }
                       >
                         <Minus className="w-4 h-4" />
-                      </button>
-                      <span className="font-medium text-gray-900">{item.quantity}</span>
-                      <button
-                        className="text-gray-600 hover:text-gray-800 font-medium"
-                        onClick={() => handleQuantityChange(item.id, 1)}
+                      </Button>
+                      <span className="font-medium text-gray-500">
+                        {item.quantity}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        className="cursor-pointer"
+                        onClick={() =>
+                          handleQuantityChange(
+                            item.productId._id,
+                            item.quantity,
+                            1
+                          )
+                        }
                       >
                         <Plus className="w-4 h-4" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
 
@@ -114,13 +243,15 @@ export default function CartPage() {
                   <div className="flex flex-col items-end justify-between h-20">
                     <button
                       className="text-gray-400 hover:text-red-500 p-1"
-                      onClick={() => handleRemoveItem(item.id)}
+                      onClick={() => handleRemoveItem(item.productId._id)}
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
                     <div className="text-right">
                       <div className="text-sm text-gray-500 mb-1">Subtotal</div>
-                      <div className="text-xl font-bold text-gray-900">${(item.price * item.quantity).toFixed(2)}</div>
+                      <div className="text-xl font-bold text-gray-900">
+                        ${(item?.productId?.price * item?.quantity)?.toFixed(2)}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -128,58 +259,71 @@ export default function CartPage() {
             ))}
 
             {/* Recommendations Section */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-6">You might also like</h3>
+            <div
+              className="bg-white rounded-lg shadow-sm p-6"
+              style={{ boxShadow: "rgba(0, 0, 0, 0.2) 0px 18px 50px -10px" }}
+            >
+              <h3 className="text-lg font-medium text-gray-900 mb-6">
+                You might also like
+              </h3>
               <div className="grid grid-cols-4 gap-6">
                 {/* Phone Case */}
                 <div className="text-center">
                   <div className="w-full h-24 bg-gray-100 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
-                    <img 
-                      src="https://images.unsplash.com/photo-1601593346740-925612772716?w=100&h=96&fit=crop" 
-                      alt="Phone Case" 
+                    <img
+                      src="https://images.unsplash.com/photo-1601593346740-925612772716?w=100&h=96&fit=crop"
+                      alt="Phone Case"
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <h4 className="text-sm font-medium text-gray-900 mb-1">Phone Case</h4>
+                  <h4 className="text-sm font-medium text-gray-900 mb-1">
+                    Phone Case
+                  </h4>
                   <p className="text-sm font-semibold text-gray-900">$24.99</p>
                 </div>
 
                 {/* Bluetooth Speaker */}
                 <div className="text-center">
                   <div className="w-full h-24 bg-gray-100 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
-                    <img 
-                      src="https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=100&h=96&fit=crop" 
-                      alt="Bluetooth Speaker" 
+                    <img
+                      src="https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=100&h=96&fit=crop"
+                      alt="Bluetooth Speaker"
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <h4 className="text-sm font-medium text-gray-900 mb-1">Bluetooth Speaker</h4>
+                  <h4 className="text-sm font-medium text-gray-900 mb-1">
+                    Bluetooth Speaker
+                  </h4>
                   <p className="text-sm font-semibold text-gray-900">$89.99</p>
                 </div>
 
                 {/* Laptop Stand */}
                 <div className="text-center">
                   <div className="w-full h-24 bg-gray-100 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
-                    <img 
-                      src="https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=100&h=96&fit=crop" 
-                      alt="Laptop Stand" 
+                    <img
+                      src="https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=100&h=96&fit=crop"
+                      alt="Laptop Stand"
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <h4 className="text-sm font-medium text-gray-900 mb-1">Laptop Stand</h4>
+                  <h4 className="text-sm font-medium text-gray-900 mb-1">
+                    Laptop Stand
+                  </h4>
                   <p className="text-sm font-semibold text-gray-900">$49.99</p>
                 </div>
 
                 {/* USB Cable */}
                 <div className="text-center">
                   <div className="w-full h-24 bg-gray-100 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
-                    <img 
-                      src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=100&h=96&fit=crop" 
-                      alt="USB Cable" 
+                    <img
+                      src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=100&h=96&fit=crop"
+                      alt="USB Cable"
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <h4 className="text-sm font-medium text-gray-900 mb-1">USB Cable</h4>
+                  <h4 className="text-sm font-medium text-gray-900 mb-1">
+                    USB Cable
+                  </h4>
                   <p className="text-sm font-semibold text-gray-900">$14.99</p>
                 </div>
               </div>
@@ -187,15 +331,24 @@ export default function CartPage() {
           </div>
 
           {/* Right Column - Order Summary */}
-          <div className="w-80 flex-shrink-0">
-            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Order Summary</h2>
-              
+          <div className="w-96 flex-shrink-0">
+            <div
+              className="bg-white rounded-lg shadow-sm p-6 sticky top-8"
+              style={{ boxShadow: "rgba(0, 0, 0, 0.2) 0px 18px 50px -10px" }}
+            >
+              <h2 className="text-lg font-semibold text-gray-900 mb-6">
+                Order Summary
+              </h2>
+
               {/* Order Details */}
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Subtotal ({totalItems} items)</span>
-                  <span className="font-semibold text-gray-900">${subtotal.toFixed(2)}</span>
+                  <span className="text-gray-600">
+                    Subtotal ({totalItems} items)
+                  </span>
+                  <span className="font-semibold text-gray-900">
+                    ${subtotal.toFixed(2)}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Shipping</span>
@@ -203,12 +356,18 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Tax</span>
-                  <span className="font-semibold text-gray-900">${tax.toFixed(2)}</span>
+                  <span className="font-semibold text-gray-900">
+                    ${tax.toFixed(2)}
+                  </span>
                 </div>
                 <div className="border-t pt-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold text-gray-900">Total</span>
-                    <span className="text-xl font-bold text-gray-900">${total.toFixed(2)}</span>
+                    <span className="text-xl font-bold text-gray-900">
+                      Total
+                    </span>
+                    <span className="text-xl font-bold text-gray-900">
+                      ${total.toFixed(2)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -245,28 +404,23 @@ export default function CartPage() {
               <div>
                 <p className="text-sm text-gray-600 mb-3">We accept</p>
                 <div className="flex gap-2">
-                  <div className="px-3 py-1 bg-gray-100 rounded text-xs font-medium text-gray-700">VISA</div>
-                  <div className="px-3 py-1 bg-gray-100 rounded text-xs font-medium text-gray-700">MC</div>
-                  <div className="px-3 py-1 bg-gray-100 rounded text-xs font-medium text-gray-700">AMEX</div>
-                  <div className="px-3 py-1 bg-gray-100 rounded text-xs font-medium text-gray-700">PP</div>
+                  <div className="px-3 py-1 bg-gray-100 rounded text-xs font-medium text-gray-700">
+                    VISA
+                  </div>
+                  <div className="px-3 py-1 bg-gray-100 rounded text-xs font-medium text-gray-700">
+                    MC
+                  </div>
+                  <div className="px-3 py-1 bg-gray-100 rounded text-xs font-medium text-gray-700">
+                    AMEX
+                  </div>
+                  <div className="px-3 py-1 bg-gray-100 rounded text-xs font-medium text-gray-700">
+                    PP
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Windows Activation Notice */}
-      <div className="fixed bottom-4 right-4 bg-white border border-gray-300 rounded-lg p-3 shadow-lg max-w-xs">
-        <p className="text-sm text-gray-700 font-medium mb-1">Activate Windows</p>
-        <p className="text-xs text-gray-500">Go to Settings to activate Windows</p>
-      </div>
-
-      {/* Purple Chat Button */}
-      <div className="fixed bottom-4 right-4 mr-64">
-        <button className="w-12 h-12 bg-purple-600 hover:bg-purple-700 text-white rounded-full flex items-center justify-center shadow-lg">
-          <span className="text-lg">💬</span>
-        </button>
       </div>
     </div>
   );

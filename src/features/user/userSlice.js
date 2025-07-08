@@ -33,7 +33,8 @@ export const registerUser = createAsyncThunk(
   'user/registerUser',
   async (userData, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/user/create`, userData);
+      // Changed from `${API_URL}/user/create` to `${API_URL}/api/user/create`
+      const response = await axios.post(`${API_URL}/api/user/create`, userData);
       return response.data.data; // The user data is nested under 'data' in your controller's response
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {

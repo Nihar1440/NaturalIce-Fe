@@ -27,11 +27,11 @@ export const fetchCartItems = createAsyncThunk(
 // Async thunk to add an item to the cart
 export const addItemToCart = createAsyncThunk(
   'cart/addItemToCart',
-  async ({ productId, quantity, price, accessToken }, { rejectWithValue }) => {
+  async ({ productId, quantity, price, accessToken, userId }, { rejectWithValue }) => {
     try {
       const response = await axios.post(
         `${API_URL}/api/cart/create`,
-        { productId, quantity, price },
+        { productId, quantity, price, userId },
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -51,12 +51,13 @@ export const addItemToCart = createAsyncThunk(
 // Async thunk to remove an item from the cart
 export const removeCartItem = createAsyncThunk(
   'cart/removeCartItem',
-  async ({ productId, accessToken }, { rejectWithValue }) => {
+  async ({ productId, accessToken, userId }, { rejectWithValue }) => {
     try {
       const response = await axios.delete(`${API_URL}/api/cart/delete/${productId}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
+        data: { userId }
       });
       return response.data; // Backend returns { message, cart }
     } catch (error) {
@@ -104,7 +105,14 @@ const cartSlice = createSlice({
     clearCart(state) {
       state.items = [];
     },
-    // No need for addToCart or removeFromCart here, as thunks will handle updates via backend response
+    // Reducer to update item quantity locally
+    updateItemQuantity(state, action) {
+      const { productId, quantity } = action.payload;
+      const existingItem = state.items.find(item => item.productId._id === productId);
+      if (existingItem) {
+        existingItem.quantity = quantity; // Directly set the new quantity
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -168,6 +176,6 @@ const cartSlice = createSlice({
   },
 });
 
-export const { clearCart } = cartSlice.actions; // Only clearCart remains a sync action
+export const { clearCart, updateItemQuantity } = cartSlice.actions; // Only clearCart remains a sync action
 
 export default cartSlice.reducer;

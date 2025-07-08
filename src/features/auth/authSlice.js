@@ -3,6 +3,36 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Helper to get initial state from localStorage
+const loadAuthFromLocalStorage = () => {
+  try {
+    const userString = localStorage.getItem('user');
+    const accessTokenString = localStorage.getItem('accessToken'); // Assuming accessToken is also saved
+
+    const user = userString ? JSON.parse(userString) : null;
+    const accessToken = accessTokenString || null; // Access token is usually a string
+
+    return {
+      user: user,
+      accessToken: accessToken,
+      isSuperAdmin: user?.isSuperAdmin || false,
+    };
+  } catch (e) {
+    console.error("Failed to load auth state from localStorage:", e);
+    return {
+      user: null,
+      accessToken: null,
+      isSuperAdmin: false,
+    };
+  }
+};
+
+const initialState = {
+  ...loadAuthFromLocalStorage(), // Load initial state from localStorage
+  loading: false,
+  error: null,
+};
+
 // New async thunk for user registration
 export const registerUser = createAsyncThunk(
   'auth/registerUser',
@@ -27,6 +57,10 @@ export const loginUser = createAsyncThunk(
       const response = await axios.post(`${API_URL}/api/user/login`, credentials, {
         withCredentials: true,
       });
+      // Store accessToken in localStorage
+      localStorage.setItem('accessToken', response.data.accessToken);
+      localStorage.setItem('user', JSON.stringify(response.data.userProfile));
+
       return {
         user: response.data.userProfile,
         accessToken: response.data.accessToken,
@@ -64,12 +98,14 @@ export const checkAdmin = createAsyncThunk(
 // New async thunk for logging out a user
 export const logoutUser = createAsyncThunk(
   'auth/logoutUser',
-  async (_, { rejectWithValue }) => { // Removed getState as token is not sent for logout, cookie cleared by backend
+  async (_, { rejectWithValue }) => {
     try {
-      // The backend clears the httpOnly cookie, so no need to send accessToken from frontend
       await axios.post(`${API_URL}/api/user/logout`, {}, {
-        withCredentials: true, // Important for sending the refreshToken cookie
+        withCredentials: true,
       });
+      // Clear accessToken from localStorage on successful logout
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
       return true;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -91,16 +127,15 @@ export const refreshToken = createAsyncThunk(
       const response = await axios.post(`${API_URL}/api/user/refresh-token`, {}, {
         withCredentials: true,
       });
-      // Assuming refresh token returns { accessToken, user }
+      // Update accessToken in localStorage upon refresh
+      localStorage.setItem('accessToken', response.data.accessToken);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
       return response.data;
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        return rejectWithValue(error.response.data.message || 'Failed to refresh token');
-      } else if (axios.isAxiosError(error) && error.request) {
-        return rejectWithValue('No response received from server for token refresh.');
-      } else {
-        return rejectWithValue(error.message);
-      }
+      // Clear accessToken from localStorage if refresh fails (token likely expired/invalid)
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
+      return rejectWithValue(error.response?.data?.message || 'Failed to refresh token');
     }
   }
 );
@@ -189,18 +224,15 @@ export const resetPasswordConfirm = createAsyncThunk(
 
 const authSlice = createSlice({
   name: 'auth',
-  initialState: {
-    user: null,
-    accessToken: null,
-    loading: false,
-    error: null,
-    isSuperAdmin: false, 
-  },
+  initialState, // Use the dynamically loaded initial state
   reducers: {
     logout(state) {
       state.user = null;
       state.accessToken = null;
-      state.isSuperAdmin = false; 
+      state.isSuperAdmin = false;
+      // Ensure localStorage is also cleared if logout is called directly (e.g., from an action)
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
     },          
     setSuperAdminStatus(state, action) {
       state.isSuperAdmin = action.payload;
@@ -228,7 +260,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
-        state.isSuperAdmin = action.payload.user?.isSuperAdmin || false; 
+        state.isSuperAdmin = action.payload.user?.isSuperAdmin || false;
       })
       .addCase(loginUser.rejected, (state, action) => {
         console.log('action', action)
@@ -271,7 +303,6 @@ const authSlice = createSlice({
       .addCase(logoutUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        // Even if logout fails on server, we typically clear local state for UX
         state.user = null;
         state.accessToken = null;
         state.isSuperAdmin = false;
