@@ -23,29 +23,50 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManageCategory from "./pages/admin/ManageCategory";
 import RequestResetPasswordPage from "./pages/user/RequestResetPasswordPage";
 import SetNewPasswordPage from "./pages/user/SetNewPasswordPage";
-import ProductDetailsPage from './pages/user/ProductDetailsPage';
+import ProductDetailsPage from "./pages/user/ProductDetailsPage";
+import SuccessPage from "./pages/user/SuccessPage";
+import ErrorPage from "./pages/user/ErrorPage";
+import ViewProfilePage from "./pages/user/ViewProfilePage";
+import EditProfilePage from "./pages/user/EditProfilePage";
+import MyOrdersPage from "./pages/user/MyOrdersPage";
+import ShippingAddressPage from "./pages/user/ShippingAddressPage";
+import PaymentMethodsPage from "./pages/user/PaymentMethodsPage";
+import ChangePasswordPage from "./pages/user/ChangePasswordPage";
 
 const App = () => {
   const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/admin');
-  const isCartPage = location.pathname === '/cart';
-  const isProductDetailsPage = location.pathname.startsWith('/product/');
-  const isLoginPage = location.pathname === '/login';
-  const isRegisterPage = location.pathname === '/register';
-  const isRequestResetPasswordPage = location.pathname === '/forgot-password';
-  const isSetNewPasswordPage = location.pathname.startsWith('/reset-password/');
+  const isAdminRoute = location.pathname.startsWith("/admin");
+  const isCartPage = location.pathname === "/cart";
+  const isProductDetailsPage = location.pathname.startsWith("/product/");
+  const isLoginPage = location.pathname === "/login";
+  const isRegisterPage = location.pathname === "/register";
+  const isRequestResetPasswordPage = location.pathname === "/forgot-password";
+  const isSetNewPasswordPage = location.pathname.startsWith("/reset-password/");
+  const isCheckoutPage = location.pathname === "/checkout";
+  const isProfileRoute = location.pathname.startsWith("/profile"); // New condition for profile routes
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gray-100">
-      {!isAdminRoute && !isLoginPage && !isRegisterPage && !isRequestResetPasswordPage && !isSetNewPasswordPage && <Navbar />}
+      {!isAdminRoute &&
+        !isLoginPage &&
+        !isRegisterPage &&
+        !isRequestResetPasswordPage &&
+        !isSetNewPasswordPage &&
+        !isCheckoutPage && <Navbar />}
 
       <div className="flex-1">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<RequestResetPasswordPage />} />
-          <Route path="/forgot-password/:token" element={<SetNewPasswordPage />} />
+          <Route
+            path="/forgot-password"
+            element={<RequestResetPasswordPage />}
+          />
+          <Route
+            path="/forgot-password/:token"
+            element={<SetNewPasswordPage />}
+          />
           <Route path="/create-superadmin" element={<CreateSuperAdminPage />} />
           <Route path="/about" element={<AboutAllFixPage />} />
           <Route path="/cart" element={<CartPage />} />
@@ -56,6 +77,31 @@ const App = () => {
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="/product/:id" element={<ProductDetailsPage />} />
           {/* <Route path="/add-product" element={<AddProductPage />} /> */}
+
+          {/* New routes for Stripe */}
+          <Route path="/success" element={<SuccessPage />} />
+          <Route path="/cancel" element={<ErrorPage />} />
+
+          {/* User Profile Protected Routes */}
+          <Route
+            path="/profile/*"
+            element={
+              <ProtectedRoute>
+                {/* A general profile wrapper could go here if needed, or directly render sub-pages */}
+                <Routes>
+                  <Route path="view" element={<ViewProfilePage />} />
+                  <Route path="edit" element={<EditProfilePage />} />
+                  <Route path="orders" element={<MyOrdersPage />} />
+                  <Route path="wishlist" element={<WishlistPage />} /> {/* Wishlist already exists */}
+                  <Route path="shipping" element={<ShippingAddressPage />} />
+                  <Route path="payment-methods" element={<PaymentMethodsPage />} />
+                  <Route path="change-password" element={<ChangePasswordPage />} />
+                  {/* Redirect to view profile if just /profile is accessed */}
+                  <Route index element={<ViewProfilePage />} />
+                </Routes>
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/admin/*"
@@ -72,12 +118,28 @@ const App = () => {
             <Route path="messages" element={<MessagesPage />} />
             <Route path="analytics" element={<AnalyticsPage />} />
             <Route path="manage-categories" element={<ManageCategory />} />
-            <Route path="manage-users" element={<div className="p-4">Manage Users Placeholder - Please create ManageUsersPage component</div>} />
+            <Route
+              path="manage-users"
+              element={
+                <div className="p-4">
+                  Manage Users Placeholder - Please create ManageUsersPage
+                  component
+                </div>
+              }
+            />
           </Route>
         </Routes>
       </div>
 
-      {!isAdminRoute && !isCartPage && !isProductDetailsPage && !isLoginPage && !isRegisterPage && !isRequestResetPasswordPage && !isSetNewPasswordPage && <Footer />}
+      {!isAdminRoute &&
+        !isCartPage &&
+        !isProductDetailsPage &&
+        !isLoginPage &&
+        !isRegisterPage &&
+        !isRequestResetPasswordPage &&
+        !isSetNewPasswordPage &&
+        !isCheckoutPage &&
+        !isProfileRoute && /* Added this condition to hide footer on profile pages */ <Footer />}
       <Toaster />
     </div>
   );

@@ -41,6 +41,7 @@ import {
   deleteProduct,
 } from "../../features/product/productSlice";
 import useDebounce from "../../lib/useDebounce";
+import Loader from "@/component/common/Loader";
 
 const ManageProductsPage = () => {
   const dispatch = useDispatch();
@@ -237,12 +238,7 @@ const ManageProductsPage = () => {
         {/* Products Content */}
         <div className="p-4 lg:p-6">
           {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600 text-lg">Loading products...</p>
-              </div>
-            </div>
+           <Loader message={"Loading Products..."}/>
           ) : products?.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-gray-500">
               <PackageOpen className="h-16 w-16 mb-4 text-gray-400" />

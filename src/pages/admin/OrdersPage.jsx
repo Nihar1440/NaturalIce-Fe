@@ -1,28 +1,22 @@
 // File: src/pages/OrdersPage.jsx
-import React, { useEffect, useState, useRef } from "react";
+import Loader from "@/component/common/Loader";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
 import {
-  Search,
-  RotateCw,
-  FileText,
-  Calendar,
-  PackageOpen,
-  Eye,
-  Package,
-  User,
-  DollarSign,
-  Clock,
-  Filter,
-  X,
-  Truck,
-  Check,
-  Ban,
-  Loader,
-  ClipboardList,
-  MapPin,
-} from "lucide-react";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -31,24 +25,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-} from "@/components/ui/dialog";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import {
+  Calendar,
+  Eye,
+  FileText,
+  Filter,
+  MapPin,
+  Package,
+  PackageOpen,
+  RotateCw,
+  Search,
+  Truck,
+  User,
+  X
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -573,12 +567,7 @@ const OrdersPage = () => {
 
           {/* Content */}
           {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600 text-lg">Loading orders...</p>
-              </div>
-            </div>
+            <Loader message={"Loading Orders..."} />
           ) : orders?.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-gray-500">
               <PackageOpen className="h-16 w-16 mb-4 text-gray-400" />

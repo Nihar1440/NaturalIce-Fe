@@ -1,4 +1,3 @@
-// File: src/pages/InvoicePage.jsx
 import React from "react";
 
 const InvoicePage = () => {

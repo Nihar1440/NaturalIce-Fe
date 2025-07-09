@@ -33,9 +33,8 @@ export const registerUser = createAsyncThunk(
   'user/registerUser',
   async (userData, { rejectWithValue }) => {
     try {
-      // Changed from `${API_URL}/user/create` to `${API_URL}/api/user/create`
       const response = await axios.post(`${API_URL}/api/user/create`, userData);
-      return response.data.data; // The user data is nested under 'data' in your controller's response
+      return response.data.data; 
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         return rejectWithValue(error.response.data.message || 'Registration failed');
@@ -48,8 +47,6 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-// Async Thunk for Getting User Profile
-// This thunk will need the accessToken from the authSlice state
 export const getUserProfile = createAsyncThunk(
   'user/getUserProfile',
   async (_, { getState, rejectWithValue }) => {
@@ -64,7 +61,7 @@ export const getUserProfile = createAsyncThunk(
       const response = await axios.get(`${API_URL}/user/profile`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      return response.data.user; // Your controller returns { user: userData }
+      return response.data.user; 
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         return rejectWithValue(error.response.data.message || 'Failed to fetch user profile');
@@ -89,7 +86,7 @@ export const updateUserProfile = createAsyncThunk(
         return rejectWithValue('No access token available for updating profile.');
       }
 
-      const response = await axios.put(`${API_URL}/user/update/${userId}`, updateData, {
+      const response = await axios.put(`${API_URL}/api/user/update/${userId}`, updateData, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       return response.data; // Your controller returns the updated user object directly
@@ -98,6 +95,27 @@ export const updateUserProfile = createAsyncThunk(
         return rejectWithValue(error.response.data.message || 'Failed to update user profile');
       } else if (axios.isAxiosError(error) && error.request) {
         return rejectWithValue('No response received from server.');
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  }
+);
+
+// Async thunk for fetching user profile
+export const fetchUserProfile = createAsyncThunk(
+  'user/fetchUserProfile',
+  async ({ accessToken }, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/user/profile`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      return response.data.user;
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        return rejectWithValue(error.response.data.message);
       } else {
         return rejectWithValue(error.message);
       }
@@ -124,7 +142,12 @@ const userSlice = createSlice({
     },
     clearRegistrationStatus(state) {
       state.registrationSuccess = false;
-    }
+    },
+    clearUserProfile: (state) => {
+      state.profile = null;
+      state.loading = false;
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -182,9 +205,22 @@ const userSlice = createSlice({
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(fetchUserProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.profile = action.payload;
+      })
+      .addCase(fetchUserProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.profile = null; // Clear profile on error
       });
   },
 });
 
-export const { clearUsers, clearRegistrationStatus } = userSlice.actions;
+export const { clearUsers, clearRegistrationStatus, clearUserProfile } = userSlice.actions;
 export default userSlice.reducer;

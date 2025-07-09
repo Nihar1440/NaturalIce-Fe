@@ -3,9 +3,10 @@ import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import { loginUser, checkAdmin, logout } from "../../features/auth/authSlice";
-import { registerUser, clearRegistrationStatus } from "../../features/user/userSlice";
+import { registerUser } from "../../features/auth/authSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, User, Mail, Lock } from "lucide-react";
+import { clearRegistrationStatus } from "@/features/user/userSlice";
 
 const AuthTogglePage = () => {
   const dispatch = useDispatch();
@@ -13,7 +14,6 @@ const AuthTogglePage = () => {
   const { accessToken, loading, error, user } = useSelector(
     (state) => state.auth
   );
-  // Destructure user-specific loading, error, and registration success from userSlice
   const { loading: userLoading, error: userError, registrationSuccess } = useSelector(
     (state) => state.user
   );
@@ -24,13 +24,13 @@ const AuthTogglePage = () => {
     name: "",
     email: "",
     password: "",
-    address: "", // Add address field
+    address: "", 
   });
 
   const toggleMode = () => {
     setIsSignUp((prev) => !prev);
     setFormData({ name: "", email: "", password: "", address: "" });
-    dispatch(clearRegistrationStatus()); // Clear registration status when toggling mode
+    dispatch(clearRegistrationStatus()); 
   };
 
   const handleChange = (e) => {
@@ -43,14 +43,11 @@ const AuthTogglePage = () => {
     dispatch(loginUser({ email: formData.email, password: formData.password }));
   };
 
-  // New handler for user registration
   const handleRegister = async (e) => {
-    debugger
     e.preventDefault();
     await dispatch(registerUser(formData));
   };
 
-  // Effect for handling login (authSlice)
   useEffect(() => {
     if (accessToken && !user && !loading) {
       dispatch(checkAdmin(accessToken));
@@ -88,9 +85,9 @@ const AuthTogglePage = () => {
       toast.success("Registration Successful!", {
         description: "You can now sign in with your new account.",
       });
-      setIsSignUp(false); // Switch to sign-in mode
-      setFormData({ name: "", email: "", password: "", address: "" }); // Clear the form
-      dispatch(clearRegistrationStatus()); // Clear registrationSuccess flag in Redux state
+      setIsSignUp(false); 
+      setFormData({ name: "", email: "", password: "", address: "" }); 
+      dispatch(clearRegistrationStatus());
     }
     if (userError) {
       toast.error("Registration Failed", {

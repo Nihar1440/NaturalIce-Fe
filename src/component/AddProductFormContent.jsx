@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from "react";
-// import Swal from "sweetalert2"; // Remove Swal import
-import { Input } from "@/components/ui/input";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -10,10 +8,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
-import { useDispatch, useSelector } from "react-redux";
+import { Textarea } from "@/components/ui/textarea";
 import { getCategories } from "@/features/category/categorySlice";
-import { Loader2 } from "lucide-react"; // Import Loader2 icon
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
 
 const API_URL = import.meta.env.VITE_API_URL;
 

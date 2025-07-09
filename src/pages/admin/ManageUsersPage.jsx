@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUsers } from '../../features/user/userSlice'; // Import the thunk
 import { toast } from 'sonner';
+import Loader from '@/component/common/Loader';
 
 const ManageUsersPage = () => {
   const dispatch = useDispatch();
@@ -19,7 +20,7 @@ const ManageUsersPage = () => {
   }, [dispatch, accessToken]);
 
   if (loading) {
-    return <div className="p-4 text-center">Loading users...</div>;
+    return <Loader message={"Loading Users..."}/>
   }
 
   if (error) {

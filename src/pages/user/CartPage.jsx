@@ -16,6 +16,7 @@ import {
 } from "../../features/cart/cartSlice";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import Loader from "@/component/common/Loader";
 
 export default function CartPage() {
   const dispatch = useDispatch();
@@ -25,6 +26,7 @@ export default function CartPage() {
     error,
   } = useSelector((state) => state.cart);
   const { accessToken } = useSelector((state) => state.auth);
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
 
   let isUser = null;
   try {
@@ -118,14 +120,62 @@ export default function CartPage() {
   const tax = subtotal * 0.08;
   const total = subtotal + tax;
 
+  const handleCheckout = async () => {
+    if (!isUser || !accessToken) {
+      toast.error("Please log in to proceed to checkout.");
+      return;
+    }
+
+    if (!cartItems || cartItems.length === 0) {
+      toast.info("Your cart is empty. Add items before checking out.");
+      return;
+    }
+
+    try {
+      // Map cartItems to the structure expected by the backend
+      const itemsForCheckout = cartItems.map((item) => ({
+        name: item?.productId?.name,
+        price: item?.productId?.price,
+        image: item?.productId?.image,
+        category: { name: item?.productId?.category?.name || 'Uncategorized' },
+        productId: item?.productId?._id,
+        originalPrice: item?.productId?.originalPrice || item?.productId?.price,
+        quantity: item?.quantity,
+      }));
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/payment/create-checkout-session`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ items: itemsForCheckout }),
+        }
+      );
+      console.log("response", response);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || "Failed to create checkout session."
+        );
+      }
+
+      const data = await response.json();
+      // Redirect to Stripe checkout page
+      window.location.href = data.url;
+    } catch (err) {
+      toast.error(
+        err.message || "Failed to initiate checkout. Please try again."
+      );
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading cart items...</p>
-        </div>
-      </div>
+      <Loader message={"Loading Cart Items..."}/>
     );
   }
 
@@ -389,10 +439,13 @@ export default function CartPage() {
               </div>
 
               {/* Checkout Button */}
-              <button className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 mb-4">
+              <Button
+                onClick={handleCheckout}
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 mb-4"
+              >
                 Proceed to Checkout
                 <span className="text-lg">→</span>
-              </button>
+              </Button>
 
               {/* Security Badge */}
               <div className="flex items-center justify-center gap-2 text-sm text-gray-600 mb-6">

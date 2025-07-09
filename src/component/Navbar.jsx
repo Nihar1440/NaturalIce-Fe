@@ -12,6 +12,13 @@ import {
   X,
   LogOut,
   LogIn,
+  UserCircle, // Add UserCircle icon
+  User, // New: User icon for View Profile
+  Edit, // New: Edit icon for Edit Profile
+  ClipboardList, // New: ClipboardList icon for My Orders
+  MapPin, // New: MapPin icon for Shipping Address
+  CreditCard, // New: CreditCard icon for Payment Methods
+  Lock, // New: Lock icon for Change Password
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -29,6 +36,14 @@ import { Button } from "@/components/ui/button";
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCartItems } from '../features/cart/cartSlice';
 import { logout } from "../features/auth/authSlice";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const location = useLocation();
@@ -61,9 +76,8 @@ const Navbar = () => {
     : [
         { to: "/", label: "Home", icon: <Home className="w-5 h-5" /> },
         { to: "/cart", label: "Cart", icon: <ShoppingCart className="w-5 h-5" /> },
-        { to: "/wishlist", label: "Wishlist", icon: <Heart className="w-5 h-5" /> },
+        // { to: "/wishlist", label: "Wishlist", icon: <Heart className="w-5 h-5" /> },
         { to: "/contactUs", label: "Contact Us", icon: <Mail className="w-5 h-5" /> },
-        ...(!isLoggedIn ? [{ to: "/login", label: "Login", icon: <LogIn  className="w-5 h-5" /> }] : []),
       ].filter(Boolean);
 
   const performLogout = () => {
@@ -107,36 +121,104 @@ const Navbar = () => {
               </Link>
             </li>
           ))}
-          {isLoggedIn && (
-            <li>
-              <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
-                <AlertDialogTrigger asChild>
-                  <button
-                    className="flex items-center gap-1 text-white text-base hover:text-blue-200 transition-colors"
-                  >
-                    <LogOut className="w-5 h-5" />
-                    Logout
+          {/* User Profile Dropdown / Login-Register Links (Desktop) */}
+          {isLoggedIn && !isAdmin ? (
+            <li className="relative">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 text-white text-base hover:text-blue-200 transition-colors focus:outline-none">
+                    {user?.avatar ? (
+                      <img src={user.avatar} alt="User Avatar" className="w-8 h-8 rounded-full border-2 border-white" />
+                    ) : (
+                      <UserCircle className="w-8 h-8" />
+                    )}
+                    <span className="font-semibold">{user?.name || user?.email || 'Profile'}</span>
+                    <svg className="w-4 h-4 ml-1 transform transition-transform duration-200 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                   </button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="max-w-md">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to log out of your account?
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </AlertDialogCancel>
-                    <AlertDialogAction onClick={performLogout} className="bg-red-500 hover:bg-red-600">
-                      Logout
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-48">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile/view" onClick={() => setMobileOpen(false)} className="flex items-center">
+                      <User className="mr-2 h-4 w-4" /> View Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile/edit" onClick={() => setMobileOpen(false)} className="flex items-center">
+                      <Edit className="mr-2 h-4 w-4" /> Edit Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile/orders" onClick={() => setMobileOpen(false)} className="flex items-center">
+                      <ClipboardList className="mr-2 h-4 w-4" /> My Orders
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/wishlist" onClick={() => setMobileOpen(false)} className="flex items-center">
+                      <Heart className="mr-2 h-4 w-4" /> Wishlist
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile/shipping" onClick={() => setMobileOpen(false)} className="flex items-center">
+                      <MapPin className="mr-2 h-4 w-4" /> Shipping Address
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile/payment-methods" onClick={() => setMobileOpen(false)} className="flex items-center">
+                      <CreditCard className="mr-2 h-4 w-4" /> Payment Methods
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile/change-password" onClick={() => setMobileOpen(false)} className="flex items-center">
+                      <Lock className="mr-2 h-4 w-4" /> Change Password
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+                    <AlertDialogTrigger asChild>
+                      <DropdownMenuItem
+                        onSelect={(e) => e.preventDefault()} // Prevent DropdownMenu from closing immediately
+                        className="text-red-600 focus:bg-red-50 flex items-center" // Added flex items-center
+                      >
+                        <LogOut className="mr-2 h-4 w-4" /> {/* Added Logout icon */}
+                        Logout
+                      </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="max-w-md">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to log out of your account?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel asChild>
+                          <Button variant="outline">Cancel</Button>
+                        </AlertDialogCancel>
+                        <AlertDialogAction onClick={performLogout} className="bg-red-500 hover:bg-red-600">
+                          Logout
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </li>
-          )}
+          ) : !isLoggedIn && !isAdmin ? (
+            <li>
+                <Link
+                  to="/login"
+                  className={cn(
+                    "flex items-center gap-1 text-white text-base hover:text-blue-200 transition-colors",
+                    location.pathname === "/login" ? "underline font-semibold" : ""
+                  )}
+                >
+                  <LogIn className="w-5 h-5" />
+                  Login
+                </Link>
+            </li>
+          ) : null}
         </ul>
 
         <button
@@ -171,37 +253,86 @@ const Navbar = () => {
                 </Link>
               </li>
             ))}
-            {isLoggedIn && (
+            {/* User Profile Links / Login-Register Links (Mobile) */}
+            {isLoggedIn && !isAdmin ? (
+              <>
+                <li>
+                  <Link
+                    to="/profile/view"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2 text-white text-base hover:text-blue-200 py-2"
+                  >
+                    {user?.avatar ? (
+                      <img src={user.avatar} alt="User Avatar" className="w-8 h-8 rounded-full border-2 border-white" />
+                    ) : (
+                      <UserCircle className="w-8 h-8" />
+                    )}
+                    <span className="font-semibold">{user?.name || user?.email || 'Profile'}</span>
+                  </Link>
+                </li>
+                <li className="pl-6"> {/* Indent sub-items */}
+                  <Link to="/profile/edit" onClick={() => setMobileOpen(false)} className="flex items-center py-2 text-white hover:text-blue-200">
+                    <Edit className="mr-2 h-4 w-4" /> Edit Profile
+                  </Link>
+                  <Link to="/profile/orders" onClick={() => setMobileOpen(false)} className="flex items-center py-2 text-white hover:text-blue-200">
+                    <ClipboardList className="mr-2 h-4 w-4" /> My Orders
+                  </Link>
+                  <Link to="/wishlist" onClick={() => setMobileOpen(false)} className="flex items-center py-2 text-white hover:text-blue-200">
+                    <Heart className="mr-2 h-4 w-4" /> Wishlist
+                  </Link>
+                  <Link to="/profile/shipping" onClick={() => setMobileOpen(false)} className="flex items-center py-2 text-white hover:text-blue-200">
+                    <MapPin className="mr-2 h-4 w-4" /> Shipping Address
+                  </Link>
+                  <Link to="/profile/payment-methods" onClick={() => setMobileOpen(false)} className="flex items-center py-2 text-white hover:text-blue-200">
+                    <CreditCard className="mr-2 h-4 w-4" /> Payment Methods
+                  </Link>
+                  <Link to="/profile/change-password" onClick={() => setMobileOpen(false)} className="flex items-center py-2 text-white hover:text-blue-200">
+                    <Lock className="mr-2 h-4 w-4" /> Change Password
+                  </Link>
+                  <hr className="my-1 border-blue-700" />
+                  <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setMobileOpen(false); setShowLogoutDialog(true); }}
+                        className="block w-full text-left py-2 text-red-300 hover:text-red-100 flex items-center" // Added flex items-center
+                      >
+                        <LogOut className="inline-block w-5 h-5 mr-2" /> Logout
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="max-w-md">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to log out of your account?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel asChild>
+                          <Button variant="outline">Cancel</Button>
+                        </AlertDialogCancel>
+                        <AlertDialogAction onClick={performLogout} className="bg-red-500 hover:bg-red-600">
+                          Logout
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </li>
+              </>
+            ) : !isLoggedIn && !isAdmin ? (
               <li>
-                <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
-                  <AlertDialogTrigger asChild>
-                    <button
-                      onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-2 text-white text-base hover:text-blue-200 py-2"
-                    >
-                      <LogOut className="w-5 h-5" />
-                      Logout
-                    </button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent className="max-w-md">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to log out of your account?
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel asChild>
-                        <Button variant="outline">Cancel</Button>
-                      </AlertDialogCancel>
-                      <AlertDialogAction onClick={performLogout} className="bg-red-500 hover:bg-red-600">
-                        Logout
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <Link
+                  to="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className={cn(
+                    "flex items-center gap-2 text-white text-base hover:text-blue-200 py-2",
+                    location.pathname === "/login" ? "underline font-semibold" : ""
+                  )}
+                >
+                  <LogIn className="w-5 h-5" />
+                  Login
+                </Link>
               </li>
-            )}
+            ) : null}
           </ul>
         </div>
       )}
