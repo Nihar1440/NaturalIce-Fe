@@ -1,20 +1,18 @@
-// src/features/cart/cartSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL; // Ensure this is defined in your .env or similar
-
+const API_URL = import.meta.env.VITE_API_URL;
 // Async thunk to fetch cart items from API
 export const fetchCartItems = createAsyncThunk(
   'cart/fetchCartItems',
   async ({ accessToken }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/api/cart/list`, {
+      const response = await axios.get(`${API_URL}/api/cart/cartList`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      return response.data; // Backend returns the full cart object
+      return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         return rejectWithValue(error.response.data.message || 'Failed to fetch cart');
@@ -30,7 +28,7 @@ export const addItemToCart = createAsyncThunk(
   async ({ productId, quantity, price, accessToken, userId }, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `${API_URL}/api/cart/create`,
+        `${API_URL}/api/cart/addToCart`,
         { productId, quantity, price, userId },
         {
           headers: {

@@ -57,7 +57,7 @@ const AdminDashboard = () => {
       toast.success("Logged Out!", {
         description: "You have been successfully logged out.",
       });
-      navigate("/login");
+      navigate("/");
     } catch (error) {
       console.error("Logout failed:", error);
       setShowLogoutDialog(false);
@@ -66,7 +66,7 @@ const AdminDashboard = () => {
       });
       localStorage.removeItem("accessToken");
       localStorage.removeItem("user");
-      navigate("/login");
+      navigate("/");
     }
   };
 
@@ -80,7 +80,7 @@ const AdminDashboard = () => {
       {/* Main Content Area (Navbar + Outlet) */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Navigation Bar */}
-        <header className="bg-blue-700 text-white p-4 sticky top-0 shadow-md flex justify-between items-center z-10">
+        <header className="bg-sky-400 text-slate-50 p-4 sticky top-0 shadow-md flex justify-between items-center z-10">
           <div className="flex items-center">
             {/* Mobile menu toggle button */}
             <button
@@ -98,7 +98,7 @@ const AdminDashboard = () => {
           </div>
           <div className="flex items-center space-x-4">
             <Bell className="h-6 w-6 cursor-pointer" />
-            <div className="flex items-center space-x-2 bg-blue-600 px-3 py-2 rounded-full">
+            <div className="flex items-center space-x-2 bg-sky-300 hover:bg-sky-500 px-3 py-2 rounded-full">
               <User className="h-5 w-5" />
               <span className="text-sm hidden md:block">Admin User</span>
             </div>
@@ -106,7 +106,7 @@ const AdminDashboard = () => {
               <DialogTrigger asChild>
                 <Button
                   onClick={handleLogout}
-                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded"
+                  className="bg-rose-500 hover:bg-rose-600 text-white px-3 py-2 rounded"
                 >
                   Log Out
                 </Button>

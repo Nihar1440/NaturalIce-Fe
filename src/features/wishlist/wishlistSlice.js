@@ -15,7 +15,7 @@ export const addItemToWishList = createAsyncThunk(
       }
 
       const response = await axios.post(
-        `${API_URL}/wishlist/add`,
+        `${API_URL}/api/wishlist/addToWishlist`,
         { productId },
         {
           headers: { Authorization: `Bearer ${accessToken}` },
@@ -47,10 +47,10 @@ export const getUserWishList = createAsyncThunk(
         return rejectWithValue("No access token available for fetching wishlist.");
       }
 
-      const response = await axios.get(`${API_URL}/wishlist/list`, {
+      const response = await axios.get(`${API_URL}/api/wishlist/wishlist`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      return response.data; // Backend returns the full wishlist object
+      return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         return rejectWithValue(
@@ -77,12 +77,13 @@ export const removeItemFromWishList = createAsyncThunk(
       }
 
       const response = await axios.delete(
-        `${API_URL}/wishlist/remove/${productId}`,
+        `${API_URL}/api/wishlist/remove/${productId}`,
         {
           headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
-      return response.data; // Backend returns the updated wishlist object
+      console.log('response', response)
+      return productId;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         return rejectWithValue(
@@ -129,7 +130,7 @@ export const clearWishList = createAsyncThunk(
 // Async Thunk for Merging Wishlist Items
 export const mergeWishListItems = createAsyncThunk(
   "wishlist/merge",
-  async (productIds, { getState, rejectWithValue }) => { // productIds should be an array of product IDs
+  async (productIds, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
       const accessToken = auth.accessToken;
@@ -139,12 +140,12 @@ export const mergeWishListItems = createAsyncThunk(
 
       const response = await axios.post(
         `${API_URL}/wishlist/merge`,
-        { products: productIds }, // Backend expects 'products' array in the request body
+        { products: productIds }, 
         {
           headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
-      return response.data; // Backend returns the updated wishlist object
+      return response.data; 
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         return rejectWithValue(
@@ -160,7 +161,7 @@ export const mergeWishListItems = createAsyncThunk(
 );
 
 const initialState = {
-  wishlist: null, // Will store the user's wishlist object
+  wishlist: null, 
   loading: false,
   error: null,
 };
@@ -197,21 +198,24 @@ const wishlistSlice = createSlice({
       })
       .addCase(getUserWishList.fulfilled, (state, action) => {
         state.loading = false;
-        state.wishlist = action.payload; // Backend returns the full wishlist
+        state.wishlist = action.payload; 
       })
       .addCase(getUserWishList.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to fetch wishlist";
-        state.wishlist = null; // Clear wishlist on error or if not found
+        state.wishlist = null; 
       })
-      // Remove Item from Wishlist
       .addCase(removeItemFromWishList.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(removeItemFromWishList.fulfilled, (state, action) => {
         state.loading = false;
-        state.wishlist = action.payload; // Backend returns the updated wishlist
+        if (state.wishlist && state.wishlist.products) {
+          state.wishlist.products = state.wishlist.products.filter(
+            (product) => product._id !== action.payload
+          );
+        }
       })
       .addCase(removeItemFromWishList.rejected, (state, action) => {
         state.loading = false;
@@ -224,7 +228,7 @@ const wishlistSlice = createSlice({
       })
       .addCase(clearWishList.fulfilled, (state, action) => {
         state.loading = false;
-        state.wishlist = action.payload; // Backend returns the cleared wishlist
+        state.wishlist = action.payload;
       })
       .addCase(clearWishList.rejected, (state, action) => {
         state.loading = false;
@@ -237,7 +241,7 @@ const wishlistSlice = createSlice({
       })
       .addCase(mergeWishListItems.fulfilled, (state, action) => {
         state.loading = false;
-        state.wishlist = action.payload; // Backend returns the updated wishlist
+        state.wishlist = action.payload; 
       })
       .addCase(mergeWishListItems.rejected, (state, action) => {
         state.loading = false;

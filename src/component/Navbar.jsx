@@ -90,7 +90,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-blue-600 text-white shadow">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-sky-400 text-slate-50 shadow">
       <div className="flex items-center justify-between px-4 md:px-6 lg:px-8 py-3 w-full">
         <Link to="/" className="flex items-center font-bold text-xl">
           <img
@@ -294,7 +294,7 @@ const Navbar = () => {
                     <AlertDialogTrigger asChild>
                       <button
                         onClick={(e) => { e.stopPropagation(); setMobileOpen(false); setShowLogoutDialog(true); }}
-                        className="block w-full text-left py-2 text-red-300 hover:text-red-100 flex items-center" // Added flex items-center
+                        className="block w-full text-left py-2 text-red-300 hover:text-red-100 items-center" // Added flex items-center
                       >
                         <LogOut className="inline-block w-5 h-5 mr-2" /> Logout
                       </button>

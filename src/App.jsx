@@ -32,6 +32,7 @@ import MyOrdersPage from "./pages/user/MyOrdersPage";
 import ShippingAddressPage from "./pages/user/ShippingAddressPage";
 import PaymentMethodsPage from "./pages/user/PaymentMethodsPage";
 import ChangePasswordPage from "./pages/user/ChangePasswordPage";
+import ContactForm from "./component/ContactForm";
 
 const App = () => {
   const location = useLocation();
@@ -43,7 +44,8 @@ const App = () => {
   const isRequestResetPasswordPage = location.pathname === "/forgot-password";
   const isSetNewPasswordPage = location.pathname.startsWith("/reset-password/");
   const isCheckoutPage = location.pathname === "/checkout";
-  const isProfileRoute = location.pathname.startsWith("/profile"); // New condition for profile routes
+  const isProfileRoute = location.pathname.startsWith("/profile");
+  const isWishlistRoute = location.pathname === "/wishlist";
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gray-100">
@@ -74,29 +76,32 @@ const App = () => {
           <Route path="/invoice" element={<InvoicePage />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/payment" element={<PaymentPage />} />
+          <Route path="/contactUs" element={<ContactForm />} />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="/product/:id" element={<ProductDetailsPage />} />
           {/* <Route path="/add-product" element={<AddProductPage />} /> */}
 
-          {/* New routes for Stripe */}
           <Route path="/success" element={<SuccessPage />} />
           <Route path="/cancel" element={<ErrorPage />} />
 
-          {/* User Profile Protected Routes */}
           <Route
             path="/profile/*"
             element={
               <ProtectedRoute>
-                {/* A general profile wrapper could go here if needed, or directly render sub-pages */}
                 <Routes>
                   <Route path="view" element={<ViewProfilePage />} />
                   <Route path="edit" element={<EditProfilePage />} />
                   <Route path="orders" element={<MyOrdersPage />} />
-                  <Route path="wishlist" element={<WishlistPage />} /> {/* Wishlist already exists */}
+                  <Route path="wishlist" element={<WishlistPage />} />
                   <Route path="shipping" element={<ShippingAddressPage />} />
-                  <Route path="payment-methods" element={<PaymentMethodsPage />} />
-                  <Route path="change-password" element={<ChangePasswordPage />} />
-                  {/* Redirect to view profile if just /profile is accessed */}
+                  <Route
+                    path="payment-methods"
+                    element={<PaymentMethodsPage />}
+                  />
+                  <Route
+                    path="change-password"
+                    element={<ChangePasswordPage />}
+                  />
                   <Route index element={<ViewProfilePage />} />
                 </Routes>
               </ProtectedRoute>
@@ -139,7 +144,8 @@ const App = () => {
         !isRequestResetPasswordPage &&
         !isSetNewPasswordPage &&
         !isCheckoutPage &&
-        !isProfileRoute && /* Added this condition to hide footer on profile pages */ <Footer />}
+        !isWishlistRoute &&
+        !isProfileRoute && <Footer />}
       <Toaster />
     </div>
   );

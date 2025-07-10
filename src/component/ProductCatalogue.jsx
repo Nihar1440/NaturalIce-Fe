@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Snowflake, Star } from "lucide-react";
+import { ShoppingCart, Snowflake, Star, Heart } from "lucide-react"; 
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { addItemToCart } from '../../src/features/cart/cartSlice';
+import { addItemToWishList } from '../../src/features/wishlist/wishlistSlice'; 
 import AddToCartConfirmationPopup from './AddToCartConfirmationPopup';
 import LoginRequiredPopup from './LoginRequiredPopup';
 
@@ -81,40 +82,68 @@ const ProductCatalogue = ({ products, loading }) => {
                       className="w-full h-48 sm:h-56 lg:h-64 object-cover transition-transform duration-700 group-hover:scale-110"
                     />
 
-                    {/* Add to Cart Button - appears on hover, centered over image */}
+                    {/* Buttons overlay - appears on hover */}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <Button
-                        className="w-2/5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 sm:py-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base group/btn"
-                        onClick={async (e) => {
-                          e.preventDefault(); 
-                          e.stopPropagation(); 
+                      <div className="flex space-x-2"> {/* Container for both buttons */}
+                        <Button
+                          className="w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 sm:py-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base group/btn"
+                          onClick={async (e) => {
+                            e.preventDefault(); 
+                            e.stopPropagation(); 
 
-                          if (!isUser) {
-                            setShowLoginAlert(true);
-                            return;
-                          }
+                            if (!isUser) {
+                              setShowLoginAlert(true);
+                              return;
+                            }
 
-                          try {
-                            await dispatch( addItemToCart({
-                              productId: product._id,
-                              quantity: quantity,
-                              price: product.price,
-                              userId: isUser._id,
-                              accessToken: accessToken,
-                            })).unwrap();
-                            setAddedProductName(product.name);
-                            setAddedProductQuantity(quantity);
-                            setShowSuccessAlert(true);
-                          } catch (error) {
-                            const errorMessage = error.message || 'Failed to add product to cart.';
-                            toast.error(errorMessage);
-                            console.error('Failed to add to cart:', error);
-                          }
-                        }}
-                      >
-                        <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover/btn:animate-bounce" />
-                        Add to Cart
-                      </Button>
+                            try {
+                              await dispatch( addItemToCart({
+                                productId: product._id,
+                                quantity: quantity,
+                                price: product.price,
+                                userId: isUser._id,
+                                accessToken: accessToken,
+                              })).unwrap();
+                              setAddedProductName(product.name);
+                              setAddedProductQuantity(quantity);
+                              setShowSuccessAlert(true);
+                            } catch (error) {
+                              const errorMessage = error.message || 'Failed to add product to cart.';
+                              toast.error(errorMessage);
+                              console.error('Failed to add to cart:', error);
+                            }
+                          }}
+                        >
+                          <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover/btn:animate-bounce" />
+                          Add to Cart
+                        </Button>
+                        {/* Add to Wishlist Button */}
+                        <Button
+                          className="w-auto bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-semibold py-3 sm:py-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base group/btn"
+                          onClick={async (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            if (!isUser) {
+                              setShowLoginAlert(true);
+                              return;
+                            }
+
+                            try {
+                              // Dispatch the addItemToWishList thunk
+                              await dispatch(addItemToWishList(product._id)).unwrap();
+                              toast.success(`${product.name} added to wishlist!`);
+                            } catch (error) {
+                              const errorMessage = error.message || 'Failed to add to wishlist.';
+                              toast.error(errorMessage);
+                              console.error('Failed to add to wishlist:', error);
+                            }
+                          }}
+                        >
+                          <Heart className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover/btn:animate-bounce" />
+                          Wishlist
+                        </Button>
+                      </div> {/* End of buttons container */}
                     </div>
                   </div>
 
