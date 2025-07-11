@@ -103,8 +103,6 @@ const OrderItemDetails = ({ item }) => {
 const MyOrdersPage = () => {
   const dispatch = useDispatch();
   const { orders, loading } = useSelector((state) => state.order);
-  const { user } = useSelector((state) => state.auth);
-
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
@@ -293,15 +291,33 @@ const MyOrdersPage = () => {
                     </h3>
                     <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
                       <p className="text-gray-700">
-                        <strong>Address:</strong> 123 Main St, Anytown, USA
-                        12345{" "}
-                      </p>
-                      <p className="text-gray-700">
                         <strong>Recipient:</strong>{" "}
-                        {user?.name || "Customer Name"}{" "}
+                        {selectedOrder?.shippingAddress?.fullName ||
+                          "Customer Name"}{" "}
                       </p>
                       <p className="text-gray-700">
-                        <strong>Phone:</strong> +1 (555) 123-4567{" "}
+                        <strong>Address:</strong>{" "}
+                        {selectedOrder?.shippingAddress?.addressLine}
+                      </p>
+                      <p className="text-gray-700">
+                        <strong>Phone:</strong>{" "}
+                        {selectedOrder?.shippingAddress?.phoneNumber}
+                      </p>
+                      <p className="text-gray-700">
+                        <strong>City:</strong>{" "}
+                        {selectedOrder?.shippingAddress?.city}
+                      </p>
+                      <p className="text-gray-700">
+                        <strong>Postal Code:</strong>{" "}
+                        {selectedOrder?.shippingAddress?.postalCode}
+                      </p>
+                      <p className="text-gray-700">
+                        <strong>State</strong>{" "}
+                        {selectedOrder?.shippingAddress?.state}
+                      </p>
+                      <p className="text-gray-700">
+                        <strong>Country</strong>{" "}
+                        {selectedOrder?.shippingAddress?.country}
                       </p>
                     </div>
                   </div>

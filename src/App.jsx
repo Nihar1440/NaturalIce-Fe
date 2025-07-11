@@ -30,7 +30,6 @@ import ViewProfilePage from "./pages/user/ViewProfilePage";
 import EditProfilePage from "./pages/user/EditProfilePage";
 import MyOrdersPage from "./pages/user/MyOrdersPage";
 import ShippingAddressPage from "./pages/user/ShippingAddressPage";
-import PaymentMethodsPage from "./pages/user/PaymentMethodsPage";
 import ChangePasswordPage from "./pages/user/ChangePasswordPage";
 import ContactForm from "./component/ContactForm";
 
