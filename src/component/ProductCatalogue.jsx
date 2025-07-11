@@ -30,7 +30,7 @@ const ProductCatalogue = ({ products, loading }) => {
   let quantity = 1;
 
   return (
-    <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 relative">
+    <section className="py-8 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 relative">
       <div className="w-full">
         {/* Section header */}
         <div className="text-center mb-12 sm:mb-16">
@@ -61,11 +61,11 @@ const ProductCatalogue = ({ products, loading }) => {
           </div>
         ) : (
           /* Products grid */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-6 lg:gap-4">
             {products?.map((product, index) => (
               <div
                 key={product._id}
-                className="product-card group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
+                className="product-card group relative bg-sky-50 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
                 style={{
                   animationDelay: `${index * 100}ms`,
                 }}
@@ -83,7 +83,7 @@ const ProductCatalogue = ({ products, loading }) => {
                     />
 
                     {/* Buttons overlay - appears on hover */}
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <div className="flex space-x-2"> {/* Container for both buttons */}
                         <Button
                           className="w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 sm:py-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base group/btn"
@@ -161,7 +161,7 @@ const ProductCatalogue = ({ products, loading }) => {
                         <span className="ml-1 text-slate-500 text-xs">(0)</span>
                       </div>
                     </div>
-                    <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors duration-300">
+                    <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-2 transition-colors duration-300">
                       {product.name}
                     </h3>
                     <p className="text-slate-600 mb-4 text-sm leading-relaxed line-clamp-2">
@@ -169,7 +169,7 @@ const ProductCatalogue = ({ products, loading }) => {
                     </p>
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
-                        <span className="text-xl sm:text-2xl font-bold text-blue-600 group-hover:text-blue-700 transition-colors duration-300">
+                        <span className="text-xl sm:text-2xl font-bold text-blue-600 transition-colors duration-300">
                           ₹{product.price}
                         </span>
                       </div>

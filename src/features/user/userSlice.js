@@ -3,7 +3,7 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-// Async thunk to fetch all users
+//fetch all users
 export const fetchUsers = createAsyncThunk(
   "user/fetchUsers",
   async (accessToken, { rejectWithValue }) => {
@@ -28,7 +28,7 @@ export const fetchUsers = createAsyncThunk(
   }
 );
 
-// Async Thunk for User Registration
+//Create User Registration
 export const registerUser = createAsyncThunk(
   'user/registerUser',
   async (userData, { rejectWithValue }) => {
@@ -74,7 +74,7 @@ export const getUserProfile = createAsyncThunk(
   }
 );
 
-// Async Thunk for Updating User Profile
+// Updating User Profile
 export const updateUserProfile = createAsyncThunk(
   'user/updateUserProfile',
   async ({ userId, updateData }, { getState, rejectWithValue }) => {
@@ -89,7 +89,7 @@ export const updateUserProfile = createAsyncThunk(
       const response = await axios.put(`${API_URL}/api/user/update/${userId}`, updateData, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      return response.data; // Your controller returns the updated user object directly
+      return response.data; 
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         return rejectWithValue(error.response.data.message || 'Failed to update user profile');
@@ -102,7 +102,7 @@ export const updateUserProfile = createAsyncThunk(
   }
 );
 
-// Async thunk for fetching user profile
+// fetching user profile
 export const fetchUserProfile = createAsyncThunk(
   'user/fetchUserProfile',
   async ({ accessToken }, { rejectWithValue }) => {
@@ -217,7 +217,7 @@ const userSlice = createSlice({
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        state.profile = null; // Clear profile on error
+        state.profile = null; 
       });
   },
 });

@@ -94,10 +94,10 @@ const App = () => {
                   <Route path="orders" element={<MyOrdersPage />} />
                   <Route path="wishlist" element={<WishlistPage />} />
                   <Route path="shipping" element={<ShippingAddressPage />} />
-                  <Route
+                  {/* <Route
                     path="payment-methods"
                     element={<PaymentMethodsPage />}
-                  />
+                  /> */}
                   <Route
                     path="change-password"
                     element={<ChangePasswordPage />}

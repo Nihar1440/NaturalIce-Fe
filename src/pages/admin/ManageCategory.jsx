@@ -42,6 +42,7 @@ import {
 } from "../../components/ui/alert-dialog";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
+import { Toaster } from "../../components/ui/sonner";
 
 import {
   getCategories,
@@ -51,6 +52,7 @@ import {
 } from "../../features/category/categorySlice";
 import useDebounce from "../../lib/useDebounce";
 import Loader from "@/component/common/Loader";
+import { toast } from "sonner";
 
 const ManageCategory = () => {
   const dispatch = useDispatch();
@@ -72,6 +74,7 @@ const ManageCategory = () => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
       console.warn("No access token found for fetching categories.");
+      toast.warning("Authentication required. Please log in.");
       return;
     }
     dispatch(
@@ -109,6 +112,7 @@ const ManageCategory = () => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
       console.warn("No access token found for creating/updating category.");
+      toast.warning("Authentication required. Please log in.");
       return;
     }
 
@@ -130,9 +134,11 @@ const ManageCategory = () => {
         .then(() => {
           setIsAddEditModalOpen(false);
           fetchCategoriesData();
+          toast.success("Category updated successfully!");
         })
         .catch((err) => {
           console.error("Failed to update category:", err);
+          toast.error(`Failed to update category: ${err.message || "Unknown error"}`);
         });
     } else {
       dispatch(createCategory({ categoryData, accessToken: token }))
@@ -140,9 +146,11 @@ const ManageCategory = () => {
         .then(() => {
           setIsAddEditModalOpen(false);
           fetchCategoriesData();
+          toast.success("Category created successfully!");
         })
         .catch((err) => {
           console.error("Failed to create category:", err);
+          toast.error(`Failed to create category: ${err.message || "Unknown error"}`);
         });
     }
   };
@@ -157,6 +165,7 @@ const ManageCategory = () => {
       const token = localStorage.getItem("accessToken");
       if (!token) {
         console.warn("No access token found for deleting category.");
+        toast.warning("Authentication required. Please log in.");
         return;
       }
       dispatch(
@@ -167,9 +176,11 @@ const ManageCategory = () => {
           setCategoryToDelete(null);
           setIsDeleteConfirmModalOpen(false);
           fetchCategoriesData();
+          toast.success("Category deleted successfully!");
         })
         .catch((err) => {
           console.error("Failed to delete category:", err);
+          toast.error(`Failed to delete category: ${err.message || "Unknown error"}`);
         });
     }
   };
@@ -179,6 +190,7 @@ const ManageCategory = () => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
       console.warn("No access token found for updating category status.");
+      toast.warning("Authentication required. Please log in.");
       return;
     }
     dispatch(
@@ -191,15 +203,18 @@ const ManageCategory = () => {
       .unwrap()
       .then(() => {
         fetchCategoriesData();
+        toast.success(`Category status updated to ${newStatus}.`);
       })
       .catch((err) => {
         console.error("Failed to toggle category status:", err);
+        toast.error(`Failed to update status: ${err.message || "Unknown error"}`);
       });
   };
 
   useEffect(() => {
     if (error) {
       console.error("Category operation error:", error);
+      toast.error(`Category operation error: ${error.message || "Unknown error"}`);
     }
   }, [error]);
 
@@ -382,42 +397,42 @@ const ManageCategory = () => {
                   <tbody>
                     {categories?.map((category) => (
                       <tr
-                        key={String(category._id)}
+                        key={String(category?._id)}
                         className="border-b last:border-b-0 hover:bg-gray-50 transition-colors"
                       >
                         <td className="px-6 py-4">
                           <div className="font-bold text-gray-900">
-                            {category.name.charAt(0).toUpperCase() +
-                              category.name.slice(1)}
+                            {category?.name?.charAt(0)?.toUpperCase() +
+                              category?.name?.slice(1)}
                           </div>
                         </td>
                         <td className="px-6 py-4 hidden md:table-cell">
                           <div className="text-sm text-gray-700 max-w-xs truncate">
-                            {category.description
-                              ? category.description.charAt(0).toUpperCase() +
-                                category.description.slice(1)
+                            {category?.description
+                              ? category?.description?.charAt(0)?.toUpperCase() +
+                                category?.description?.slice(1)
                               : "No description"}
                           </div>
                         </td>
                         <td className="px-6 py-4">
                           <span
                             className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                              category.status === "Active"
+                              category?.status === "Active"
                                 ? "bg-green-100 text-green-700"
                                 : "bg-red-100 text-red-700"
                             }`}
                           >
-                            {category.status}
+                            {category?.status}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-gray-700">
-                          {new Date(category.createdAt).toLocaleDateString(
+                          {new Date(category?.createdAt).toLocaleDateString(
                             "en-US",
                             { year: "numeric", month: "short", day: "numeric" }
                           )}
                         </td>
                         <td className="px-6 py-4 text-gray-700">
-                          {new Date(category.updatedAt).toLocaleDateString(
+                          {new Date(category?.updatedAt).toLocaleDateString(
                             "en-US",
                             { year: "numeric", month: "short", day: "numeric" }
                           )}
@@ -432,13 +447,13 @@ const ManageCategory = () => {
                             </span>
                             <span
                               className={`cursor-pointer p-1 rounded-md transition-colors ${
-                                category.status === "Active"
+                                category?.status === "Active"
                                   ? "text-red-600 hover:text-red-800 hover:bg-red-50"
                                   : "text-green-600 hover:text-green-800 hover:bg-green-50"
                               }`}
                               onClick={() => handleToggleStatus(category)}
                             >
-                              {category.status === "Active" ? (
+                              {category?.status === "Active" ? (
                                 <XCircle className="h-4 w-4" />
                               ) : (
                                 <CheckCircle2 className="h-4 w-4" />
@@ -485,6 +500,7 @@ const ManageCategory = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <Toaster richColors />
     </div>
   );
 };

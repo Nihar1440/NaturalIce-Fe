@@ -1,13 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// Assuming your backend API base URL
-const API_URL = import.meta.env.VITE_API_URL; // Please adjust if your backend runs on a different port or domain
+const API_URL = import.meta.env.VITE_API_URL;
 
-// Async thunk to fetch orders
-// Note: This currently fetches ALL orders and relies on frontend filtering.
-// For better performance with large datasets, consider a backend endpoint
-// specifically for fetching orders by user ID or email (e.g., /api/orders/user/:email).
+// Fetch all orders
 export const fetchOrders = createAsyncThunk(
   'order/fetchOrders',
   async (_, { rejectWithValue }) => {

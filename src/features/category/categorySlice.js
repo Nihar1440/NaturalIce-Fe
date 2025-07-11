@@ -39,7 +39,7 @@ export const getCategories = createAsyncThunk(
   }
 );
 
-// Async Thunk to fetch a single category by ID
+//fetch a single category by ID
 export const getCategoryById = createAsyncThunk(
   "category/getCategoryById",
   async ({ id, accessToken }, { rejectWithValue }) => {
@@ -61,7 +61,7 @@ export const getCategoryById = createAsyncThunk(
   }
 );
 
-// Async Thunk to create a new category
+//create a new category
 export const createCategory = createAsyncThunk(
   "category/createCategory",
   async ({ categoryData, accessToken }, { rejectWithValue }) => {
@@ -87,7 +87,7 @@ export const createCategory = createAsyncThunk(
   }
 );
 
-// Async Thunk to update an existing category
+//update an existing category
 export const updateCategory = createAsyncThunk(
   "category/updateCategory",
   async ({ _id, updateData, accessToken }, { rejectWithValue }) => {
@@ -113,7 +113,7 @@ export const updateCategory = createAsyncThunk(
   }
 );
 
-// Async Thunk to delete a category
+//delete a category
 export const deleteCategory = createAsyncThunk(
   "category/deleteCategory",
   async ({ _id, accessToken }, { rejectWithValue }) => {

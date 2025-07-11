@@ -3,7 +3,7 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-// Async Thunk for Adding Item to Wishlist
+// Adding Item to Wishlist
 export const addItemToWishList = createAsyncThunk(
   "wishlist/addItem",
   async (productId, { getState, rejectWithValue }) => {
@@ -21,7 +21,7 @@ export const addItemToWishList = createAsyncThunk(
           headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
-      return response.data; // Backend returns the updated wishlist
+      return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         return rejectWithValue(
@@ -36,7 +36,7 @@ export const addItemToWishList = createAsyncThunk(
   }
 );
 
-// Async Thunk for Getting User's Wishlist
+// Getting User's Wishlist
 export const getUserWishList = createAsyncThunk(
   "wishlist/getWishlist",
   async (_, { getState, rejectWithValue }) => {
@@ -65,7 +65,7 @@ export const getUserWishList = createAsyncThunk(
   }
 );
 
-// Async Thunk for Removing Item from Wishlist
+// Removing Item from Wishlist
 export const removeItemFromWishList = createAsyncThunk(
   "wishlist/removeItem",
   async (productId, { getState, rejectWithValue }) => {
@@ -98,7 +98,7 @@ export const removeItemFromWishList = createAsyncThunk(
   }
 );
 
-// Async Thunk for Clearing Wishlist
+// Clearing Wishlist
 export const clearWishList = createAsyncThunk(
   "wishlist/clear",
   async (_, { getState, rejectWithValue }) => {
@@ -112,7 +112,7 @@ export const clearWishList = createAsyncThunk(
       const response = await axios.delete(`${API_URL}/wishlist/clear`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      return response.data; // Backend returns the cleared wishlist object
+      return response.data; 
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         return rejectWithValue(
@@ -127,7 +127,7 @@ export const clearWishList = createAsyncThunk(
   }
 );
 
-// Async Thunk for Merging Wishlist Items
+//Merging Wishlist Items
 export const mergeWishListItems = createAsyncThunk(
   "wishlist/merge",
   async (productIds, { getState, rejectWithValue }) => {
@@ -185,7 +185,7 @@ const wishlistSlice = createSlice({
       })
       .addCase(addItemToWishList.fulfilled, (state, action) => {
         state.loading = false;
-        state.wishlist = action.payload; // Backend returns the updated wishlist
+        state.wishlist = action.payload;
       })
       .addCase(addItemToWishList.rejected, (state, action) => {
         state.loading = false;

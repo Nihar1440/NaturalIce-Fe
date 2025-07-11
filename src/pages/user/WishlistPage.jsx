@@ -141,8 +141,8 @@ const WishlistPage = () => {
               <p className="font-bold text-blue-600 mb-2">
                 {product.price} AED
               </p>
-              <div className="flex justify-between items-center mt-auto">
-                <Button onClick={() => handleAddToCart(product)}>
+              <div className="flex justify-end items-center mt-auto">
+                <Button variant="ghost" onClick={() => handleAddToCart(product)}>
                   Add to Cart
                 </Button>
                 <Button
