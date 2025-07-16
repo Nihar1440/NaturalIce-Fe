@@ -81,6 +81,19 @@ export const cancelOrder = createAsyncThunk(
   }
 );
 
+// Track order
+export const trackOrder = createAsyncThunk(
+  'order/trackOrder',
+  async (orderId, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/order/orders/track/${orderId}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 const orderSlice = createSlice({
   name: 'order',
   initialState: {
@@ -99,6 +112,9 @@ const orderSlice = createSlice({
     returnLoading: false,
     returnError: null,
     returnSuccess: null,
+    tracking: null,
+    trackingLoading: false,
+    trackingError: null,
   },
   reducers: {
     clearOrders: (state) => {
@@ -113,6 +129,11 @@ const orderSlice = createSlice({
     clearReturnStatus: (state) => {
       state.returnError = null;
       state.returnSuccess = null;
+    },
+    clearTracking: (state) => {
+      state.tracking = null;
+      state.trackingLoading = false;
+      state.trackingError = null;
     }
   },
   extraReducers: (builder) => {
@@ -220,9 +241,24 @@ const orderSlice = createSlice({
       .addCase(cancelOrder.rejected, (state, action) => {
         state.cancelLoading = false;
         state.cancelError = action.payload;
+      })
+
+      // Track order
+      .addCase(trackOrder.pending, (state) => {
+        state.trackingLoading = true;
+        state.trackingError = null;
+        state.tracking = null;
+      })
+      .addCase(trackOrder.fulfilled, (state, action) => {
+        state.trackingLoading = false;
+        state.tracking = action.payload;
+      })
+      .addCase(trackOrder.rejected, (state, action) => {
+        state.trackingLoading = false;
+        state.trackingError = action.payload;
       });
   },
 });
 
-export const { clearOrders, clearOrder, clearReturnStatus } = orderSlice.actions;
+export const { clearOrders, clearOrder, clearReturnStatus, clearTracking } = orderSlice.actions;
 export default orderSlice.reducer; 

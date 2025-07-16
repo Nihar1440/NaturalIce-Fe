@@ -17,10 +17,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cancelOrder,clearOrders,fetchOrders } from "@/features/order/orderSlice";
+import { cancelOrder, clearOrders, fetchOrders } from "@/features/order/orderSlice";
 import { format } from "date-fns";
 import {
-  AlertTriangle,
   Eye,
   Package,
   RotateCcw,
@@ -29,8 +28,9 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '../../components/ui/alert-dialog'; // adjust path if needed
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '../../components/ui/alert-dialog';
 import { toast } from "sonner";
+import TrackOrderDialog from "@/component/TrackOrderDialog";
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat("en-US", {
@@ -99,11 +99,11 @@ const OrderItemDetails = ({ item }) => {
 
 const MyOrdersPage = () => {
   const dispatch = useDispatch();
-  const { orders, loading } = useSelector((state) => state.order);
+  const { orders, loading, cancelLoading, cancelError } = useSelector((state) => state.order);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
-  const { cancelLoading, cancelError } = useSelector(state => state.order);
+  const [trackDialogOpen, setTrackDialogOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchOrders());
@@ -258,9 +258,10 @@ const MyOrdersPage = () => {
                             {order.status?.toLowerCase() === "shipped" && (
                               <button
                                 className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-md"
-                                onClick={() =>
-                                  alert(`Tracking Order ID: ${order._id}`)
-                                }
+                                onClick={() => {
+                                  setSelectedOrderId(order._id);
+                                  setTrackDialogOpen(true);
+                                }}
                               >
                                 <Truck className="w-3 h-3 mr-1" />
                                 Track
@@ -289,14 +290,13 @@ const MyOrdersPage = () => {
             </div>
           </div>
 
-          {/* Dialog content remains unchanged */}
           <DialogContent className="sm:max-w-[800px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {selectedOrder && (
               <>
                 <DialogHeader>
-                    <DialogTitle>
-                      Order Details: {selectedOrder._id?.substring(0, 25)}
-                    </DialogTitle>
+                  <DialogTitle>
+                    Order Details: {selectedOrder._id?.substring(0, 25)}
+                  </DialogTitle>
                   <DialogDescription>
                     Details of your order placed on{" "}
                     {format(
@@ -317,7 +317,6 @@ const MyOrdersPage = () => {
                       ))}
                     </div>
                   </div>
-
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-3">
                       Shipping Information
@@ -354,7 +353,6 @@ const MyOrdersPage = () => {
                       </p>
                     </div>
                   </div>
-
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-3">
                       Payment Details
@@ -373,7 +371,6 @@ const MyOrdersPage = () => {
                       </p>
                     </div>
                   </div>
-
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-3">
                       Order Timeline
@@ -404,6 +401,11 @@ const MyOrdersPage = () => {
             )}
           </DialogContent>
         </Dialog>
+        <TrackOrderDialog
+          open={trackDialogOpen}
+          onOpenChange={setTrackDialogOpen}
+          orderId={selectedOrderId}
+        />
       </div>
     </div>
   );
