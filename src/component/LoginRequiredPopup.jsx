@@ -77,7 +77,7 @@ const LoginRequiredPopup = ({ isVisible, onClose }) => {
     return null;
   }
 
-  const overlayClasses = `fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm transition-opacity duration-500 ${
+  const overlayClasses = `fixed inset-0 z-50 flex items-center justify-center bg-black/5 backdrop-blur-sm transition-opacity duration-500 ${
     isVisible ? "opacity-100" : "opacity-0 pointer-events-none" 
   }`;
   const modalClasses = `relative bg-white rounded-xl p-8 shadow-2xl max-w-sm w-full mx-4 transform transition-all duration-500 ${

@@ -8,9 +8,9 @@ import { clearCart, clearCartBackend } from "../../features/cart/cartSlice";
 export default function SuccessPage() {
   const location = useLocation();
   const dispatch = useDispatch();
-  const { accessToken } = useSelector((state) => state.auth);
-  const user = JSON.parse(localStorage.getItem("user"));
-  console.log('userRRRR', user)
+  const { accessToken, user } = useSelector((state) => state.auth);
+  const guestId = localStorage.getItem("guestId");
+
   const API_BASE_URL = import.meta.env.VITE_API_URL;
 
   const [paymentStatus, setPaymentStatus] = useState("verifying");
@@ -21,7 +21,7 @@ export default function SuccessPage() {
     const sessionId = query.get("session_id");
 
     const verifyAndStoreOrder = async () => {
-      if (!sessionId || !accessToken) {
+      if (!sessionId) {
         setPaymentStatus("error");
         toast.error("Invalid payment session or not logged in.");
         return;
@@ -34,7 +34,7 @@ export default function SuccessPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
-          body: JSON.stringify({ sessionId, userId: user?._id }),
+          body: JSON.stringify({ sessionId, userId: user?._id, guestId }),
         });
 
         if (!response.ok) {
@@ -47,7 +47,9 @@ export default function SuccessPage() {
         setOrderId(data.orderId);
         toast.success("Payment successful! Your order has been placed.");
         dispatch(clearCart());
-        dispatch(clearCartBackend({ accessToken }));
+        if (user && accessToken) {
+          dispatch(clearCartBackend({ accessToken }));
+        }
       } catch (err) {
         console.error("Order verification/storage error:", err);
         setPaymentStatus("error");

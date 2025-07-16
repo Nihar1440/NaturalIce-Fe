@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cancelOrder, clearOrders, fetchOrders } from "@/features/order/orderSlice";
+import { cancelOrder, clearOrders, fetchMyOrders, fetchOrders } from "@/features/order/orderSlice";
 import { format } from "date-fns";
 import {
   Eye,
@@ -53,7 +53,6 @@ const getStatusClasses = (status) => {
     case 'delivered':
       return 'bg-green-100 text-green-800';
     case 'cancelled':
-    case 'canceled':
       return 'bg-red-100 text-red-800';
     default:
       return 'bg-gray-100 text-gray-800';
@@ -100,17 +99,20 @@ const OrderItemDetails = ({ item }) => {
 const MyOrdersPage = () => {
   const dispatch = useDispatch();
   const { orders, loading, cancelLoading, cancelError } = useSelector((state) => state.order);
+  const { user } = useSelector((state) => state.auth);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [trackDialogOpen, setTrackDialogOpen] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchOrders());
+    if (user?._id) {
+      dispatch(fetchMyOrders(user?._id));
+    }
     return () => {
       dispatch(clearOrders());
     };
-  }, [dispatch]);
+  }, [dispatch,user]);
 
   const handleViewDetails = (order) => {
     setSelectedOrder(order);

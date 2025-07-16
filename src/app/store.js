@@ -1,8 +1,6 @@
-// src/app/store.js
-import { configureStore } from '@reduxjs/toolkit';
-import { persistStore, persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage'; // defaults to localStorage
-import { combineReducers } from 'redux';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
+import { persistReducer, persistStore } from 'redux-persist';
+import storage from 'redux-persist/lib/storage'; 
 
 import cartReducer from '../features/cart/cartSlice';
 import authReducer from '../features/auth/authSlice';
@@ -13,29 +11,35 @@ import userReducer from '../features/user/userSlice';
 import categoryReducer from '../features/category/categorySlice';
 import shippingAddressReducer from '../features/shippingAddress/shippingAddressSlice';
 
-// Create persist config for category
-const categoryPersistConfig = {
-  key: 'category',
-  storage,
-};
 
 const rootReducer = combineReducers({
   auth: authReducer,
   user: userReducer,
   cart: cartReducer,
-  category: persistReducer(categoryPersistConfig, categoryReducer), // only category is persisted
+  category: categoryReducer,
   product: productReducer,
   wishlist: wishlistReducer,
   order: orderReducer,
   shippingAddress: shippingAddressReducer,
 });
 
+// Configuration for redux-persist
+const persistConfig = {
+  key: 'root',
+  storage,
+  whitelist: ['auth', 'cart', 'shippingAddress','category'] // only persist these slices
+};
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+// Export store and persistor
 export const store = configureStore({
-  reducer: rootReducer,
+  reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false, // required for redux-persist
+      serializableCheck: false, // Required for Redux Persist
     }),
 });
 
 export const persistor = persistStore(store);
+
