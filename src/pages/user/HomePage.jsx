@@ -6,7 +6,7 @@ import ContactForm from "@/component/ContactForm";
 const API_BASE_URL = import.meta.env.VITE_API_URL; 
 const HomePage = () => {
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {

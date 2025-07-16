@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import {
   fetchCartItems,
   removeCartItem,
+  removeItem,
   updateItemQuantity,
 } from "../../features/cart/cartSlice";
 import {
@@ -31,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"; // Import shadcn select components
+import AddressDialog from "@/component/AddressDialog";
 
 export default function CartPage() {
   const dispatch = useDispatch();
@@ -39,35 +41,38 @@ export default function CartPage() {
     loading,
     error,
   } = useSelector((state) => state.cart);
-  const { accessToken } = useSelector((state) => state.auth);
+  const { accessToken, user } = useSelector((state) => state.auth);
   // Access shipping addresses from the store
   const { addresses: shippingAddresses, loading: addressLoading, error: addressError } = useSelector(
     (state) => state.shippingAddress
   );
   const API_BASE_URL = import.meta.env.VITE_API_URL;
 
+  const [email, setEmail] = useState("");
+  const [showAddAddress, setShowAddAddress] = useState(false);
   const [promoCode, setPromoCode] = useState("");
   const [selectedAddress, setSelectedAddress] = useState(null); // State for the selected shipping address
+  const guestId = localStorage.getItem("guestId");
 
-  let isUser = null;
-  try {
-    const userString = localStorage.getItem("user");
-    if (userString) {
-      isUser = JSON.parse(userString);
-    }
-  } catch (e) {
-    console.error("Failed to parse user from localStorage:", e);
-    toast.error("User data corrupted. Please log in again.");
-  }
+  // try {
+  //   const userString = localStorage.getItem("user");
+  //   if (userString) {
+  //     user = JSON.parse(userString);
+  //   }
+  // } catch (e) {
+  //   console.error("Failed to parse user from localStorage:", e);
+  //   toast.error("User data corrupted. Please log in again.");
+  // }
 
   useEffect(() => {
-    if (accessToken && isUser?._id) {
+    if (accessToken && user?._id) {
+      setEmail(user.email);
       dispatch(fetchCartItems({ accessToken }));
       dispatch(getShippingAddresses());
     } else {
-      toast.info("Please log in to view your cart items.");
+      // toast.info("Please log in to view your cart items.");
     }
-  }, [accessToken, isUser?._id, dispatch]);
+  }, [accessToken, user?._id, dispatch]);
 
   // Effect to set the default or first address when addresses are loaded
   useEffect(() => {
@@ -92,10 +97,10 @@ export default function CartPage() {
 
 
   const handleQuantityChange = (productId, currentQuantity, change) => {
-    if (!isUser || !accessToken) {
-      toast.error("Please log in to modify cart items.");
-      return;
-    }
+    // if (!user || !accessToken) {
+    //   toast.error("Please log in to modify cart items.");
+    //   return;
+    // }
 
     const newQuantity = currentQuantity + change;
 
@@ -125,14 +130,18 @@ export default function CartPage() {
   };
 
   const handleRemoveItem = async (productId) => {
-    if (!isUser || !accessToken) {
+    if (guestId && !user) {
+      dispatch(removeItem(productId));
+      return;
+    }
+    if (!user || !accessToken) {
       toast.error("Please log in to remove cart items.");
       return;
     }
 
     try {
       const resultAction = await dispatch(
-        removeCartItem({ productId, accessToken, userId: isUser._id })
+        removeCartItem({ productId, accessToken, userId: user._id })
       );
 
       if (removeCartItem.fulfilled.match(resultAction)) {
@@ -162,11 +171,12 @@ export default function CartPage() {
   const tax = subtotal * 0.08;
   const total = subtotal + tax;
 
+  const handleAddAddress = (address) => {
+    setSelectedAddress(address);
+    setShowAddAddress(false);
+  }
+
   const handleCheckout = async () => {
-    if (!isUser || !accessToken) {
-      toast.error("Please log in to proceed to checkout.");
-      return;
-    }
 
     if (!cartItems || cartItems.length === 0) {
       toast.info("Your cart is empty. Add items before checking out.");
@@ -178,8 +188,19 @@ export default function CartPage() {
       return;
     }
 
+    // Map cartItems to the structure expected by the backend
+
+    // try {
+    //   const response = await dispatch(createOrder(data));
+    // } catch (error) {
+    //   toast.error(
+    //     error.message || "Failed to create order. Please try again."
+    //   );
+    //   console.error("Order creation error:", error);
+    // }
+
+
     try {
-      // Map cartItems to the structure expected by the backend
       const itemsForCheckout = cartItems.map((item) => ({
         name: item?.productId?.name,
         price: item?.productId?.price,
@@ -190,7 +211,6 @@ export default function CartPage() {
         quantity: item?.quantity,
       }));
 
-      // Prepare the selected shipping address to match the backend schema
       const shippingAddressForCheckout = {
         fullName: selectedAddress.fullName,
         phoneNumber: selectedAddress.phoneNumber,
@@ -204,7 +224,15 @@ export default function CartPage() {
         isDefault: selectedAddress.isDefault,
       };
 
-      console.log("Shipping address being sent to backend:", shippingAddressForCheckout);
+      const formData = {
+        userId: user?._id || null,
+        guestId,
+        isGuest: !!guestId,
+        email,
+        totalAmount: total,
+        items: itemsForCheckout,
+        shippingAddress: shippingAddressForCheckout,
+      };
 
       const response = await fetch(
         `${API_BASE_URL}/api/payment/create-checkout-session`,
@@ -214,11 +242,7 @@ export default function CartPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
-          body: JSON.stringify({
-            items: itemsForCheckout,
-            shippingAddress: shippingAddressForCheckout,
-            userId: isUser._id,
-          }),
+          body: JSON.stringify(formData),
         }
       );
       console.log("response", response);
@@ -241,16 +265,16 @@ export default function CartPage() {
     }
   };
 
-  if (loading || addressLoading) {
+  if (loading) {
     return (
-      <Loader message={"Loading Cart Items and Addresses..."}/>
+      <Loader message={"Loading Cart Items and Addresses..."} />
     );
   }
 
-  if (error || addressError) {
+  if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-red-50">
-        <p className="text-red-700 text-lg">Error loading data: {error || addressError}</p>
+        <p className="text-red-700 text-lg">Error loading data: {error}</p>
       </div>
     );
   }
@@ -490,13 +514,44 @@ export default function CartPage() {
                 </div>
               </div>
 
+              <div className={`mb-6 ${guestId && !user ? "block" : "hidden"}`}>
+                <h3 className="text-md font-semibold text-gray-800 mb-3 flex items-center">
+                  Email
+                </h3>
+                {guestId && !user && (
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    required />
+                )}
+              </div>
+
               {/* Shipping Address Selection */}
               <div className="mb-6">
                 <h3 className="text-md font-semibold text-gray-800 mb-3 flex items-center">
                   <MapPin className="h-4 w-4 mr-2 text-blue-600" />
                   Delivery Address
-                </h3>
-                {shippingAddresses && shippingAddresses.length > 0 ? (
+                </h3>{guestId && !user && (
+                  <Button onClick={() => setShowAddAddress(true)}>
+                    {selectedAddress ? "Edit Shipping Address" : "Add Shipping Address"}
+                  </Button>
+                )}
+
+                <AddressDialog
+                  isOpen={showAddAddress}
+                  onClose={() => {
+                    setShowAddAddress(false);
+                  }}
+                  onSubmit={handleAddAddress}
+                  initialData={selectedAddress}
+                  isLoading={false}
+                  showDefaultOption={false} // Authenticated users can set default
+                />
+
+                {user && (shippingAddresses && shippingAddresses.length > 0 ? (
                   <Select
                     onValueChange={(addressId) => {
                       const addr = shippingAddresses.find(a => a._id === addressId);
@@ -518,14 +573,14 @@ export default function CartPage() {
                               {address.addressLine}, {address.city}, {address.state} {address.postalCode}, {address.country}
                             </span>
                           </div>
-                          { console.log('address', address)}
+                          {console.log('address', address)}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 ) : (
                   <p className="text-sm text-gray-500">No shipping addresses found. Please add one in your profile settings.</p>
-                )}
+                ))}
                 {selectedAddress && (
                   <div className="mt-4 p-4 border border-gray-200 rounded-md bg-gray-50 text-sm text-gray-700">
                     <p className="flex items-center mb-1">
@@ -565,7 +620,7 @@ export default function CartPage() {
               <Button
                 onClick={handleCheckout}
                 className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 mb-4"
-                disabled={!selectedAddress} // Disable if no address is selected
+                disabled={!selectedAddress || !email} // Disable if no address is selected
               >
                 Proceed to Checkout
                 <span className="text-lg">→</span>

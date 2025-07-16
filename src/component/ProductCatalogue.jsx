@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { addItemToCart } from '../../src/features/cart/cartSlice';
+import { addItem, addItemToCart } from '../../src/features/cart/cartSlice';
 import { addItemToWishList } from '../../src/features/wishlist/wishlistSlice'; 
 import AddToCartConfirmationPopup from './AddToCartConfirmationPopup';
 import LoginRequiredPopup from './LoginRequiredPopup';
@@ -28,6 +28,43 @@ const ProductCatalogue = ({ products, loading }) => {
     toast.error("User data corrupted. Please log in again.");
   }
   let quantity = 1;
+
+  
+  const handleAddToCart = async (e,product) => {
+    e.preventDefault(); 
+    e.stopPropagation(); 
+
+    if (!isUser) {
+      if(!localStorage.getItem("guestId")){
+        localStorage.setItem("guestId", "GUEST_" + crypto.randomUUID());
+      }
+      dispatch(addItem({
+        productId: product,
+        quantity: quantity,
+        price: product.price,
+      }));
+      // setShowLoginAlert(true);
+      return;
+    }
+
+    try {
+      await dispatch( addItemToCart({
+        productId: product._id,
+        quantity: quantity,
+        price: product.price,
+        userId: isUser._id,
+        accessToken: accessToken,
+      })).unwrap();
+      setAddedProductName(product.name);
+      setAddedProductQuantity(quantity);
+      setShowSuccessAlert(true);
+    } catch (error) {
+      const errorMessage = error.message || 'Failed to add product to cart.';
+      toast.error(errorMessage);
+      console.error('Failed to add to cart:', error);
+    }
+  }
+
 
   return (
     <section className="py-8 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 relative">
@@ -87,32 +124,7 @@ const ProductCatalogue = ({ products, loading }) => {
                       <div className="flex space-x-2"> {/* Container for both buttons */}
                         <Button
                           className="w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 sm:py-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base group/btn"
-                          onClick={async (e) => {
-                            e.preventDefault(); 
-                            e.stopPropagation(); 
-
-                            if (!isUser) {
-                              setShowLoginAlert(true);
-                              return;
-                            }
-
-                            try {
-                              await dispatch( addItemToCart({
-                                productId: product._id,
-                                quantity: quantity,
-                                price: product.price,
-                                userId: isUser._id,
-                                accessToken: accessToken,
-                              })).unwrap();
-                              setAddedProductName(product.name);
-                              setAddedProductQuantity(quantity);
-                              setShowSuccessAlert(true);
-                            } catch (error) {
-                              const errorMessage = error.message || 'Failed to add product to cart.';
-                              toast.error(errorMessage);
-                              console.error('Failed to add to cart:', error);
-                            }
-                          }}
+                          onClick={(e) => handleAddToCart(e,product)}
                         >
                           <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover/btn:animate-bounce" />
                           Add to Cart

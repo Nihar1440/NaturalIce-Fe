@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
+const accessToken = localStorage.getItem('accessToken');
 
 // Fetch all orders
 export const fetchOrders = createAsyncThunk(
@@ -10,6 +11,23 @@ export const fetchOrders = createAsyncThunk(
     try {
       const response = await axios.get(`${API_URL}/api/order/orders`);
       return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+
+export const fetchMyOrders = createAsyncThunk(
+  'order/fetchMyOrders',
+  async (userId, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/order/user-orders/${userId}`,{
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      });
+      return response.data
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -150,6 +168,19 @@ const orderSlice = createSlice({
       .addCase(fetchOrders.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      .addCase(fetchMyOrders.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchMyOrders.fulfilled, (state, action) => {
+        state.loading = false;
+        state.orders = action.payload;
+      })
+      .addCase(fetchMyOrders.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.message;
       })
 
       // Fetch single order
