@@ -108,10 +108,10 @@ const ManageProductsPage = () => {
     setFilterCategory("All");
   };
 
-  const handleEdit = (product) => {
-    setEditingProduct(product);
-    setIsModalOpen(true);
-  };
+  // const handleEdit = (product) => {
+  //   setEditingProduct(product);
+  //   setIsModalOpen(true);
+  // };
 
   const handleDelete = (product) => {
     setProductToDelete(product);
@@ -205,35 +205,39 @@ const ManageProductsPage = () => {
 
             {/* Add Product Button */}
             <div>
-              <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogTrigger asChild>
-                  <Button
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 h-auto whitespace-nowrap"
-                    onClick={() => setEditingProduct(null)}
-                  >
-                    <Plus className="h-4 w-4 lg:mr-2" />
-                    <span className="hidden sm:inline">Add Product</span>
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="no-scrollbar">
-                  <DialogHeader>
-                    <DialogTitle>
-                      {editingProduct ? "Edit Product" : "Add New Product"}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <AddProductFormContent
-                    onClose={handleCloseModal}
-                    onProductAdded={fetchProductsData}
-                    initialData={editingProduct}
-                    categories={categories}
-                    loading={loading}
-                    error={error}
-                  />
-                </DialogContent>
-              </Dialog>
+              <Button
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 h-auto whitespace-nowrap"
+                onClick={() => {
+                  setEditingProduct(null);
+                  setIsModalOpen(true);
+                }}
+              >
+                <Plus className="h-4 w-4 lg:mr-2" />
+                <span className="hidden sm:inline">Add Product</span>
+              </Button>
             </div>
           </div>
         </div>
+
+        {/* Dialog for Add/Edit Product */}
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent className="no-scrollbar">
+            <DialogHeader>
+              <DialogTitle>
+                {editingProduct ? "Edit Product" : "Add New Product"}
+              </DialogTitle>
+            </DialogHeader>
+            <AddProductFormContent
+              onClose={handleCloseModal}
+              onProductAdded={fetchProductsData}
+              initialData={editingProduct}
+              categories={categories}
+              loading={loading}
+              error={error}
+            />
+          </DialogContent>
+        </Dialog>
+        {/* End Dialog */}
 
         {/* Products Content */}
         <div className="p-4 lg:p-6">
@@ -296,7 +300,10 @@ const ManageProductsPage = () => {
                               variant="ghost"
                               size="sm"
                               className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
-                              onClick={() => handleEdit(product)}
+                              onClick={() => {
+                                setEditingProduct(product);
+                                setIsModalOpen(true);
+                              }}
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -363,7 +370,10 @@ const ManageProductsPage = () => {
                         variant="ghost"
                         size="sm"
                         className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
-                        onClick={() => handleEdit(product)}
+                        onClick={() => {
+                          setEditingProduct(product);
+                          setIsModalOpen(true);
+                        }}
                       >
                         <Edit className="h-4 w-4 mr-1" />
                         Edit

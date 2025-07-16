@@ -37,56 +37,50 @@ const AddProductFormContent = ({ onClose, onProductAdded, initialData }) => {
   }, [dispatch]);
 
   useEffect(() => {
-    // Only process initialData if we have categories loaded OR if it's not edit mode
-    if (!initialData || (initialData && categories?.length > 0)) {
-      if (initialData) {
-        // Determine category ID
-        let categoryToSet = "";
-
-        if (initialData.category) {
-          if (
-            typeof initialData.category === "object" &&
-            initialData.category._id
-          ) {
-            // Category is an object with _id
-            categoryToSet = initialData.category._id;
-          } else if (typeof initialData.category === "string") {
-            // Category is a string (could be ID or name)
-            const existingCategoryById = categories.find(
-              (cat) => cat._id === initialData.category
+    if (initialData && categories && categories.length > 0) {
+      let categoryToSet = "";
+      if (initialData.category) {
+        if (
+          typeof initialData.category === "object" &&
+          initialData.category._id
+        ) {
+          categoryToSet = String(initialData.category._id);
+        } else if (
+          typeof initialData.category === "string" ||
+          typeof initialData.category === "number"
+        ) {
+          // Try to find by ID or name
+          const byId = categories.find(
+            (cat) => String(cat._id) === String(initialData.category)
+          );
+          if (byId) {
+            categoryToSet = String(byId._id);
+          } else {
+            const byName = categories.find(
+              (cat) =>
+                cat.name.toLowerCase() ===
+                String(initialData.category).toLowerCase()
             );
-            if (existingCategoryById) {
-              categoryToSet = initialData.category;
-            } else {
-              // Try to find by name
-              const existingCategoryByName = categories.find(
-                (cat) =>
-                  cat.name.toLowerCase() === initialData.category.toLowerCase()
-              );
-              if (existingCategoryByName) {
-                categoryToSet = existingCategoryByName._id;
-              }
-            }
+            if (byName) categoryToSet = String(byName._id);
           }
         }
-
-        setForm({
-          name: initialData.name || "",
-          description: initialData.description || "",
-          price: initialData.price ? initialData.price.toString() : "",
-          category: categoryToSet,
-          image: initialData.image || "",
-        });
-      } else {
-        // New product form
-        setForm({
-          name: "",
-          description: "",
-          price: "",
-          category: "",
-          image: null,
-        });
       }
+      setForm({
+        name: initialData.name || "",
+        description: initialData.description || "",
+        price: initialData.price ? initialData.price.toString() : "",
+        category: categoryToSet,
+        image: initialData.image || "",
+      });
+    } else if (!initialData) {
+      // For add mode, reset form
+      setForm({
+        name: "",
+        description: "",
+        price: "",
+        category: "",
+        image: null,
+      });
     }
   }, [initialData, categories]);
 
@@ -113,12 +107,12 @@ const AddProductFormContent = ({ onClose, onProductAdded, initialData }) => {
     }));
   };
 
-  const handleSelectChange = (value) => {
-    setForm((prev) => ({
-      ...prev,
-      category: value,
-    }));
-  };
+  // const handleSelectChange = (value) => {
+  //   setForm((prev) => ({
+  //     ...prev,
+  //     category: value,
+  //   }));
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -204,15 +198,15 @@ const AddProductFormContent = ({ onClose, onProductAdded, initialData }) => {
     }
   };
 
-  const handleCategorySelectOpenChange = (open) => {
-    if (open && categories?.length === 0) {
-      dispatch(getCategories());
-    }
-  };
+  // const handleCategorySelectOpenChange = (open) => {
+  //   if (open && categories?.length === 0) {
+  //     dispatch(getCategories());
+  //   }
+  // };
 
   // Get the selected category name for display
-  const selectedCategoryName =
     categories?.find((cat) => cat._id === form.category)?.name || "";
+  
 
   return (
     <div className="relative">
@@ -258,26 +252,22 @@ const AddProductFormContent = ({ onClose, onProductAdded, initialData }) => {
         </div>
         <div>
           <label htmlFor="category">Category</label>
-          <Select
+          <select
             name="category"
-            value={form.category}
-            onValueChange={handleSelectChange}
+            value={form.category || ""}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, category: e.target.value }))
+            }
             required
-            onOpenChange={handleCategorySelectOpenChange}
+            className="w-full border rounded p-2"
           >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select Category">
-                {selectedCategoryName || "Select Category"}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {categories?.map((category) => (
-                <SelectItem key={String(category._id)} value={category._id}>
-                  {category.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <option value="">Select Category</option>
+            {categories.map((cat) => (
+              <option key={cat._id} value={cat._id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           {imagePreviewUrl && (
@@ -349,12 +339,12 @@ const AddProductFormContent = ({ onClose, onProductAdded, initialData }) => {
       </form>
       {isSubmitting && (
         <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center rounded-lg z-10">
-           <div className="flex justify-center items-center py-12">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600 text-lg">Loading...</p>
-              </div>
+          <div className="flex justify-center items-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 text-lg">Loading...</p>
             </div>
+          </div>
         </div>
       )}
     </div>

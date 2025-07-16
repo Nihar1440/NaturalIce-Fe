@@ -2,17 +2,16 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
-import "./index.css"; 
-import { Toaster } from "@/components/ui/sonner"; 
+import "./index.css";
+import { Toaster } from "@/components/ui/sonner";
 import { Provider } from "react-redux";
-import { store } from "./app/store";
+import { persistor, store } from "./app/store";
 import axios from "axios";
 import { logout, refreshToken } from "./features/auth/authSlice.js";
+import { PersistGate } from "redux-persist/integration/react";
 
 const API_URL = import.meta.env.VITE_API_URL;
-
 const axiosToIntercept = axios;
-
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -54,11 +53,11 @@ axiosToIntercept.interceptors.response.use(
       error.response.status === 401 &&
       !originalRequest._retry
     ) {
-      if (originalRequest.url.endsWith('/api/user/login')) {
+      if (originalRequest.url.endsWith("/api/user/login")) {
         store.dispatch(logout());
         return Promise.reject(error);
       }
-      
+
       originalRequest._retry = true;
       originalRequest._refreshAttempted = true;
 
@@ -112,12 +111,14 @@ axiosToIntercept.interceptors.response.use(
 );
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
+  <>
     <BrowserRouter>
       <Provider store={store}>
-        <App />
+        <PersistGate loading={null} persistor={persistor}>
+          <App />
+        </PersistGate>
       </Provider>
     </BrowserRouter>
     <Toaster />
-  </React.StrictMode>
+  </>
 );
