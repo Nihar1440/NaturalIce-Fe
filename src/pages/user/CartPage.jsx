@@ -163,7 +163,6 @@ export default function CartPage() {
   const total = subtotal + tax;
 
   const handleCheckout = async () => {
-    debugger
     if (!isUser || !accessToken) {
       toast.error("Please log in to proceed to checkout.");
       return;
@@ -217,7 +216,8 @@ export default function CartPage() {
           },
           body: JSON.stringify({
             items: itemsForCheckout,
-            shippingAddress: shippingAddressForCheckout, // Pass the selected shipping address
+            shippingAddress: shippingAddressForCheckout,
+            userId: isUser._id,
           }),
         }
       );
@@ -241,13 +241,13 @@ export default function CartPage() {
     }
   };
 
-  if (loading || addressLoading) { // Also check for address loading state
+  if (loading || addressLoading) {
     return (
       <Loader message={"Loading Cart Items and Addresses..."}/>
     );
   }
 
-  if (error || addressError) { // Also check for address error state
+  if (error || addressError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-red-50">
         <p className="text-red-700 text-lg">Error loading data: {error || addressError}</p>

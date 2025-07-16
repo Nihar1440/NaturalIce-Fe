@@ -3,15 +3,17 @@ import { useLocation, Link } from "react-router-dom";
 import { CheckCircle, Home, ShoppingCart } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
-import { clearCart } from "../../features/cart/cartSlice";
+import { clearCart, clearCartBackend } from "../../features/cart/cartSlice";
 
 export default function SuccessPage() {
   const location = useLocation();
   const dispatch = useDispatch();
   const { accessToken } = useSelector((state) => state.auth);
+  const user = JSON.parse(localStorage.getItem("user"));
+  console.log('userRRRR', user)
   const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-  const [paymentStatus, setPaymentStatus] = useState("verifying"); // verifying, success, error
+  const [paymentStatus, setPaymentStatus] = useState("verifying");
   const [orderId, setOrderId] = useState(null);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export default function SuccessPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
-          body: JSON.stringify({ sessionId }),
+          body: JSON.stringify({ sessionId, userId: user?._id }),
         });
 
         if (!response.ok) {
@@ -45,15 +47,15 @@ export default function SuccessPage() {
         setOrderId(data.orderId);
         toast.success("Payment successful! Your order has been placed.");
         dispatch(clearCart());
+        dispatch(clearCartBackend({ accessToken }));
       } catch (err) {
         console.error("Order verification/storage error:", err);
         setPaymentStatus("error");
         toast.error(err.message || "Failed to confirm your order. Please contact support.");
       }
     };
-
     verifyAndStoreOrder();
-  }, [location.search, accessToken, dispatch, API_BASE_URL]);
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-blue-200 p-6">

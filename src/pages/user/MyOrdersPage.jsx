@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { clearOrders, fetchOrders } from "@/features/order/orderSlice";
+import { cancelOrder,clearOrders,fetchOrders } from "@/features/order/orderSlice";
 import { format } from "date-fns";
 import {
   AlertTriangle,
@@ -29,8 +29,9 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '../../components/ui/alert-dialog'; // adjust path if needed
+import { toast } from "sonner";
 
-// Helper function to format currency
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -38,31 +39,27 @@ const formatCurrency = (amount) => {
   }).format(amount);
 };
 
-// Helper function to capitalize the first letter of a string
 const capitalizeFirstLetter = (string) => {
   if (!string) return "";
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
-// Helper function for status styling
 const getStatusClasses = (status) => {
   switch (status?.toLowerCase()) {
-    case "pending":
-      return "bg-yellow-100 text-yellow-800";
-    case "confirmed":
-      return "bg-blue-100 text-blue-800";
-    case "shipped":
-      return "bg-purple-100 text-purple-800";
-    case "delivered":
-      return "bg-green-100 text-green-800";
-    case "cancelled":
-      return "bg-red-100 text-red-800";
+    case 'pending':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'processing':
+      return 'bg-blue-100 text-blue-800';
+    case 'delivered':
+      return 'bg-green-100 text-green-800';
+    case 'cancelled':
+    case 'canceled':
+      return 'bg-red-100 text-red-800';
     default:
-      return "bg-gray-100 text-gray-800";
+      return 'bg-gray-100 text-gray-800';
   }
-};
+}
 
-// Component to display details of an individual item within an order
 const OrderItemDetails = ({ item }) => {
   const savings =
     item.originalPrice && item.originalPrice > item.price
@@ -105,6 +102,8 @@ const MyOrdersPage = () => {
   const { orders, loading } = useSelector((state) => state.order);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const { cancelLoading, cancelError } = useSelector(state => state.order);
 
   useEffect(() => {
     dispatch(fetchOrders());
@@ -116,6 +115,18 @@ const MyOrdersPage = () => {
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
     setIsDialogOpen(true);
+  };
+
+  const handleCancelOrder = async () => {
+    if (selectedOrderId) {
+      try {
+        await dispatch(cancelOrder(selectedOrderId)).unwrap();
+        toast.success('Order cancelled successfully!');
+      } catch (err) {
+        toast.error(err || 'Failed to cancel order');
+      }
+      setSelectedOrderId(null);
+    }
   };
 
   if (loading) {
@@ -185,11 +196,11 @@ const MyOrdersPage = () => {
                         </TableCell>
                         <TableCell className="px-4 py-3 text-middle">
                           <span
-                            className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusClasses(
+                            className={`px-2 py-1 text-black rounded-full text-xs font-semibold ${getStatusClasses(
                               order.status
                             )}`}
                           >
-                            {capitalizeFirstLetter(order.status)}
+                            {capitalizeFirstLetter(order?.status)}
                           </span>
                         </TableCell>
                         <TableCell className="px-4 py-3 text-middle text-sm font-medium text-gray-800">
@@ -211,15 +222,37 @@ const MyOrdersPage = () => {
                             </DialogTrigger>
 
                             {order.status?.toLowerCase() === "pending" && (
-                              <button
-                                className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-md"
-                                onClick={() =>
-                                  alert(`Cancelling Order ID: ${order._id}`)
-                                }
-                              >
-                                <XCircle className="w-3 h-3 mr-1" />
-                                Cancel
-                              </button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <button
+                                    className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-md"
+                                    onClick={() => setSelectedOrderId(order._id)}
+                                  >
+                                    <XCircle className="w-3 h-3 mr-1" />
+                                    Cancel
+                                  </button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Cancel Order</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to cancel this order? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                    {cancelError && <div className="text-red-500 text-sm">{cancelError}</div>}
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel onClick={() => setSelectedOrderId(null)}>
+                                      No, keep order
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      disabled={cancelLoading}
+                                      onClick={handleCancelOrder}
+                                    >
+                                      {cancelLoading ? 'Cancelling...' : 'Yes, cancel order'}
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             )}
 
                             {order.status?.toLowerCase() === "shipped" && (
@@ -257,13 +290,13 @@ const MyOrdersPage = () => {
           </div>
 
           {/* Dialog content remains unchanged */}
-          <DialogContent className="sm:max-w-[800px]">
+          <DialogContent className="sm:max-w-[800px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {selectedOrder && (
               <>
                 <DialogHeader>
-                  <DialogTitle>
-                    Order Details: {selectedOrder._id?.substring(0, 8)}...
-                  </DialogTitle>
+                    <DialogTitle>
+                      Order Details: {selectedOrder._id?.substring(0, 25)}
+                    </DialogTitle>
                   <DialogDescription>
                     Details of your order placed on{" "}
                     {format(

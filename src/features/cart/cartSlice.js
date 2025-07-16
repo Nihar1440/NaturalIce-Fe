@@ -80,31 +80,29 @@ export const removeCartItem = createAsyncThunk(
   }
 );
 
-// merge products into the user's cart
-export const mergeCart = createAsyncThunk(
-  "cart/mergeCart",
-  async ({ products, accessToken }, { rejectWithValue }) => {
+// Clear user's cart from the backend
+export const clearCartBackend = createAsyncThunk(
+  "cart/clearCartBackend",
+  async ({ accessToken }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        `${API_URL}/api/cart/merge`,
-        { products },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const response = await axios.delete(`${API_URL}/api/cart/clear`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         return rejectWithValue(
-          error.response.data.message || "Failed to merge cart items"
+          error.response.data.message || "Failed to clear cart"
         );
       }
       return rejectWithValue(error.message);
     }
   }
 );
+
+
 
 const cartSlice = createSlice({
   name: "cart",
@@ -171,19 +169,19 @@ const cartSlice = createSlice({
         state.error = action.payload || action.error.message;
       })
 
-      // Handlers for mergeCart
-      .addCase(mergeCart.pending, (state) => {
+      // Handlers for clearCartBackend
+      .addCase(clearCartBackend.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(mergeCart.fulfilled, (state, action) => {
+      .addCase(clearCartBackend.fulfilled, (state) => {
         state.loading = false;
-        state.items = action.payload.cart.items;
+        state.items = []; // Clear items from Redux as well
       })
-      .addCase(mergeCart.rejected, (state, action) => {
+      .addCase(clearCartBackend.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
-      });
+      })
   },
 });
 

@@ -33,7 +33,8 @@ import {
   ShoppingCart,
   User,
   UserCircle,
-  X
+  X,
+  Lock
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -220,22 +221,13 @@ const Navbar = () => {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    {/* <Link
-                      to="/profile/payment-methods"
-                      onClick={() => setMobileOpen(false)}
-                      className="flex items-center"
-                    >
-                      <CreditCard className="mr-2 h-4 w-4" /> Payment Methods
-                    </Link> */}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    {/* <Link
+                    <Link
                       to="/profile/change-password"
                       onClick={() => setMobileOpen(false)}
                       className="flex items-center"
                     >
                       <Lock className="mr-2 h-4 w-4" /> Change Password
-                    </Link> */}
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <AlertDialog
@@ -384,20 +376,13 @@ const Navbar = () => {
                   >
                     <MapPin className="mr-2 h-4 w-4" /> Shipping Address
                   </Link>
-                  {/* <Link
-                    to="/profile/payment-methods"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center py-2 text-white hover:text-blue-200"
-                  >
-                    <CreditCard className="mr-2 h-4 w-4" /> Payment Methods
-                  </Link> */}
-                  {/* <Link
+                  <Link
                     to="/profile/change-password"
                     onClick={() => setMobileOpen(false)}
                     className="flex items-center py-2 text-white hover:text-blue-200"
                   >
                     <Lock className="mr-2 h-4 w-4" /> Change Password
-                  </Link> */}
+                  </Link>
                   <hr className="my-1 border-blue-700" />
                   <AlertDialog
                     open={showLogoutDialog}

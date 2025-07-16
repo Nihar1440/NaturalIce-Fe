@@ -123,12 +123,37 @@ export const fetchUserProfile = createAsyncThunk(
   }
 );
 
+export const changePassword = createAsyncThunk(
+  "user/changePassword",
+  async ({ oldPassword, newPassword, accessToken }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/user/update-password`,
+        { oldPassword, newPassword },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to change password"
+      );
+    }
+  }
+);
+
 const initialState = {
   users: [],
   loading: false,
   error: null,
   profile: null,
   registrationSuccess: false,
+  changePasswordStatus: "idle",
+  changePasswordError: null,
+  changePasswordSuccess: null,
 };
 
 const userSlice = createSlice({
@@ -147,6 +172,11 @@ const userSlice = createSlice({
       state.profile = null;
       state.loading = false;
       state.error = null;
+    },
+    clearChangePasswordState: (state) => {
+      state.changePasswordStatus = "idle";
+      state.changePasswordError = null;
+      state.changePasswordSuccess = null;
     },
   },
   extraReducers: (builder) => {
@@ -218,9 +248,22 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
         state.profile = null; 
+      })
+      .addCase(changePassword.pending, (state) => {
+        state.changePasswordStatus = "loading";
+        state.changePasswordError = null;
+        state.changePasswordSuccess = null;
+      })
+      .addCase(changePassword.fulfilled, (state, action) => {
+        state.changePasswordStatus = "succeeded";
+        state.changePasswordSuccess = action.payload.message;
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.changePasswordStatus = "failed";
+        state.changePasswordError = action.payload;
       });
   },
 });
 
-export const { clearUsers, clearRegistrationStatus, clearUserProfile } = userSlice.actions;
+export const { clearUsers, clearRegistrationStatus, clearUserProfile, clearChangePasswordState } = userSlice.actions;
 export default userSlice.reducer;
