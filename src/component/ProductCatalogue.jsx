@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Snowflake, Star, Heart } from "lucide-react"; 
+import { ShoppingCart, Snowflake, Star, Heart } from "lucide-react";
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { addItem, addItemToCart } from '../../src/features/cart/cartSlice';
-import { addItemToWishList } from '../../src/features/wishlist/wishlistSlice'; 
+import { addItemToWishList } from '../../src/features/wishlist/wishlistSlice';
 import AddToCartConfirmationPopup from './AddToCartConfirmationPopup';
 import LoginRequiredPopup from './LoginRequiredPopup';
 
@@ -29,32 +29,30 @@ const ProductCatalogue = ({ products, loading }) => {
   }
   let quantity = 1;
 
-  
-  const handleAddToCart = async (e,product) => {
-    e.preventDefault(); 
-    e.stopPropagation(); 
 
-    if (!isUser) {
-      if(!localStorage.getItem("guestId")){
-        localStorage.setItem("guestId", "GUEST_" + crypto.randomUUID());
-      }
-      dispatch(addItem({
-        productId: product,
-        quantity: quantity,
-        price: product.price,
-      }));
-      // setShowLoginAlert(true);
-      return;
-    }
-
+  const handleAddToCart = async (e, product) => {
+    e.preventDefault();
+    e.stopPropagation();
     try {
-      await dispatch( addItemToCart({
-        productId: product._id,
-        quantity: quantity,
-        price: product.price,
-        userId: isUser._id,
-        accessToken: accessToken,
-      })).unwrap();
+      if (!isUser) {
+        if (!localStorage.getItem("guestId")) {
+          localStorage.setItem("guestId", "GUEST_" + crypto.randomUUID());
+        }
+        dispatch(addItem({
+          productId: product,
+          quantity: quantity,
+          price: product.price,
+        }));
+      }
+      else {
+        await dispatch(addItemToCart({
+          productId: product._id,
+          quantity: quantity,
+          price: product.price,
+          userId: isUser._id,
+          accessToken: accessToken,
+        })).unwrap();
+      }
       setAddedProductName(product.name);
       setAddedProductQuantity(quantity);
       setShowSuccessAlert(true);
@@ -124,7 +122,7 @@ const ProductCatalogue = ({ products, loading }) => {
                       <div className="flex space-x-2"> {/* Container for both buttons */}
                         <Button
                           className="w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 sm:py-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base group/btn"
-                          onClick={(e) => handleAddToCart(e,product)}
+                          onClick={(e) => handleAddToCart(e, product)}
                         >
                           <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover/btn:animate-bounce" />
                           Add to Cart
