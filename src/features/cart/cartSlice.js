@@ -102,6 +102,27 @@ export const clearCartBackend = createAsyncThunk(
   }
 );
 
+export const mergeCartItems = createAsyncThunk(
+  "cart/mergeCartItems",
+  async ({accessToken, cartItems}, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/api/cart/merge`, {cartItems},{
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(
+          error.response.data.message || "Failed to merge cart items"
+        );
+      }
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 
 
 const cartSlice = createSlice({
@@ -189,6 +210,19 @@ const cartSlice = createSlice({
         state.items = []; // Clear items from Redux as well
       })
       .addCase(clearCartBackend.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error.message;
+      })
+
+      .addCase(mergeCartItems.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(mergeCartItems.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload.cart.items; 
+      })
+      .addCase(mergeCartItems.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
       })

@@ -1,4 +1,4 @@
-import { clearUserProfile, fetchUserProfile } from "@/features/user/userSlice";
+import { getUserProfile } from "@/features/auth/authSlice";
 import { AlertTriangle, ChevronDown, Mail } from "lucide-react";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -75,19 +75,15 @@ const ProfileLoadingSkeleton = () => (
 
 const ViewProfilePage = () => {
   const dispatch = useDispatch();
-  const { profile, loading, error } = useSelector((state) => state.user);
-  const { accessToken } = useSelector((state) => state.auth);
+  const { user, accessToken, loading, error } = useSelector((state) => state.auth);
 
   useEffect(() => {
     if (accessToken) {
-      dispatch(fetchUserProfile({ accessToken }));
+      dispatch(getUserProfile({ accessToken }));
     } else {
       toast.error("You are not logged in. Please log in to view your profile.");
     }
 
-    return () => {
-      dispatch(clearUserProfile());
-    };
   }, [dispatch, accessToken]);
 
   if (loading) {
@@ -115,7 +111,7 @@ const ViewProfilePage = () => {
     );
   }
 
-  if (!profile) {
+  if (!user) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <p className="text-gray-600 text-lg">
@@ -126,7 +122,7 @@ const ViewProfilePage = () => {
   }
 
   // Use a fallback for names to prevent errors if data is incomplete.
-  const welcomeName = profile?.name?.split(" ")[0] || "User";
+  const welcomeName = user?.name?.split(" ")[0] || "User";
   const formatTimeAgo = (isoString) => {
     if (!isoString) return "";
     const date = new Date(isoString);
@@ -202,25 +198,25 @@ const ViewProfilePage = () => {
             {/* Profile Info Header */}
             <div className="flex flex-col sm:flex-row items-center sm:items-end">
               <img
-                src={profile.avatarUrl || "https://i.imgur.com/34dFk2s.png"}
-                alt={profile.name}
+                src={user.avatarUrl || "https://i.imgur.com/34dFk2s.png"}
+                alt={user.name}
                 className="w-32 h-32 rounded-full border-4 border-white object-cover shadow-lg bg-gray-200"
               />
               <div className="flex-grow mt-4 sm:mt-0 sm:ml-6 text-center sm:text-left">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {profile.name.charAt(0).toUpperCase() + profile.name.slice(1)}
+                  {user.name.charAt(0).toUpperCase() + user.name.slice(1)}
                 </h2>
-                <p className="text-gray-500 mt-1">{profile.email}</p>
+                <p className="text-gray-500 mt-1">{user.email}</p>
               </div>
               <div className="mt-4 sm:mt-0"></div>
             </div>
 
             {/* Form Section */}
             <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-              <FormField label="Full Name" value={profile.name} />
-              <FormField label="Email" value={profile.email} />
-              <FormField label="Address" value={profile.address} />
-              <FormField label="Role" value={profile.role} />
+              <FormField label="Full Name" value={user.name} />
+              <FormField label="Email" value={user.email} />
+              <FormField label="Address" value={user.address} />
+              <FormField label="Role" value={user.role} />
             </div>
 
             {/* Email Address Section */}
@@ -235,12 +231,12 @@ const ViewProfilePage = () => {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-700">
-                      {profile.email}
+                      {user.email}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {formatTimeAgo(profile.createdAt)}
+                      {formatTimeAgo(user.createdAt)}
                     </p>{" "}
-                    {/* Used profile.createdAt */}
+                    {/* Used user.createdAt */}
                   </div>
                 </div>
               </div>

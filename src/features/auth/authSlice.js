@@ -8,20 +8,23 @@ const loadAuthFromLocalStorage = () => {
   try {
     const userString = localStorage.getItem("user");
     const accessTokenString = localStorage.getItem("accessToken");
+    if (userString) {
+      localStorage.removeItem("guestId");
+    }
 
     const user = userString ? JSON?.parse(userString) : null;
     const accessToken = accessTokenString || null;
     return {
       user: user,
       accessToken: accessToken,
-      isSuperAdmin: user?.isSuperAdmin || false,
+      isAdmin: user?.role === "admin" || false,
     };
   } catch (e) {
     console.error("Failed to load auth state from localStorage:", e);
     return {
       user: null,
       accessToken: null,
-      isSuperAdmin: false,
+      isAdmin: false,
     };
   }
 };
@@ -30,6 +33,9 @@ const initialState = {
   ...loadAuthFromLocalStorage(),
   loading: false,
   error: null,
+  changePasswordStatus: "idle",
+  changePasswordError: null,
+  changePasswordSuccess: null,
 };
 
 //user registration
@@ -64,6 +70,7 @@ export const loginUser = createAsyncThunk(
       );
       localStorage.setItem("accessToken", response.data.accessToken);
       localStorage.setItem("user", JSON.stringify(response.data.userProfile));
+      localStorage.removeItem("guestId");
 
       return {
         user: response.data.userProfile,
@@ -77,28 +84,6 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// checking admin status
-export const checkAdmin = createAsyncThunk(
-  "auth/checkAdmin",
-  async (accessToken, { rejectWithValue }) => {
-    try {
-      const response = await axios.get(`${API_URL}/auth/check-admin`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        return rejectWithValue(
-          error.response.data.message || "Authentication failed"
-        );
-      } else if (axios.isAxiosError(error) && error.request) {
-        return rejectWithValue("No response received from server.");
-      } else {
-        return rejectWithValue(error.message);
-      }
-    }
-  }
-);
 
 // logging out a user
 export const logoutUser = createAsyncThunk(
@@ -250,6 +235,28 @@ export const resetPasswordConfirm = createAsyncThunk(
   }
 );
 
+export const changePassword = createAsyncThunk(
+  "user/changePassword",
+  async ({ oldPassword, newPassword, accessToken }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/user/update-password`,
+        { oldPassword, newPassword },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to change password"
+      );
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -257,12 +264,17 @@ const authSlice = createSlice({
     logout(state) {
       state.user = null;
       state.accessToken = null;
-      state.isSuperAdmin = false;
+      state.isAdmin = false;
       localStorage.removeItem("accessToken");
       localStorage.removeItem("user");
     },
     setSuperAdminStatus(state, action) {
-      state.isSuperAdmin = action.payload;
+      state.isAdmin = action.payload;
+    },
+    clearChangePasswordState(state) {
+      state.changePasswordStatus = "idle";
+      state.changePasswordError = null;
+      state.changePasswordSuccess = null;
     },
   },
   extraReducers: (builder) => {
@@ -287,7 +299,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
-        state.isSuperAdmin = action.payload.user?.isSuperAdmin || false;
+        state.isAdmin = action.payload.user?.role === "admin" || false;
       })
       .addCase(loginUser.rejected, (state, action) => {
         console.log("action", action);
@@ -295,26 +307,9 @@ const authSlice = createSlice({
         state.error = action.payload;
         state.user = null;
         state.accessToken = null;
-        state.isSuperAdmin = false;
+        state.isAdmin = false;
       })
-      // Handlers for checkAdmin
-      .addCase(checkAdmin.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(checkAdmin.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload;
-        state.isSuperAdmin = action.payload?.isSuperAdmin || false;
-        state.error = null;
-      })
-      .addCase(checkAdmin.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-        state.user = null;
-        state.accessToken = null;
-        state.isSuperAdmin = false;
-      })
+      
       // Handlers for logoutUser
       .addCase(logoutUser.pending, (state) => {
         state.loading = true;
@@ -324,7 +319,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = null;
         state.accessToken = null;
-        state.isSuperAdmin = false;
+        state.isAdmin = false;
         state.error = null;
       })
       .addCase(logoutUser.rejected, (state, action) => {
@@ -332,7 +327,7 @@ const authSlice = createSlice({
         state.error = action.payload;
         state.user = null;
         state.accessToken = null;
-        state.isSuperAdmin = false;
+        state.isAdmin = false;
       })
       // Handlers for refreshToken
       .addCase(refreshToken.pending, (state) => {
@@ -343,7 +338,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.accessToken = action.payload.accessToken;
         state.user = action.payload.user;
-        state.isSuperAdmin = action.payload.user?.isSuperAdmin || false;
+        state.isAdmin = action.payload.user?.role === "admin" || false;
         state.error = null;
       })
       .addCase(refreshToken.rejected, (state, action) => {
@@ -351,7 +346,7 @@ const authSlice = createSlice({
         state.error = action.payload;
         state.user = null;
         state.accessToken = null;
-        state.isSuperAdmin = false;
+        state.isAdmin = false;
       })
       // Handlers for getUserProfile
       .addCase(getUserProfile.pending, (state) => {
@@ -361,14 +356,14 @@ const authSlice = createSlice({
       .addCase(getUserProfile.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
-        state.isSuperAdmin = action.payload?.isSuperAdmin || false;
+        state.isAdmin = action.payload?.role === "admin" || false;
         state.error = null;
       })
       .addCase(getUserProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
         state.user = null;
-        state.isSuperAdmin = false;
+        state.isAdmin = false;
       })
       // Handlers for updateUserProfile
       .addCase(updateUserProfile.pending, (state) => {
@@ -377,7 +372,7 @@ const authSlice = createSlice({
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
+        state.user = action.payload.updatedUser;
         state.error = null;
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
@@ -409,9 +404,24 @@ const authSlice = createSlice({
       .addCase(resetPasswordConfirm.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+      
+      // Handlers for changePassword
+      .addCase(changePassword.pending, (state) => {
+        state.changePasswordStatus = "loading";
+        state.changePasswordError = null;
+        state.changePasswordSuccess = null;
+      })
+      .addCase(changePassword.fulfilled, (state, action) => {
+        state.changePasswordStatus = "succeeded";
+        state.changePasswordSuccess = action.payload.message;
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.changePasswordStatus = "failed";
+        state.changePasswordError = action.payload;
+      })
   },
 });
 
-export const { logout, setSuperAdminStatus } = authSlice.actions;
+export const { logout, setSuperAdminStatus, clearChangePasswordState} = authSlice.actions;
 export default authSlice.reducer;

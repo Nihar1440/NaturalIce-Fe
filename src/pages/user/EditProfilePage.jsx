@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchUserProfile,
   updateUserProfile,
-  clearUserProfile,
-} from "@/features/user/userSlice";
+} from "@/features/auth/authSlice";
 import { toast } from "sonner";
 import { AlertTriangle, UserPen } from "lucide-react";
 
@@ -80,10 +78,7 @@ const ProfileLoadingSkeleton = () => (
 
 const EditProfilePage = () => {
   const dispatch = useDispatch();
-  const { profile, loading, error, updateLoading, updateError } = useSelector(
-    (state) => state.user
-  );
-  const { accessToken } = useSelector((state) => state.auth);
+  const { user, accessToken, loading, error } = useSelector((state) => state.auth);
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -93,26 +88,23 @@ const EditProfilePage = () => {
   });
 
   useEffect(() => {
-    if (accessToken) {
-      dispatch(fetchUserProfile({ accessToken }));
-    } else {
+    if (accessToken && !user) {
+      dispatch(getUserProfile({ accessToken }));
+    } else if (!accessToken) {
       toast.error("You are not logged in. Please log in to view your profile.");
     }
-
-    return () => {
-      dispatch(clearUserProfile());
-    };
+   
   }, [dispatch, accessToken]);
 
   useEffect(() => {
-    if (profile) {
+    if (user) {
       setFormData({
-        name: profile.name || "",
-        email: profile.email || "",
-        address: profile.address || "",
+        name: user.name || "",
+        email: user.email || "",
+        address: user.address || "",
       });
     }
-  }, [profile]);
+  }, [user]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -124,17 +116,17 @@ const EditProfilePage = () => {
 
   const handleEditToggle = () => {
     setIsEditing((prev) => !prev);
-    if (isEditing && profile) {
+    if (isEditing && user) {
       setFormData({
-        name: profile.name || "",
-        email: profile.email || "",
-        address: profile.address || "",
+        name: user.name || "",
+        email: user.email || "",
+        address: user.address || "",
       });
     }
   };
 
   const handleSave = async () => {
-    if (!profile?._id) {
+    if (!user?._id) {
       toast.error("User ID not found. Cannot update profile.");
       return;
     }
@@ -144,14 +136,14 @@ const EditProfilePage = () => {
     }
 
     const resultAction = await dispatch(
-      updateUserProfile({ userId: profile._id, updateData: formData })
+      updateUserProfile({ userId: user._id, userData: formData })
     );
 
     if (updateUserProfile.fulfilled.match(resultAction)) {
       toast.success("Profile updated successfully!");
       setIsEditing(false);
     } else {
-      toast.error(updateError || "Failed to update profile. Please try again.");
+      toast.error(error || "Failed to update profile. Please try again.");
     }
   };
 
@@ -165,7 +157,7 @@ const EditProfilePage = () => {
     );
   }
 
-  if (error) {
+  if (error && !accessToken) {
     return (
       <div className="flex flex-col items-center justify-center text-center min-h-[60vh]">
         <AlertTriangle className="w-16 h-16 text-red-500 mb-4" />
@@ -180,7 +172,7 @@ const EditProfilePage = () => {
     );
   }
 
-  if (!profile && !loading) {
+  if (!user && !loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <p className="text-gray-600 text-lg">
@@ -191,7 +183,7 @@ const EditProfilePage = () => {
     );
   }
 
-  const welcomeName = profile?.name?.split(" ")[0] || "User";
+  const welcomeName = user?.name?.split(" ")[0] || "User";
 
   return (
     <div className="bg-gray-50/50 font-sans mt-12">
@@ -224,14 +216,14 @@ const EditProfilePage = () => {
                 <button
                   onClick={handleSave}
                   className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
-                  disabled={updateLoading}
+                  disabled={loading}
                 >
-                  {updateLoading ? "Saving..." : "Save Changes"}
+                  {loading ? "Saving..." : "Save Changes"}
                 </button>
                 <button
                   onClick={handleEditToggle}
                   className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-                  disabled={updateLoading}
+                  disabled={loading}
                 >
                   Cancel
                 </button>
@@ -247,15 +239,15 @@ const EditProfilePage = () => {
             {/* Profile Info Header */}
             <div className="flex flex-col sm:flex-row items-center sm:items-end">
               <img
-                src={profile.avatarUrl || "https://i.imgur.com/34dFk2s.png"}
-                alt={profile.name}
+                src={user.avatarUrl || "https://i.imgur.com/34dFk2s.png"}
+                alt={user.name}
                 className="w-32 h-32 rounded-full border-4 border-white object-cover shadow-lg bg-gray-200"
               />
               <div className="flex-grow mt-4 sm:mt-0 sm:ml-6 text-center sm:text-left">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {profile.name.charAt(0).toUpperCase() + profile.name.slice(1)}
+                  {user.name.charAt(0).toUpperCase() + user.name.slice(1)}
                 </h2>
-                <p className="text-gray-500 mt-1">{profile.email}</p>
+                <p className="text-gray-500 mt-1">{user.email}</p>
               </div>
               <div className="mt-4 sm:mt-0"></div>
             </div>
@@ -289,14 +281,14 @@ const EditProfilePage = () => {
                 </label>
                 <input
                   type="text"
-                  value={profile.role || ""}
+                  value={user.role || ""}
                   readOnly
                   className="w-full bg-gray-100/80 border-transparent rounded-lg p-3 text-gray-500 cursor-default"
                 />
               </div>
             </div>
-            {updateError && (
-              <p className="text-red-500 text-sm mt-4">{updateError}</p>
+            {error && (
+              <p className="text-red-500 text-sm mt-4">{error}</p>
             )}
           </div>
         </div>

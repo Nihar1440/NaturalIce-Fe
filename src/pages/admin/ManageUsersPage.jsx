@@ -50,7 +50,7 @@ const ManageUsersPage = () => {
                   <td className="px-4 py-2 border-b text-sm">{user._id}</td>
                   <td className="px-4 py-2 border-b text-sm">{user.email}</td>
                   <td className="px-4 py-2 border-b text-sm">{user.name || 'N/A'}</td>
-                  <td className="px-4 py-2 border-b text-sm">{user.isSuperAdmin ? 'Super Admin' : 'User'}</td>
+                  <td className="px-4 py-2 border-b text-sm">{user.isAdmin ? 'Super Admin' : 'User'}</td>
                   <td className="px-4 py-2 border-b text-sm">
                     {/* Add edit/delete buttons here */}
                     <button className="text-blue-600 hover:underline mr-2">Edit</button>

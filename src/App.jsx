@@ -1,5 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import Footer from "./component/Footer";
 import Navbar from "./component/Navbar";
 import ProtectedRoute from "./component/ProtectedRoute";
@@ -32,9 +32,11 @@ import MyOrdersPage from "./pages/user/MyOrdersPage";
 import ShippingAddressPage from "./pages/user/ShippingAddressPage";
 import ChangePasswordPage from "./pages/user/ChangePasswordPage";
 import ContactForm from "./component/ContactForm";
+import { useSelector } from "react-redux";
 
 const App = () => {
   const location = useLocation();
+  const { user } = useSelector(state => state.auth);
   const isAdminRoute = location.pathname.startsWith("/admin");
   const isCartPage = location.pathname === "/cart";
   const isProductDetailsPage = location.pathname.startsWith("/product/");
@@ -55,62 +57,12 @@ const App = () => {
         !isSetNewPasswordPage &&
         !isCheckoutPage && <Navbar />}
 
-      <div className="flex-1">
+      {user?.role === "admin" ? (
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route
-            path="/forgot-password"
-            element={<RequestResetPasswordPage />}
-          />
-          <Route
-            path="/forgot-password/:token"
-            element={<SetNewPasswordPage />}
-          />
-          <Route path="/create-superadmin" element={<CreateSuperAdminPage />} />
-          <Route path="/about" element={<AboutAllFixPage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/invoice" element={<InvoicePage />} />
-          <Route path="/wishlist" element={<WishlistPage />} />
-          <Route path="/payment" element={<PaymentPage />} />
-          <Route path="/contactUs" element={<ContactForm />} />
-          <Route path="/order-confirmation" element={<OrderConfirmation />} />
-          <Route path="/product/:id" element={<ProductDetailsPage />} />
-          {/* <Route path="/add-product" element={<AddProductPage />} /> */}
-
-          <Route path="/success" element={<SuccessPage />} />
-          <Route path="/cancel" element={<ErrorPage />} />
-
-          <Route
-            path="/profile/*"
-            element={
-              <ProtectedRoute>
-                <Routes>
-                  <Route path="view" element={<ViewProfilePage />} />
-                  <Route path="edit" element={<EditProfilePage />} />
-                  <Route path="orders" element={<MyOrdersPage />} />
-                  <Route path="wishlist" element={<WishlistPage />} />
-                  <Route path="shipping" element={<ShippingAddressPage />} />
-                  {/* <Route
-                    path="payment-methods"
-                    element={<PaymentMethodsPage />}
-                  /> */}
-                  <Route
-                    path="change-password"
-                    element={<ChangePasswordPage />}
-                  />
-                  <Route index element={<ViewProfilePage />} />
-                </Routes>
-              </ProtectedRoute>
-            }
-          />
-
           <Route
             path="/admin/*"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["admin"]}>
                 <AdminDashboard />
               </ProtectedRoute>
             }
@@ -132,8 +84,68 @@ const App = () => {
               }
             />
           </Route>
+          <Route path="/*" element={<Navigate to="/admin/dashboard" />} />
         </Routes>
-      </div>
+      ) : (
+        <div className="flex-1">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            {/* <Route path="/register" element={<RegisterPage />} /> */}
+            <Route
+              path="/forgot-password"
+              element={<RequestResetPasswordPage />}
+            />
+            <Route
+              path="/forgot-password/:token"
+              element={<SetNewPasswordPage />}
+            />
+            {/* <Route path="/create-superadmin" element={<CreateSuperAdminPage />} /> */}
+
+
+            <Route path="/about" element={<AboutAllFixPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/invoice" element={<InvoicePage />} />
+            {/* <Route path="/wishlist" element={<WishlistPage />} /> */}
+            <Route path="/payment" element={<PaymentPage />} />
+            <Route path="/contactUs" element={<ContactForm />} />
+            <Route path="/order-confirmation" element={<OrderConfirmation />} />
+            <Route path="/product/:id" element={<ProductDetailsPage />} />
+            {/* <Route path="/add-product" element={<AddProductPage />} /> */}
+
+            <Route path="/success" element={<SuccessPage />} />
+            <Route path="/cancel" element={<ErrorPage />} />
+
+            <Route
+              path="/profile/*"
+              element={
+                <ProtectedRoute allowedRoles={["user"]}>
+                  <Routes>
+                    <Route path="view" element={<ViewProfilePage />} />
+                    <Route path="edit" element={<EditProfilePage />} />
+                    <Route path="orders" element={<MyOrdersPage />} />
+                    <Route path="wishlist" element={<WishlistPage />} />
+                    <Route path="shipping" element={<ShippingAddressPage />} />
+                    {/* <Route
+                    path="payment-methods"
+                    element={<PaymentMethodsPage />}
+                  /> */}
+                    <Route
+                      path="change-password"
+                      element={<ChangePasswordPage />}
+                    />
+                    <Route index element={<ViewProfilePage />} />
+                  </Routes>
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/*" element={<Navigate to="/" />} />
+          </Routes>
+        </div>
+      )}
+
+
 
       {!isAdminRoute &&
         !isCartPage &&
