@@ -53,6 +53,11 @@ import {
 import useDebounce from "../../lib/useDebounce";
 import Loader from "@/component/common/Loader";
 import { toast } from "sonner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const ManageCategory = () => {
   const dispatch = useDispatch();
@@ -138,7 +143,9 @@ const ManageCategory = () => {
         })
         .catch((err) => {
           console.error("Failed to update category:", err);
-          toast.error(`Failed to update category: ${err.message || "Unknown error"}`);
+          toast.error(
+            `Failed to update category: ${err.message || "Unknown error"}`
+          );
         });
     } else {
       dispatch(createCategory({ categoryData, accessToken: token }))
@@ -150,7 +157,9 @@ const ManageCategory = () => {
         })
         .catch((err) => {
           console.error("Failed to create category:", err);
-          toast.error(`Failed to create category: ${err.message || "Unknown error"}`);
+          toast.error(
+            `Failed to create category: ${err.message || "Unknown error"}`
+          );
         });
     }
   };
@@ -180,7 +189,9 @@ const ManageCategory = () => {
         })
         .catch((err) => {
           console.error("Failed to delete category:", err);
-          toast.error(`Failed to delete category: ${err.message || "Unknown error"}`);
+          toast.error(
+            `Failed to delete category: ${err.message || "Unknown error"}`
+          );
         });
     }
   };
@@ -207,14 +218,18 @@ const ManageCategory = () => {
       })
       .catch((err) => {
         console.error("Failed to toggle category status:", err);
-        toast.error(`Failed to update status: ${err.message || "Unknown error"}`);
+        toast.error(
+          `Failed to update status: ${err.message || "Unknown error"}`
+        );
       });
   };
 
   useEffect(() => {
     if (error) {
       console.error("Category operation error:", error);
-      toast.error(`Category operation error: ${error.message || "Unknown error"}`);
+      toast.error(
+        `Category operation error: ${error.message || "Unknown error"}`
+      );
     }
   }, [error]);
 
@@ -361,7 +376,7 @@ const ManageCategory = () => {
 
         <div className="p-4 lg:p-6">
           {loading ? (
-           <Loader message={"Loading Categories..."}/>
+            <Loader message={"Loading Categories..."} />
           ) : !hasCategories ? (
             <div className="flex flex-col items-center justify-center py-12 text-gray-500">
               <PackageOpen className="h-16 w-16 mb-4 text-gray-400" />
@@ -372,7 +387,7 @@ const ManageCategory = () => {
             <>
               <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
                 <table className="min-w-full bg-white">
-                  <thead>
+                  <thead className="text-center">
                     <tr className="bg-gray-800 text-white text-left">
                       <th className="px-6 py-3 text-sm font-semibold uppercase tracking-wider">
                         Category Name
@@ -389,7 +404,7 @@ const ManageCategory = () => {
                       <th className="px-6 py-3 text-sm font-semibold uppercase tracking-wider">
                         Updated
                       </th>
-                      <th className="px-6 py-3 text-sm font-semibold uppercase tracking-wider text-right">
+                      <th className="px-6 py-3 text-sm font-semibold uppercase tracking-wider text-center">
                         Actions
                       </th>
                     </tr>
@@ -409,7 +424,9 @@ const ManageCategory = () => {
                         <td className="px-6 py-4 hidden md:table-cell">
                           <div className="text-sm text-gray-700 max-w-xs truncate">
                             {category?.description
-                              ? category?.description?.charAt(0)?.toUpperCase() +
+                              ? category?.description
+                                  ?.charAt(0)
+                                  ?.toUpperCase() +
                                 category?.description?.slice(1)
                               : "No description"}
                           </div>
@@ -439,32 +456,62 @@ const ManageCategory = () => {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex space-x-2 justify-end">
-                            <span
-                              className="cursor-pointer text-blue-600 hover:text-blue-800 p-1 rounded-md hover:bg-blue-50 transition-colors"
-                              onClick={() => handleEdit(category)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </span>
-                            <span
-                              className={`cursor-pointer p-1 rounded-md transition-colors ${
-                                category?.status === "Active"
-                                  ? "text-red-600 hover:text-red-800 hover:bg-red-50"
-                                  : "text-green-600 hover:text-green-800 hover:bg-green-50"
-                              }`}
-                              onClick={() => handleToggleStatus(category)}
-                            >
-                              {category?.status === "Active" ? (
-                                <XCircle className="h-4 w-4" />
-                              ) : (
-                                <CheckCircle2 className="h-4 w-4" />
-                              )}
-                            </span>
-                            <span
-                              className="cursor-pointer text-red-600 hover:text-red-800 p-1 rounded-md hover:bg-red-50 transition-colors"
-                              onClick={() => handleDelete(category)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </span>
+                            {/* Edit */}
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="outline"
+                                  className="cursor-pointer text-blue-600 hover:text-blue-800 p-1 rounded-md hover:bg-blue-100 transition-colors"
+                                  onClick={() => handleEdit(category)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Edit Category</p>
+                              </TooltipContent>
+                            </Tooltip>
+
+                            {/* Toggle Status */}
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="outline"
+                                  className={`cursor-pointer p-1 rounded-md transition-colors ${
+                                    category?.status === "Active"
+                                      ? "text-red-600 hover:text-red-800 hover:bg-red-100"
+                                      : "text-green-600 hover:text-green-800 hover:bg-green-50"
+                                  }`}
+                                  onClick={() => handleToggleStatus(category)}
+                                >
+                                  {category?.status === "Active" ? (
+                                    <XCircle className="h-4 w-4" />
+                                  ) : (
+                                    <CheckCircle2 className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>
+                                  {category?.status === "Active"
+                                    ? "Deactivate Category"
+                                    : "Activate Category"}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+
+                            {/* Delete */}
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="outline"
+                                  className="cursor-pointer text-red-600 hover:text-red-800 p-1 rounded-md hover:bg-red-100 transition-colors"
+                                  onClick={() => handleDelete(category)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Delete Category</p>
+                              </TooltipContent>
+                            </Tooltip>
                           </div>
                         </td>
                       </tr>

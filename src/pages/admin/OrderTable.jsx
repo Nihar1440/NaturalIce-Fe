@@ -1,7 +1,19 @@
 // src/component/admin/OrderTable.jsx
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, Truck } from "lucide-react";
+import { Eye, Trash2, Truck } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const statusClasses = {
   Delivered: "bg-green-300 text-green-800 border-green-200",
@@ -23,45 +35,109 @@ function getStatusBadge(status) {
   );
 }
 
-const OrderTable = ({ orders, onViewDetails, onUpdateStatus }) => (
+const OrderTable = ({
+  orders,
+  onViewDetails,
+  onUpdateStatus,
+  onDeleteOrder,
+}) => (
   <div className="hidden lg:block overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-    <Table className="min-w-full bg-white">
-      <TableHeader>
-        <TableRow className="bg-gray-800">
-          <TableHead className="px-6 py-4 font-medium text-white">Order ID</TableHead>
-          <TableHead className="px-6 py-4 font-medium text-white">Name</TableHead>
-          <TableHead className="px-6 py-4 font-medium text-white">Email</TableHead>
-          <TableHead className="px-6 py-4 font-medium text-white">Date</TableHead>
-          <TableHead className="px-6 py-4 font-medium text-white">Total Amount</TableHead>
-          <TableHead className="px-6 py-4 font-medium text-white">Items</TableHead>
-          <TableHead className="px-6 py-4 font-medium text-white">Status</TableHead>
-          <TableHead className="px-6 py-4 font-medium text-white">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
+    <table className="min-w-full bg-white">
+      <thead>
+        <tr className="bg-gray-800 text-white text-center p-2">
+          <td className="px-8 py-1 font-sm">Order ID</td>
+          <td className="px-8 py-1 font-sm">Name</td>
+          <td className="px-8 py-1 font-sm">Email</td>
+          <td className="px-8 py-1 font-sm">Date</td>
+          <td className="px-8 py-1 font-sm">Total Amount</td>
+          <td className="px-8 py-1 font-sm">Items</td>
+          <td className="px-8 py-1 font-sm">Status</td>
+          <td className="px-8 py-1 font-sm">Actions</td>
+        </tr>
+      </thead>
+      <tbody className="text-center">
         {orders.map((order) => (
-          <TableRow key={order._id} className="border-b last:border-b-0 hover:bg-gray-200 transition-colors">
-            <TableCell className="px-6 py-4 text-sm font-medium text-gray-900">{order._id}</TableCell>
-            <TableCell className="px-6 py-4 text-sm font-medium text-gray-900">{order?.user?.name}</TableCell>
-            <TableCell className="px-6 py-4 text-sm text-gray-700">{order?.user?.email}</TableCell>
-            <TableCell className="px-6 py-4 text-sm text-gray-700">{new Date(order.createdAt).toLocaleString()}</TableCell>
-            <TableCell className="px-6 py-4 text-sm text-gray-700">{order.totalAmount} AED</TableCell>
-            <TableCell className="px-6 py-4 text-sm text-gray-700">{order.items.length}</TableCell>
-            <TableCell className="px-6 py-4">{getStatusBadge(order.status)}</TableCell>
-            <TableCell className="px-6 py-4">
+          <tr
+            key={order._id}
+            className="border-b last:border-b-0 hover:bg-gray-100 transition-colors"
+          >
+            <td className="px-6 py-4 text-sm font-medium text-gray-900">
+              {order._id}
+            </td>
+            <td className="px-2 py-1 text-sm font-medium text-gray-900">
+              {order?.user?.name}
+            </td>
+            <td className="px-6 py-4 text-sm text-gray-700">
+              {order?.user?.email}
+            </td>
+            <td className="px-6 py-4 text-sm text-gray-700">
+              {new Date(order.createdAt).toLocaleString()}
+            </td>
+            <td className="px-6 py-4 text-sm text-gray-700">
+              {order.totalAmount} AED
+            </td>
+            <td className="px-6 py-4 text-sm text-gray-700">
+              {order.items.length}
+            </td>
+            <td className="px-6 py-4">{getStatusBadge(order.status)}</td>
+            <td className="px-6 py-4">
               <div className="flex space-x-2">
-                <Button variant="outline" size="sm" className="text-blue-600 hover:text-blue-800 hover:bg-blue-50" onClick={() => onViewDetails(order)}>
-                  <Eye className="h-4 w-4 mr-2" /> View
-                </Button>
-                <Button variant="outline" size="sm" className="text-green-600 hover:text-green-800 hover:bg-green-50" onClick={() => onUpdateStatus(order._id, order.status)}>
-                  <Truck className="h-4 w-4 mr-2" /> Update Status
-                </Button>
+                {/* View Details */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-blue-600 hover:text-blue-800 hover:bg-blue-200"
+                      onClick={() => onViewDetails(order)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>View Order Details</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                {/* Update Status */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-green-600 hover:text-green-800 hover:bg-green-200"
+                      onClick={() => onUpdateStatus(order._id, order.status)}
+                    >
+                      <Truck className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Update Order Status</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                {/* Delete */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-red-600 hover:text-red-800 hover:bg-red-200"
+                      onClick={() => onDeleteOrder && onDeleteOrder(order._id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Delete Order</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
-            </TableCell>
-          </TableRow>
+            </td>
+          </tr>
         ))}
-      </TableBody>
-    </Table>
+      </tbody>
+    </table>
   </div>
 );
 

@@ -42,6 +42,7 @@ import {
 } from "../../features/product/productSlice";
 import useDebounce from "../../lib/useDebounce";
 import Loader from "@/component/common/Loader";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const ManageProductsPage = () => {
   const dispatch = useDispatch();
@@ -196,7 +197,7 @@ const ManageProductsPage = () => {
             <div>
               <Button
                 onClick={resetFilters}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg h-10"
+                className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg"
               >
                 <RotateCw className="h-4 w-4 mr-2" />
                 Reset Filters
@@ -242,7 +243,7 @@ const ManageProductsPage = () => {
         {/* Products Content */}
         <div className="p-4 lg:p-6">
           {loading ? (
-           <Loader message={"Loading Products..."}/>
+            <Loader message={"Loading Products..."} />
           ) : products?.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-gray-500">
               <PackageOpen className="h-16 w-16 mb-4 text-gray-400" />
@@ -296,25 +297,42 @@ const ManageProductsPage = () => {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex space-x-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
-                              onClick={() => {
-                                setEditingProduct(product);
-                                setIsModalOpen(true);
-                              }}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-red-600 hover:text-red-800 hover:bg-red-50"
-                              onClick={() => handleDelete(product)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            {/* Edit Button with Tooltip */}
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-blue-600 hover:text-blue-800 hover:bg-blue-100"
+                                  onClick={() => {
+                                    setEditingProduct(product);
+                                    setIsModalOpen(true);
+                                  }}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Edit Product</p>
+                              </TooltipContent>
+                            </Tooltip>
+
+                            {/* Delete Button with Tooltip */}
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-red-600 hover:text-red-800 hover:bg-red-100"
+                                  onClick={() => handleDelete(product)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Delete Product</p>
+                              </TooltipContent>
+                            </Tooltip>
                           </div>
                         </td>
                       </tr>

@@ -7,7 +7,6 @@ import AboutAllFixPage from "./pages/user/AboutAllFixPage";
 import AnalyticsPage from "./pages/admin/AnalyticsPage";
 import CartPage from "./pages/user/CartPage";
 import CheckoutPage from "./pages/user/CheckoutPage";
-import CreateSuperAdminPage from "./pages/admin/CreateSuperAdminPage";
 import DashboardHomePage from "./pages/admin/DashboardHomePage";
 import HomePage from "./pages/user/HomePage";
 import InvoicePage from "./pages/user/InvoicePage";
@@ -33,6 +32,7 @@ import ShippingAddressPage from "./pages/user/ShippingAddressPage";
 import ChangePasswordPage from "./pages/user/ChangePasswordPage";
 import ContactForm from "./component/ContactForm";
 import { useSelector } from "react-redux";
+import ManageUsers from "./pages/admin/ManageUsers";
 
 const App = () => {
   const location = useLocation();
@@ -78,8 +78,7 @@ const App = () => {
               path="manage-users"
               element={
                 <div className="p-4">
-                  Manage Users Placeholder - Please create ManageUsersPage
-                  component
+                 <ManageUsers/>
                 </div>
               }
             />
@@ -100,9 +99,6 @@ const App = () => {
               path="/forgot-password/:token"
               element={<SetNewPasswordPage />}
             />
-            {/* <Route path="/create-superadmin" element={<CreateSuperAdminPage />} /> */}
-
-
             <Route path="/about" element={<AboutAllFixPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />

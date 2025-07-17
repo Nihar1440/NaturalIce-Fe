@@ -30,91 +30,91 @@ const OrderFilters = ({
   setShowFilters,
   onSearch,
   onReset,
-  totalOrders,
 }) => (
   <div className="mb-6 space-y-4">
     {/* Search Bar */}
-    <div className="flex flex-col sm:flex-row gap-3">
-      <div className="flex-1 flex">
-        <Input
-          type="text"
-          placeholder="Search by Order ID, customer name, or email..."
-          className="flex-1 rounded-r-none border-r-0"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          onKeyPress={(e) => {
-            if (e.key === "Enter") onSearch();
-          }}
-        />
-        <Button
-          onClick={onSearch}
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-l-none px-4"
-        >
-          <Search className="h-4 w-4" />
-          <span className="hidden sm:inline ml-2">Search</span>
-        </Button>
-      </div>
-      <Button
-        variant="outline"
-        onClick={() => setShowFilters(!showFilters)}
-        className="sm:hidden"
-      >
-        <Filter className="h-4 w-4 mr-2" />
-        Filters
-      </Button>
-    </div>
 
     {/* Desktop Filters */}
-    <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
-      <div>
-        <label className="block text-gray-700 text-sm font-medium mb-2">
-          Status
-        </label>
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-full border border-gray-500 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            <SelectValue placeholder="All Statuses" />
-          </SelectTrigger>
-          <SelectContent>
-            {statusOptions.map((status) => (
-              <SelectItem key={status} value={status}>
-                {status}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div>
-        <label className="block text-gray-700 text-sm font-medium mb-2">
-          Date
-        </label>
-        <div className="relative">
-          <input
-            type="date"
-            className="w-full border border-gray-300 rounded-md px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            value={filterDate}
-            onChange={(e) => setFilterDate(e.target.value)}
+    <div className="w-full space-y-4">
+      {/* Filters & Search Bar */}
+      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+        {/* Search */}
+        <div className="flex flex-1 max-w-full">
+          <Input
+            type="text"
+            placeholder="Search by customer name"
+            className="rounded-r-none border-r-0 w-full"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && onSearch()}
           />
-          <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
+          <Button
+            onClick={onSearch}
+            className="bg-blue-600 hover:bg-blue-700 text-white rounded-l-none"
+          >
+            <Search className="h-4 w-4" />
+            <span className="hidden sm:inline ml-2">Search</span>
+          </Button>
         </div>
-      </div>
-      <div className="flex items-end">
-        <Button onClick={onReset} variant="outline" className="w-full">
-          <RotateCw className="mr-2 h-4 w-4" />
-          Reset
-        </Button>
-      </div>
-      <div className="flex items-end">
-        <Button
-          onClick={() => alert("Export to PDF not implemented")}
-          className="w-full bg-green-600 hover:bg-green-700"
-        >
-          <FileText className="mr-2 h-4 w-4" />
-          Export PDF
-        </Button>
-      </div>
-      <div className="flex items-end">
-        <div className="text-sm text-gray-600 p-2">
-          Total: <span className="font-semibold">{totalOrders}</span> orders
+
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-4 flex-wrap lg:flex-nowrap">
+          {/* Status */}
+          <div className="flex-1 min-w-[150px]">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Status
+            </label>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-full border border-gray-300 rounded-md px-3 py-2">
+                <SelectValue placeholder="All" />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Date */}
+          <div className="flex-1 min-w-[150px]">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Date
+            </label>
+            <div className="relative">
+              <Input
+                type="date"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 pr-10"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+              />
+              <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Reset */}
+          <div className="flex items-end">
+            <Button
+              onClick={onReset}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white w-full"
+            >
+              <RotateCw className=" h-4 w-4" />
+              Reset
+            </Button>
+          </div>
+
+          {/* Export */}
+          {/* <div className="flex items-end">
+            <Button
+              onClick={() => alert("Export to PDF not implemented")}
+              className="bg-green-600 hover:bg-green-700 text-white w-full"
+            >
+              <FileText className="mr-2 h-4 w-4" />
+              Export PDF
+            </Button>
+          </div> */}
         </div>
       </div>
     </div>
@@ -154,7 +154,7 @@ const OrderFilters = ({
             <label className="block text-gray-700 text-sm font-medium mb-1">
               Date
             </label>
-            <input
+            <Input
               type="date"
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={filterDate}

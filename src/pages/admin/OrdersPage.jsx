@@ -9,7 +9,7 @@ import OrderFilters from "./OrderFilters";
 import OrderSummary from "./OrderSummary";
 import OrderDetailsDialog from "./OrderDetailsDialog";
 import OrderStatusDialog from "./OrderStatusDialog";
-import { fetchOrders, updateOrderStatus } from "@/features/order/orderSlice";
+import { fetchOrders, updateOrderStatus, deleteOrder } from "@/features/order/orderSlice";
 import { PackageOpen } from "lucide-react";
 import useDebounce from "@/lib/useDebounce";
 
@@ -25,6 +25,8 @@ const OrdersPage = () => {
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [statusOrderId, setStatusOrderId] = useState(null);
   const [newStatus, setNewStatus] = useState("");
+  const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState(null);
 
   const dispatch = useDispatch();
   const { orders, loading } = useSelector((state) => state.order);
@@ -51,6 +53,31 @@ const OrdersPage = () => {
     setShowStatusDialog(true);
   };
 
+  const handleDeleteOrder = (orderId) => {
+    setOrderToDelete(orderId);
+    setShowDeleteConfirmDialog(true);
+  };
+
+  const confirmDeleteOrder = async () => {
+    setShowDeleteConfirmDialog(false);
+    if (!orderToDelete) return;
+    try {
+      await dispatch(deleteOrder(orderToDelete)).unwrap();
+      toast.success("Order deleted successfully!");
+      setOrderToDelete(null);
+      dispatch(
+        fetchOrders({
+          name: debouncedSearchTerm,
+          status: filterStatus !== "All" ? filterStatus : undefined,
+          date: filterDate || undefined,
+        })
+      );
+    } catch (err) {
+      toast.error("Failed to delete order", { description: err?.message || String(err) });
+      setOrderToDelete(null);
+    }
+  };
+
   const handleSearch = () => {
     dispatch(
       fetchOrders({
@@ -72,14 +99,11 @@ const OrdersPage = () => {
     <div className="bg-gray-100 min-h-screen p-2">
       <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-md">
         {/* Header */}
-        <div className="p-4 lg:p-6 border-b border-gray-200">
-          <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4 lg:mb-6">
+        <div className="p-2 lg:p-4">
+          <h2 className="text-2xl lg:text-3xl font-bold text-gray-800">
             Orders Management
           </h2>
-          <p className="mt-1 opacity-90">Track and manage customer orders</p>
-        </div>
-
-        <div className="p-4 lg:p-6">
+        <div className="p-1 lg:p-2 border-b border-gray-200">
           <OrderFilters
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -111,6 +135,7 @@ const OrdersPage = () => {
                 orders={orders}
                 onViewDetails={handleViewDetails}
                 onUpdateStatus={handleUpdateStatus}
+                onDeleteOrder={handleDeleteOrder}
               />
               <OrderCardList
                 orders={orders}
@@ -121,7 +146,33 @@ const OrdersPage = () => {
             </>
           )}
         </div>
+        <div className="border border-b-1 w-full"></div>
+        </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirmDialog && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-2">Confirm Deletion</h3>
+            <p className="mb-4">Are you sure you want to delete this order? This action cannot be undone.</p>
+            <div className="flex justify-end gap-2">
+              <button
+                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+                onClick={() => { setShowDeleteConfirmDialog(false); setOrderToDelete(null); }}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                onClick={confirmDeleteOrder}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <OrderDetailsDialog
         open={showOrderDetailsDialog}
