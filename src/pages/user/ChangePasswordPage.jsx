@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { changePassword, clearChangePasswordState } from "@/features/user/userSlice";
+import { changePassword, clearChangePasswordState } from "@/features/auth/authSlice";
 import { toast } from "sonner";
 import { CheckCircle, Eye, EyeOff, Shield, X, Sparkles, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ const ChangePasswordPage = () => {
     changePasswordStatus,
     changePasswordError,
     changePasswordSuccess,
-  } = useSelector((state) => state.user);
+  } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   const [form, setForm] = useState({

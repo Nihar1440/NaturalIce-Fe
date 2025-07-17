@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
-import { loginUser, checkAdmin, logout } from "../../features/auth/authSlice";
+import { loginUser, logout } from "../../features/auth/authSlice";
 import { registerUser } from "../../features/auth/authSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, User, Mail, Lock } from "lucide-react";
-import { clearRegistrationStatus } from "@/features/user/userSlice";
+import { mergeCartItems } from "@/features/cart/cartSlice";
 
 const AuthTogglePage = () => {
   const dispatch = useDispatch();
@@ -14,10 +14,11 @@ const AuthTogglePage = () => {
   const { accessToken, loading, error, user } = useSelector(
     (state) => state.auth
   );
+  const { items: cartItems } = useSelector((state) => state.cart);
   const { loading: userLoading, error: userError, registrationSuccess } = useSelector(
     (state) => state.user
   );
-
+// console.log({cartItems})
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -30,7 +31,6 @@ const AuthTogglePage = () => {
   const toggleMode = () => {
     setIsSignUp((prev) => !prev);
     setFormData({ name: "", email: "", password: "", address: "" });
-    dispatch(clearRegistrationStatus()); 
   };
 
   const handleChange = (e) => {
@@ -38,20 +38,33 @@ const AuthTogglePage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    dispatch(loginUser({ email: formData.email, password: formData.password }));
+    try { 
+      const response = await dispatch(loginUser({ email: formData.email, password: formData.password }));
+      if(response.payload.accessToken){
+        dispatch(mergeCartItems({accessToken:response.payload.accessToken, cartItems}));
+      }
+    } catch (error) {
+      toast.error("Login Failed", {
+        description: error?.message || "An unknown error occurred.",
+      });
+    }
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    await dispatch(registerUser(formData));
+    const response = await dispatch(registerUser(formData));
+    if(response.payload.success){
+      toast.success("Registration Successful!", {
+        description: "You can now sign in with your new account.",
+      });
+      setIsSignUp(false); 
+      setFormData({ name: "", email: "", password: "", address: "" }); 
+    }
   };
 
   useEffect(() => {
-    if (accessToken && !user && !loading) {
-      dispatch(checkAdmin(accessToken));
-    }
 
     if (user?.role === "admin") {
       localStorage.setItem("user", JSON.stringify(user));
@@ -87,7 +100,6 @@ const AuthTogglePage = () => {
       });
       setIsSignUp(false); 
       setFormData({ name: "", email: "", password: "", address: "" }); 
-      dispatch(clearRegistrationStatus());
     }
     if (userError) {
       toast.error("Registration Failed", {
@@ -96,12 +108,6 @@ const AuthTogglePage = () => {
     }
   }, [registrationSuccess, userError, dispatch]);
 
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (token && !accessToken && !user && !loading) {
-      dispatch(checkAdmin(token));
-    }
-  }, [dispatch, accessToken, user, loading]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">

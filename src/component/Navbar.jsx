@@ -41,7 +41,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { logout } from "../features/auth/authSlice";
-import { fetchCartItems } from "../features/cart/cartSlice";
+import { clearCart, fetchCartItems } from "../features/cart/cartSlice";
 
 const Navbar = () => {
   const location = useLocation();
@@ -99,6 +99,7 @@ const Navbar = () => {
 
   const performLogout = () => {
     dispatch(logout());
+    dispatch(clearCart());
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
     toast.success("Logged out successfully!");
@@ -204,7 +205,7 @@ const Navbar = () => {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link
-                      to="/wishlist"
+                      to="/profile/wishlist"
                       onClick={() => setMobileOpen(false)}
                       className="flex items-center"
                     >
