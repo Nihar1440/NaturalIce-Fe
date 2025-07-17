@@ -1,7 +1,13 @@
 // src/component/TrackOrderDialog.jsx
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { trackOrder, clearTracking } from "@/features/order/orderSlice";
 import { Button } from "@/components/ui/button";
 
@@ -19,7 +25,9 @@ function getStepStatus(idx, currentIdx) {
 
 export default function TrackOrderDialog({ open, onOpenChange, orderId }) {
   const dispatch = useDispatch();
-  const { tracking, trackingLoading, trackingError } = useSelector((state) => state.order);
+  const { tracking, trackingLoading, trackingError } = useSelector(
+    (state) => state.order
+  );
 
   useEffect(() => {
     if (open && orderId) {
@@ -36,7 +44,8 @@ export default function TrackOrderDialog({ open, onOpenChange, orderId }) {
     currentStepIdx = tracking.trackingHistory.findIndex(
       (item) => item.status === tracking.status
     );
-    if (currentStepIdx === -1) currentStepIdx = tracking.trackingHistory.length - 1;
+    if (currentStepIdx === -1)
+      currentStepIdx = tracking.trackingHistory.length - 1;
   }
 
   return (
@@ -46,12 +55,16 @@ export default function TrackOrderDialog({ open, onOpenChange, orderId }) {
           <DialogTitle>Track Order</DialogTitle>
           <DialogDescription>
             {orderId && (
-              <span className="font-mono text-xs text-gray-500">Order ID: #{orderId}</span>
+              <span className="font-mono text-xs text-gray-500">
+                Order ID: #{orderId}
+              </span>
             )}
           </DialogDescription>
         </DialogHeader>
         {trackingLoading && <div>Loading tracking info...</div>}
-        {trackingError && <div className="text-red-500">Error: {trackingError}</div>}
+        {trackingError && (
+          <div className="text-red-500">Error: {trackingError}</div>
+        )}
         {tracking && (
           <div>
             <div className="mb-2">
@@ -64,7 +77,8 @@ export default function TrackOrderDialog({ open, onOpenChange, orderId }) {
                 : "N/A"}
             </div>
             <div className="mb-4">
-              <span className="font-semibold">Current Location:</span> {tracking.currentLocation || "N/A"}
+              <span className="font-semibold">Current Location:</span>{" "}
+              {tracking.currentLocation || "N/A"}
             </div>
             <div className="flex flex-col gap-2">
               {tracking.trackingHistory?.map((item, idx) => {
@@ -76,11 +90,19 @@ export default function TrackOrderDialog({ open, onOpenChange, orderId }) {
                     </span>
                     <div>
                       <div className="font-medium">{item.status}</div>
-                      <div className="text-xs text-gray-500">
+                      {/* <div className="text-xs text-gray-500">
                         {item.timestamp
                           ? new Date(item.timestamp).toLocaleDateString()
                           : "Pending"}
                         {item.location ? ` - ${item.location}` : ""}
+                      </div> */}
+                      <div className="text-xs text-gray-500 flex flex-col">
+                        <span>
+                          {item.timestamp
+                            ? new Date(item.timestamp).toLocaleDateString()
+                            : "Pending"}
+                        </span>
+                        {item.location && <span>📍 {item.location}</span>}
                       </div>
                     </div>
                   </div>

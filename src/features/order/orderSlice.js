@@ -7,9 +7,15 @@ const accessToken = localStorage.getItem('accessToken');
 // Fetch all orders
 export const fetchOrders = createAsyncThunk(
   'order/fetchOrders',
-  async (_, { rejectWithValue }) => {
+  async (params = {}, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/api/order/orders`);
+      // Build query string from params
+      const query = new URLSearchParams();
+      if (params.name) query.append("name", params.name);
+      if (params.status) query.append("status", params.status);
+      if (params.date) query.append("date", params.date);
+      const queryString = query.toString() ? `?${query.toString()}` : "";
+      const response = await axios.get(`${API_URL}/api/order/orders${queryString}`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);

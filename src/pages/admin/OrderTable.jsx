@@ -43,7 +43,7 @@ const OrderTable = ({ orders, onViewDetails, onUpdateStatus }) => (
           <TableRow key={order._id} className="border-b last:border-b-0 hover:bg-gray-200 transition-colors">
             <TableCell className="px-6 py-4 text-sm font-medium text-gray-900">{order._id}</TableCell>
             <TableCell className="px-6 py-4 text-sm font-medium text-gray-900">{order?.user?.name}</TableCell>
-            <TableCell className="px-6 py-4 text-sm text-gray-700">{order.user?.email}</TableCell>
+            <TableCell className="px-6 py-4 text-sm text-gray-700">{order?.user?.email}</TableCell>
             <TableCell className="px-6 py-4 text-sm text-gray-700">{new Date(order.createdAt).toLocaleString()}</TableCell>
             <TableCell className="px-6 py-4 text-sm text-gray-700">{order.totalAmount} AED</TableCell>
             <TableCell className="px-6 py-4 text-sm text-gray-700">{order.items.length}</TableCell>

@@ -11,14 +11,17 @@ import OrderDetailsDialog from "./OrderDetailsDialog";
 import OrderStatusDialog from "./OrderStatusDialog";
 import { fetchOrders, updateOrderStatus } from "@/features/order/orderSlice";
 import { PackageOpen } from "lucide-react";
+import useDebounce from "@/lib/useDebounce";
 
 const OrdersPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterDate, setFilterDate] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [showOrderDetailsDialog, setShowOrderDetailsDialog] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  console.log('selectedOrder', selectedOrder)
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [statusOrderId, setStatusOrderId] = useState(null);
   const [newStatus, setNewStatus] = useState("");
@@ -27,8 +30,14 @@ const OrdersPage = () => {
   const { orders, loading } = useSelector((state) => state.order);
 
   useEffect(() => {
-    dispatch(fetchOrders());
-  }, [dispatch]);
+    dispatch(
+      fetchOrders({
+        name: debouncedSearchTerm,
+        status: filterStatus !== "All" ? filterStatus : undefined,
+        date: filterDate || undefined,
+      })
+    );
+  }, [dispatch, debouncedSearchTerm, filterStatus, filterDate]);
 
   // Handlers
   const handleViewDetails = (order) => {
@@ -42,11 +51,21 @@ const OrdersPage = () => {
     setShowStatusDialog(true);
   };
 
+  const handleSearch = () => {
+    dispatch(
+      fetchOrders({
+        name: searchTerm,
+        status: filterStatus !== "All" ? filterStatus : undefined,
+        date: filterDate || undefined,
+      })
+    );
+  };
+
   const handleResetFilters = () => {
     setSearchTerm("");
     setFilterStatus("All");
     setFilterDate("");
-    dispatch(fetchOrders());
+    dispatch(fetchOrders({}));
   };
 
   return (
@@ -70,7 +89,7 @@ const OrdersPage = () => {
             setFilterDate={setFilterDate}
             showFilters={showFilters}
             setShowFilters={setShowFilters}
-            onSearch={() => dispatch(fetchOrders())}
+            onSearch={handleSearch}
             onReset={handleResetFilters}
             totalOrders={orders.length}
           />
