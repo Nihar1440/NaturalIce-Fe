@@ -18,6 +18,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 const AddProductFormContent = ({ onClose, onProductAdded, initialData }) => {
   const dispatch = useDispatch();
   const { categories } = useSelector((state) => state.category);
+  const { accessToken } = useSelector((state) => state.auth);
 
   const [form, setForm] = useState({
     name: "",
@@ -33,7 +34,7 @@ const AddProductFormContent = ({ onClose, onProductAdded, initialData }) => {
 
   // Load categories when component mounts
   useEffect(() => {
-    dispatch(getCategories());
+    dispatch(getCategories({ accessToken }));
   }, [dispatch]);
 
   useEffect(() => {

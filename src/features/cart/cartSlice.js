@@ -139,7 +139,14 @@ const cartSlice = createSlice({
       state.error = null;
     },
     addItem(state, action) {
-      state.items.push(action.payload);
+      const existingItem = state.items.find(
+        (item) => item.productId._id === action.payload.productId._id
+      );
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        state.items.push(action.payload);
+      }
     },
     removeItem(state, action) {
       state.items = state.items.filter(
