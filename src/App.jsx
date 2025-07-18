@@ -26,7 +26,6 @@ import ProductDetailsPage from "./pages/user/ProductDetailsPage";
 import SuccessPage from "./pages/user/SuccessPage";
 import ErrorPage from "./pages/user/ErrorPage";
 import ViewProfilePage from "./pages/user/ViewProfilePage";
-import EditProfilePage from "./pages/user/EditProfilePage";
 import MyOrdersPage from "./pages/user/MyOrdersPage";
 import ShippingAddressPage from "./pages/user/ShippingAddressPage";
 import ChangePasswordPage from "./pages/user/ChangePasswordPage";
@@ -119,7 +118,6 @@ const App = () => {
                 <ProtectedRoute allowedRoles={["user"]}>
                   <Routes>
                     <Route path="view" element={<ViewProfilePage />} />
-                    <Route path="edit" element={<EditProfilePage />} />
                     <Route path="orders" element={<MyOrdersPage />} />
                     <Route path="wishlist" element={<WishlistPage />} />
                     <Route path="shipping" element={<ShippingAddressPage />} />

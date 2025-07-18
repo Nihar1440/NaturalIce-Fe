@@ -187,15 +187,6 @@ const Navbar = () => {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link
-                      to="/profile/edit"
-                      onClick={() => setMobileOpen(false)}
-                      className="flex items-center"
-                    >
-                      <Edit className="mr-2 h-4 w-4" /> Edit Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link
                       to="/profile/orders"
                       onClick={() => setMobileOpen(false)}
                       className="flex items-center"
@@ -349,13 +340,6 @@ const Navbar = () => {
                 <li className="pl-6">
                   {" "}
                   {/* Indent sub-items */}
-                  <Link
-                    to="/profile/edit"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center py-2 text-white hover:text-blue-200"
-                  >
-                    <Edit className="mr-2 h-4 w-4" /> Edit Profile
-                  </Link>
                   <Link
                     to="/profile/orders"
                     onClick={() => setMobileOpen(false)}
