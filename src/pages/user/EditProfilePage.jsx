@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  getUserProfile,
   updateUserProfile,
 } from "@/features/auth/authSlice";
 import { toast } from "sonner";
@@ -86,6 +87,8 @@ const EditProfilePage = () => {
     email: "",
     address: "",
   });
+  const [imagePreview, setImagePreview] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     if (accessToken && !user) {
@@ -103,6 +106,7 @@ const EditProfilePage = () => {
         email: user.email || "",
         address: user.address || "",
       });
+      setImagePreview(user.avatar || "https://i.imgur.com/34dFk2s.png");
     }
   }, [user]);
 
@@ -125,6 +129,14 @@ const EditProfilePage = () => {
     }
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSave = async () => {
     if (!user?._id) {
       toast.error("User ID not found. Cannot update profile.");
@@ -135,8 +147,20 @@ const EditProfilePage = () => {
       return;
     }
 
+    let payload;
+    if (selectedImage) {
+      // If image is selected, use FormData
+      payload = new FormData();
+      payload.append("name", formData.name);
+      payload.append("email", formData.email);
+      payload.append("address", formData.address);
+      payload.append("avatar", selectedImage);
+    } else {
+      payload = formData;
+    }
+
     const resultAction = await dispatch(
-      updateUserProfile({ userId: user._id, userData: formData })
+      updateUserProfile({ userId: user._id, userData: payload })
     );
 
     if (updateUserProfile.fulfilled.match(resultAction)) {
@@ -238,11 +262,24 @@ const EditProfilePage = () => {
           <div className="p-6 sm:p-8">
             {/* Profile Info Header */}
             <div className="flex flex-col sm:flex-row items-center sm:items-end">
-              <img
-                src={user.avatarUrl || "https://i.imgur.com/34dFk2s.png"}
-                alt={user.name}
-                className="w-32 h-32 rounded-full border-4 border-white object-cover shadow-lg bg-gray-200"
-              />
+              <div className="relative">
+                <img
+                  src={imagePreview}
+                  alt={user.name}
+                  className="w-32 h-32 rounded-full border-4 border-white object-cover shadow-lg bg-gray-200"
+                />
+                {isEditing && (
+                  <label className="absolute bottom-2 right-2 bg-white rounded-full p-2 shadow cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageChange}
+                    />
+                    <span className="text-xs text-blue-600">Edit</span>
+                  </label>
+                )}
+              </div>
               <div className="flex-grow mt-4 sm:mt-0 sm:ml-6 text-center sm:text-left">
                 <h2 className="text-2xl font-bold text-gray-900">
                   {user.name.charAt(0).toUpperCase() + user.name.slice(1)}

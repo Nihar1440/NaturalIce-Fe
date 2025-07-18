@@ -61,7 +61,7 @@ const ManageUsers = () => {
       dispatch(fetchAllUsers(accessToken));
     } catch (err) {
       // Optionally, show a toast here for error
-      toast.error(typeof err === "string" ? err : err.message || String(err));
+      toast.error(typeof err === "string" ? err : err.message);
     }
     setUserToDelete(null);
   };
@@ -169,7 +169,7 @@ const ManageUsers = () => {
                           {user.role}
                         </td>
                         <td className="px-6 py-4 text-gray-700">
-                          {user.isActive ? (
+                          {user.status == "active" ? (
                             <span className="text-green-600 font-semibold">
                               Active
                             </span>
@@ -244,12 +244,12 @@ const ManageUsers = () => {
                         <span className="capitalize">{user.role}</span>
                         <span
                           className={
-                            user.isActive
+                            user.status === "active"
                               ? "text-green-600 font-semibold"
                               : "text-red-600 font-semibold"
                           }
                         >
-                          {user.isActive ? "Active" : "Inactive"}
+                          {user.status === "active" ? "Active" : "Inactive"}
                         </span>
                       </div>
                     </div>
@@ -278,54 +278,108 @@ const ManageUsers = () => {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>User Details</DialogTitle>
-            <DialogDescription>
-              {selectedUser ? (
-                <div className="space-y-2 mt-4">
-                  <div className="flex items-center space-x-4">
-                    <img
-                      src={selectedUser.avatar || "/default-avatar.png"}
-                      alt={selectedUser.name}
-                      className="w-16 h-16 object-cover rounded-full shadow"
-                    />
-                    <div>
-                      <div className="font-bold text-lg">
-                        {selectedUser.name}
-                      </div>
-                      <div className="text-gray-500">{selectedUser.email}</div>
-                    </div>
-                  </div>
-                  <div>
-                    <span className="font-semibold">Role:</span>{" "}
-                    <span className="capitalize">{selectedUser.role}</span>
-                  </div>
-                  <div>
-                    <span className="font-semibold">Status:</span>{" "}
-                    {selectedUser.isActive ? (
-                      <span className="text-green-600 font-semibold">
-                        Active
-                      </span>
-                    ) : (
-                      <span className="text-red-600 font-semibold">
-                        Inactive
-                      </span>
-                    )}
-                  </div>
-                  {/* Add more fields as needed */}
-                  <div>
-                    <span className="font-semibold">ID:</span>{" "}
-                    {selectedUser._id}
-                  </div>
-                  {/* Example: <div><span className="font-semibold">Phone:</span> {selectedUser.phone}</div> */}
-                  {/* Example: <div><span className="font-semibold">Created:</span> {new Date(selectedUser.createdAt).toLocaleString()}</div> */}
-                </div>
-              ) : (
-                <div>No user selected.</div>
-              )}
-            </DialogDescription>
+        <DialogContent className="sm:max-w-lg max-w-[95vw] max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="text-center pb-6">
+            <DialogTitle className="text-2xl font-bold text-gray-900">
+              User Profile
+            </DialogTitle>
           </DialogHeader>
+          
+          {selectedUser ? (
+            <div className="space-y-6">
+              {/* Profile Section */}
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="relative">
+                  <img
+                    src={selectedUser.avatar || "/default-avatar.png"}
+                    alt={selectedUser.name}
+                    className="w-60 h-60 sm:w-44 sm:h-40 object-cover rounded-full shadow-lg border-4 border-white ring-4 ring-blue-100"
+                  />
+                  <div className={`absolute -bottom-2 -right-2 w-6 h-6 sm:w-8 sm:h-8 rounded-full border-4 border-white shadow-lg ${
+                    selectedUser.status === "active" ? "bg-green-500" : "bg-red-500"
+                  }`}></div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                    {selectedUser.name}
+                  </h2>
+                  <p className="text-lg text-gray-600 break-all">
+                    {selectedUser.email}
+                  </p>
+                </div>
+              </div>
+
+              {/* Details Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-gray-200">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                    Role
+                  </div>
+                  <div className="mt-2 text-lg font-semibold text-gray-900 capitalize">
+                    {selectedUser.role}
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                    Status
+                  </div>
+                  <div className="mt-2 flex items-center">
+                    <div className={`w-3 h-3 rounded-full mr-2 ${
+                      selectedUser.status === "active" ? "bg-green-500" : "bg-red-500"
+                    }`}></div>
+                    <span className={`text-lg font-semibold ${
+                      selectedUser.status === "active" ? "text-green-600" : "text-red-600"
+                    }`}>
+                      {selectedUser.status === "active" ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Information */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
+                  User ID
+                </div>
+                <div className="text-sm text-gray-700 font-mono bg-white px-3 py-2 rounded border break-all">
+                  {selectedUser._id}
+                </div>
+              </div>
+
+              {/* Add more fields as needed */}
+              {/* Example: 
+              {selectedUser.phone && (
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
+                    Phone
+                  </div>
+                  <div className="text-lg text-gray-900">
+                    {selectedUser.phone}
+                  </div>
+                </div>
+              )}
+              */}
+              
+              {/* Example: 
+              {selectedUser.createdAt && (
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
+                    Created
+                  </div>
+                  <div className="text-lg text-gray-900">
+                    {new Date(selectedUser.createdAt).toLocaleString()}
+                  </div>
+                </div>
+              )}
+              */}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No user selected.</p>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
