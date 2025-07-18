@@ -6,12 +6,15 @@ const API_URL = import.meta.env.VITE_API_URL;
 // Fetch all users (admin only)
 export const fetchAllUsers = createAsyncThunk(
   "user/fetchAllUsers",
-  async (accessToken, { rejectWithValue }) => {
+  async ({ name = "", accessToken }, { rejectWithValue }) => {
     try {
+      const params = {};
+      if (name) params.name = name;
       const response = await axios.get(`${API_URL}/api/user/all-users`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
+        params,
       });
       // The backend returns { success, message, data }
       return response.data.data;
@@ -118,5 +121,6 @@ const userSlice = createSlice({
   },
 });
 
-export const { clearUsers, clearUserProfile, clearDeleteSuccess } = userSlice.actions;
+export const { clearUsers, clearUserProfile, clearDeleteSuccess } =
+  userSlice.actions;
 export default userSlice.reducer;

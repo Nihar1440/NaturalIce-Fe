@@ -265,14 +265,14 @@ const ShippingAddressPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="container mx-auto max-w-7xl mt-18">
+      <div className="container mx-auto max-w-7xl mt-22">
 
         {/* Loading and Error Indicators */}
         {loading && <Loader message={"Loading Address..."} />}
 
         {/* Button to Add New Address */}
         {!showAddEditForm && (
-          <div className="text-left mb-8">
+          <div className="text-left mb-4">
             <Button
               onClick={handleAddClick}
               className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-blue-700 hover:to-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 inline-flex items-center"

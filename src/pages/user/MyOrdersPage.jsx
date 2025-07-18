@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cancelOrder, clearOrders, fetchMyOrders, fetchOrders } from "@/features/order/orderSlice";
+import { cancelOrder, clearOrders, fetchMyOrders } from "@/features/order/orderSlice";
 import { format } from "date-fns";
 import {
   Eye,
@@ -150,7 +150,7 @@ const MyOrdersPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-8xl mx-auto">
-        <h1 className="text-2xl font-extrabold text-gray-900 mt-8 mb-6">
+        <h1 className="text-2xl font-extrabold text-gray-900 mt-10 mb-6">
           Your Order History
         </h1>
 

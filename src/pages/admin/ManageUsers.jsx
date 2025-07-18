@@ -26,12 +26,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import useDebounce from "@/lib/useDebounce";
 
 const ManageUsers = () => {
   const dispatch = useDispatch();
   const { users, loading } = useSelector((state) => state.user);
 
   const [searchInput, setSearchInput] = useState("");
+  const debouncedSearchInput = useDebounce(searchInput, 500);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
@@ -72,14 +74,14 @@ const ManageUsers = () => {
 
   useEffect(() => {
     if (accessToken) {
-      dispatch(fetchAllUsers(accessToken));
+      // Pass the search param as "name"
+      dispatch(fetchAllUsers({ name: debouncedSearchInput, accessToken }));
     }
-  }, [dispatch, accessToken]);
-  const filteredUsers = users?.filter(
-    (user) =>
-      user.name?.toLowerCase().includes(searchInput.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchInput.toLowerCase())
-  );
+  }, [dispatch, accessToken, debouncedSearchInput]);
+  // Remove the client-side filtering:
+  // const filteredUsers = users?.filter(...);
+  // Instead, just use the users from Redux:
+  const filteredUsers = users;
 
   return (
     <div className="bg-gray-100 min-h-screen">
