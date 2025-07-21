@@ -66,15 +66,11 @@ const AuthTogglePage = () => {
   useEffect(() => {
 
     if (user?.role === "admin") {
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("accessToken", accessToken);
       toast.success("Login Successful", {
         description: "Welcome to the Admin Dashboard!",
       });
       navigate("/admin");
     } else if (user?.role === "user") {
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("accessToken", accessToken);
       toast.success("Login Successful", {
         description: "Welcome to the Website!",
       });

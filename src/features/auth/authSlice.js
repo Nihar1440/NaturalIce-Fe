@@ -12,7 +12,7 @@ const loadAuthFromLocalStorage = () => {
       localStorage.removeItem("guestId");
     }
 
-    const user = userString ? JSON?.parse(userString) : null;
+    const user = userString ? JSON.parse(userString) : null;
     const accessToken = accessTokenString || null;
     return {
       user: user,
@@ -124,7 +124,6 @@ export const refreshToken = createAsyncThunk(
         }
       );
       localStorage.setItem("accessToken", response.data.accessToken);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
       return response.data;
     } catch (error) {
       localStorage.removeItem("accessToken");

@@ -11,30 +11,19 @@ import LoginRequiredPopup from './LoginRequiredPopup';
 
 const ProductCatalogue = ({ products, loading }) => {
   const dispatch = useDispatch();
-  const { accessToken } = useSelector((state) => state.auth);
+  const { user,accessToken } = useSelector((state) => state.auth);
   const [showLoginAlert, setShowLoginAlert] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [addedProductName, setAddedProductName] = useState('');
   const [addedProductQuantity, setAddedProductQuantity] = useState(0);
 
-  let isUser = null;
-  try {
-    const userString = localStorage.getItem("user");
-    if (userString) {
-      isUser = JSON.parse(userString);
-    }
-  } catch (e) {
-    console.error("Failed to parse user from localStorage:", e);
-    toast.error("User data corrupted. Please log in again.");
-  }
   let quantity = 1;
-
 
   const handleAddToCart = async (e, product) => {
     e.preventDefault();
     e.stopPropagation();
     try {
-      if (!isUser) {
+      if (!user) {
         if (!localStorage.getItem("guestId")) {
           localStorage.setItem("guestId", "GUEST_" + crypto.randomUUID());
         }
@@ -49,7 +38,7 @@ const ProductCatalogue = ({ products, loading }) => {
           productId: product._id,
           quantity: quantity,
           price: product.price,
-          userId: isUser._id,
+          userId: user._id,
           accessToken: accessToken,
         })).unwrap();
       }
@@ -134,7 +123,7 @@ const ProductCatalogue = ({ products, loading }) => {
                             e.preventDefault();
                             e.stopPropagation();
 
-                            if (!isUser) {
+                            if (!user) {
                               setShowLoginAlert(true);
                               return;
                             }
