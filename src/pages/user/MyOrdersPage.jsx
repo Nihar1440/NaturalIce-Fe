@@ -99,7 +99,7 @@ const OrderItemDetails = ({ item }) => {
 const MyOrdersPage = () => {
   const dispatch = useDispatch();
   const { orders, loading, cancelLoading, cancelError } = useSelector((state) => state.order);
-  const { user } = useSelector((state) => state.auth);
+  const { user, accessToken } = useSelector((state) => state.auth);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
@@ -107,11 +107,11 @@ const MyOrdersPage = () => {
 
   useEffect(() => {
     if (user?._id) {
-      dispatch(fetchMyOrders(user?._id));
+      dispatch(fetchMyOrders({userId: user?._id, accessToken}));
     }
-    return () => {
-      dispatch(clearOrders());
-    };
+    // return () => {
+    //   dispatch(clearOrders());
+    // };
   }, [dispatch,user]);
 
   const handleViewDetails = (order) => {

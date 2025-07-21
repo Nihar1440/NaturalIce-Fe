@@ -15,19 +15,18 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../features/auth/authSlice";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+  const { accessToken, user } = useSelector((state) => state.auth);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");
-    const user = JSON.parse(localStorage.getItem("user"));
 
     if ((!accessToken || !user || user.role !== 'admin') && location.pathname !== "/login") {
       Swal.fire(

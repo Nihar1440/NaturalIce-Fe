@@ -2,7 +2,6 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
-const accessToken = localStorage.getItem('accessToken');
 
 // Fetch all orders
 export const fetchOrders = createAsyncThunk(
@@ -26,7 +25,7 @@ export const fetchOrders = createAsyncThunk(
 
 export const fetchMyOrders = createAsyncThunk(
   'order/fetchMyOrders',
-  async (userId, { rejectWithValue }) => {
+  async ({userId, accessToken}, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${API_URL}/api/order/user-orders/${userId}`,{
         headers: {
@@ -58,7 +57,7 @@ export const updateOrderStatus = createAsyncThunk(
   'order/updateOrderStatus',
   async ({ orderId, status }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL}/api/order/orders/${orderId}`, { status });
+      const response = await axios.patch(`${API_URL}/api/order/update-status/${orderId}`, { status });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -182,7 +181,7 @@ const orderSlice = createSlice({
       })
       .addCase(fetchMyOrders.fulfilled, (state, action) => {
         state.loading = false;
-        state.orders = action.payload;
+        state.orders = action.payload.orders;
       })
       .addCase(fetchMyOrders.rejected, (state, action) => {
         state.loading = false;
@@ -213,11 +212,11 @@ const orderSlice = createSlice({
         state.updateStatusLoading = false;
         // Update the order in the orders array
         state.orders = state.orders.map(order =>
-          order._id === action.payload._id ? action.payload : order
+          order._id === action.payload.order._id ? action.payload.order : order
         );
         // If viewing this order, update it too
-        if (state.order && state.order._id === action.payload._id) {
-          state.order = action.payload;
+        if (state.order && state.order._id === action.payload.order._id) {
+          state.order = action.payload.order;
         }
       })
       .addCase(updateOrderStatus.rejected, (state, action) => {
