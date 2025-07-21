@@ -18,7 +18,6 @@ const AuthTogglePage = () => {
   const { loading: userLoading, error: userError, registrationSuccess } = useSelector(
     (state) => state.user
   );
-// console.log({cartItems})
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({

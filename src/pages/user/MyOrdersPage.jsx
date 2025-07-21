@@ -47,15 +47,17 @@ const capitalizeFirstLetter = (string) => {
 const getStatusClasses = (status) => {
   switch (status?.toLowerCase()) {
     case 'pending':
-      return 'bg-yellow-100 text-yellow-800';
+      return 'bg-yellow-200 text-yellow-800';
+    case 'shipped':
+      return 'bg-purple-200 text-purple-800';
     case 'processing':
-      return 'bg-blue-100 text-blue-800';
+      return 'bg-blue-200 text-blue-800';
     case 'delivered':
-      return 'bg-green-100 text-green-800';
+      return 'bg-green-200 text-green-800';
     case 'cancelled':
-      return 'bg-red-100 text-red-800';
+      return 'bg-red-200 text-red-800';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-gray-200 text-gray-800';
   }
 }
 
@@ -164,6 +166,9 @@ const MyOrdersPage = () => {
                       Order ID
                     </TableHead>
                     <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                      Name
+                    </TableHead>
+                    <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                       Date
                     </TableHead>
                     <TableHead className="px-4 py-3 text-middle text-xs font-medium text-gray-600 uppercase tracking-wider">
@@ -182,6 +187,7 @@ const MyOrdersPage = () => {
                 </TableHeader>
                 <TableBody className="bg-white divide-y divide-gray-100">
                   {orders?.map((order) => {
+                    console.log('orders', orders)
                     const orderDate = new Date(order.createdAt);
                     const numberOfItems = order.items ? order.items.length : 0;
 
@@ -192,6 +198,9 @@ const MyOrdersPage = () => {
                       >
                         <TableCell className="px-4 py-3 font-mono text-sm text-gray-700">
                           {order._id.substring(0, 30)}
+                        </TableCell>
+                        <TableCell className="px-4 py-3 font-mono text-sm text-gray-700">
+                          {order.items.map((item) => item.name)}
                         </TableCell>
                         <TableCell className="px-4 py-3 text-sm text-gray-600 text-left">
                           {format(orderDate, "MMM d, yyyy")}

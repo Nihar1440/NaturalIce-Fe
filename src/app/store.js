@@ -10,6 +10,7 @@ import wishlistReducer from '../features/wishlist/wishlistSlice';
 import userReducer from '../features/user/userSlice';
 import categoryReducer from '../features/category/categorySlice';
 import shippingAddressReducer from '../features/shippingAddress/shippingAddressSlice';
+import notificationReducer from "../features/notification/notificationSlice";
 
 
 const rootReducer = combineReducers({
@@ -21,6 +22,7 @@ const rootReducer = combineReducers({
   wishlist: wishlistReducer,
   order: orderReducer,
   shippingAddress: shippingAddressReducer,
+  notifications: notificationReducer,
 });
 
 // Configuration for redux-persist
