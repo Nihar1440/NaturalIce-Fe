@@ -95,6 +95,25 @@ const OrdersPage = () => {
     dispatch(fetchOrders({}));
   };
 
+  const statusOrder = orders.find((o) => o._id === statusOrderId);
+
+  const UpdateStatus = async() => {
+    if (!newStatus) return;
+    try {
+      await dispatch(
+        updateOrderStatus({
+          orderId: statusOrderId,
+          status: newStatus,
+        })
+      );
+      toast.success("Order status updated successfully!");
+      setShowStatusDialog(false);
+      dispatch(fetchOrders());
+    } catch {
+      toast.error("Failed to update status");
+    }
+  }
+
   return (
     <div className="bg-gray-100 min-h-screen p-2">
       <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-md">
@@ -186,22 +205,9 @@ const OrdersPage = () => {
         orderId={statusOrderId}
         newStatus={newStatus}
         setNewStatus={setNewStatus}
-        onUpdate={async () => {
-          if (!newStatus) return;
-          try {
-            await dispatch(
-              updateOrderStatus({
-                orderId: statusOrderId,
-                status: newStatus,
-              })
-            );
-            toast.success("Order status updated successfully!");
-            setShowStatusDialog(false);
-            dispatch(fetchOrders());
-          } catch {
-            toast.error("Failed to update status");
-          }
-        }}
+        currentStatus={statusOrder?.status}
+        onUpdate={UpdateStatus}
+
       />
     </div>
   );

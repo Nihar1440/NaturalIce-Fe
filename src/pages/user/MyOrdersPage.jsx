@@ -17,18 +17,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cancelOrder, clearOrders, fetchMyOrders } from "@/features/order/orderSlice";
+import { cancelOrder, fetchMyOrders } from "@/features/order/orderSlice";
 import { format } from "date-fns";
-import {
-  Eye,
-  Package,
-  RotateCcw,
-  Truck,
-  XCircle,
-} from "lucide-react";
+import { Eye, Package, RotateCcw, Truck, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '../../components/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "../../components/ui/alert-dialog";
 import { toast } from "sonner";
 import TrackOrderDialog from "@/component/TrackOrderDialog";
 
@@ -46,20 +50,20 @@ const capitalizeFirstLetter = (string) => {
 
 const getStatusClasses = (status) => {
   switch (status?.toLowerCase()) {
-    case 'pending':
-      return 'bg-yellow-200 text-yellow-800';
-    case 'shipped':
-      return 'bg-purple-200 text-purple-800';
-    case 'processing':
-      return 'bg-blue-200 text-blue-800';
-    case 'delivered':
-      return 'bg-green-200 text-green-800';
-    case 'cancelled':
-      return 'bg-red-200 text-red-800';
+    case "pending":
+      return "bg-yellow-200 text-yellow-800";
+    case "shipped":
+      return "bg-purple-200 text-purple-800";
+    case "processing":
+      return "bg-blue-200 text-blue-800";
+    case "delivered":
+      return "bg-green-200 text-green-800";
+    case "cancelled":
+      return "bg-red-200 text-red-800";
     default:
-      return 'bg-gray-200 text-gray-800';
+      return "bg-gray-200 text-gray-800";
   }
-}
+};
 
 const OrderItemDetails = ({ item }) => {
   const savings =
@@ -100,21 +104,24 @@ const OrderItemDetails = ({ item }) => {
 
 const MyOrdersPage = () => {
   const dispatch = useDispatch();
-  const { orders, loading, cancelLoading, cancelError } = useSelector((state) => state.order);
+  const { orders, loading, cancelLoading, cancelError } = useSelector(
+    (state) => state.order
+  );
   const { user, accessToken } = useSelector((state) => state.auth);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  console.log("selectedOrder", selectedOrder);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [trackDialogOpen, setTrackDialogOpen] = useState(false);
 
   useEffect(() => {
     if (user?._id) {
-      dispatch(fetchMyOrders({userId: user?._id, accessToken}));
+      dispatch(fetchMyOrders({ userId: user?._id, accessToken }));
     }
     // return () => {
     //   dispatch(clearOrders());
     // };
-  }, [dispatch,user]);
+  }, [dispatch, user]);
 
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
@@ -125,9 +132,9 @@ const MyOrdersPage = () => {
     if (selectedOrderId) {
       try {
         await dispatch(cancelOrder(selectedOrderId)).unwrap();
-        toast.success('Order cancelled successfully!');
+        toast.success("Order cancelled successfully!");
       } catch (err) {
-        toast.error(err || 'Failed to cancel order');
+        toast.error(err || "Failed to cancel order");
       }
       setSelectedOrderId(null);
     }
@@ -148,6 +155,7 @@ const MyOrdersPage = () => {
       </div>
     );
   }
+  // const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -187,7 +195,7 @@ const MyOrdersPage = () => {
                 </TableHeader>
                 <TableBody className="bg-white divide-y divide-gray-100">
                   {orders?.map((order) => {
-                    console.log('orders', orders)
+                    console.log("orders", orders);
                     const orderDate = new Date(order.createdAt);
                     const numberOfItems = order.items ? order.items.length : 0;
 
@@ -200,7 +208,9 @@ const MyOrdersPage = () => {
                           {order._id.substring(0, 30)}
                         </TableCell>
                         <TableCell className="px-4 py-3 font-mono text-sm text-gray-700">
-                          {order.items.map((item) => item.name)}
+                          {order.items.length > 1
+                            ? `${order.items[0].name}, ...`
+                            : order.items[0]?.name || "—"}
                         </TableCell>
                         <TableCell className="px-4 py-3 text-sm text-gray-600 text-left">
                           {format(orderDate, "MMM d, yyyy")}
@@ -237,7 +247,9 @@ const MyOrdersPage = () => {
                                 <AlertDialogTrigger asChild>
                                   <button
                                     className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-md"
-                                    onClick={() => setSelectedOrderId(order._id)}
+                                    onClick={() =>
+                                      setSelectedOrderId(order._id)
+                                    }
                                   >
                                     <XCircle className="w-3 h-3 mr-1" />
                                     Cancel
@@ -245,21 +257,32 @@ const MyOrdersPage = () => {
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
-                                    <AlertDialogTitle>Cancel Order</AlertDialogTitle>
+                                    <AlertDialogTitle>
+                                      Cancel Order
+                                    </AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      Are you sure you want to cancel this order? This action cannot be undone.
+                                      Are you sure you want to cancel this
+                                      order? This action cannot be undone.
                                     </AlertDialogDescription>
-                                    {cancelError && <div className="text-red-500 text-sm">{cancelError}</div>}
+                                    {cancelError && (
+                                      <div className="text-red-500 text-sm">
+                                        {cancelError}
+                                      </div>
+                                    )}
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
-                                    <AlertDialogCancel onClick={() => setSelectedOrderId(null)}>
+                                    <AlertDialogCancel
+                                      onClick={() => setSelectedOrderId(null)}
+                                    >
                                       No, keep order
                                     </AlertDialogCancel>
                                     <AlertDialogAction
                                       disabled={cancelLoading}
                                       onClick={handleCancelOrder}
                                     >
-                                      {cancelLoading ? 'Cancelling...' : 'Yes, cancel order'}
+                                      {cancelLoading
+                                        ? "Cancelling..."
+                                        : "Yes, cancel order"}
                                     </AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
@@ -388,15 +411,72 @@ const MyOrdersPage = () => {
                     </h3>
                     <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
                       <ul className="list-disc list-inside text-gray-700 space-y-1">
+                        {/* Timeline Events */}
                         <li>
-                          Order Placed:{" "}
+                          <span className="font-medium">Order Placed:</span>{" "}
                           {format(
                             new Date(selectedOrder.createdAt),
                             "MMMM d, yyyy 'at' hh:mm a"
                           )}
                         </li>
-                        <li>Order Shipped: N/A </li>
-                        <li>Order Delivered: N/A </li>
+
+                        {selectedOrder.shippedAt && (
+                          <li>
+                            <span className="font-medium">Order Shipped:</span>{" "}
+                            {format(
+                              new Date(selectedOrder.shippedAt),
+                              "MMMM d, yyyy 'at' hh:mm a"
+                            )}
+                          </li>
+                        )}
+
+                        {selectedOrder.deliveredAt && (
+                          <li>
+                            <span className="font-medium">
+                              Order Delivered:
+                            </span>{" "}
+                            {format(
+                              new Date(selectedOrder.deliveredAt),
+                              "MMMM d, yyyy 'at' hh:mm a"
+                            )}
+                          </li>
+                        )}
+
+                        {/* Full Tracking History */}
+                        {selectedOrder.trackingHistory?.length > 0 && (
+                          <>
+                            <hr className="my-3" />
+                            <h4 className="font-semibold mb-2">
+                              Tracking History
+                            </h4>
+                            <div className="relative border-l-2 border-gray-300 ml-2 pl-4 space-y-4">
+                              {selectedOrder.trackingHistory
+                                .slice()
+                                .sort(
+                                  (a, b) =>
+                                    new Date(a.timestamp) -
+                                    new Date(b.timestamp)
+                                )
+                                .map((entry, index) => (
+                                  <div key={index} className="relative">
+                                    <div className="absolute -left-4 top-2 w-3 h-3 bg-blue-500 rounded-full border-2 border-white shadow" />
+                                    <div className="text-sm text-gray-700">
+                                      <p className="font-medium">
+                                        {entry.status}
+                                      </p>
+                                      <p className="text-xs text-gray-500">
+                                        {entry.location} –{" "}
+                                        {format(
+                                          new Date(entry.timestamp),
+                                          "MMMM d, yyyy 'at' hh:mm a"
+                                        )}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
+                          </>
+                        )}
                       </ul>
                     </div>
                   </div>
