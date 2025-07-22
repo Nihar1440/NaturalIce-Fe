@@ -23,20 +23,25 @@ function getStepStatus(idx, currentIdx) {
   return "pending";
 }
 
-export default function TrackOrderDialog({ open, onOpenChange, orderId }) {
+export default function TrackOrderDialog({
+  isOpen,
+  onClose,
+  trackingId,
+  estimatedDeliveryDate,
+}) {
   const dispatch = useDispatch();
   const { tracking, trackingLoading, trackingError } = useSelector(
     (state) => state.order
   );
 
   useEffect(() => {
-    if (open && orderId) {
-      dispatch(trackOrder(orderId));
+    if (isOpen && trackingId) {
+      dispatch(trackOrder(trackingId));
     }
     return () => {
       dispatch(clearTracking());
     };
-  }, [dispatch, open, orderId]);
+  }, [dispatch, isOpen, trackingId]);
 
   // Find the current step index
   let currentStepIdx = -1;
@@ -49,14 +54,14 @@ export default function TrackOrderDialog({ open, onOpenChange, orderId }) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Track Order</DialogTitle>
           <DialogDescription>
-            {orderId && (
+            {trackingId && (
               <span className="font-mono text-xs text-gray-500">
-                Order ID: #{orderId}
+                Tracking ID: #{trackingId}
               </span>
             )}
           </DialogDescription>
@@ -71,9 +76,9 @@ export default function TrackOrderDialog({ open, onOpenChange, orderId }) {
               <span className="font-semibold">Status:</span> {tracking.status}
             </div>
             <div className="mb-2">
-              <span className="font-semibold">ETA:</span>{" "}
-              {tracking.estimatedDeliveryDate
-                ? new Date(tracking.estimatedDeliveryDate).toLocaleDateString()
+              <span className="font-semibold">Estimated Delivery:</span>{" "}
+              {estimatedDeliveryDate
+                ? new Date(estimatedDeliveryDate).toLocaleDateString()
                 : "N/A"}
             </div>
             <div className="mb-4">
@@ -90,12 +95,6 @@ export default function TrackOrderDialog({ open, onOpenChange, orderId }) {
                     </span>
                     <div>
                       <div className="font-medium">{item.status}</div>
-                      {/* <div className="text-xs text-gray-500">
-                        {item.timestamp
-                          ? new Date(item.timestamp).toLocaleDateString()
-                          : "Pending"}
-                        {item.location ? ` - ${item.location}` : ""}
-                      </div> */}
                       <div className="text-xs text-gray-500 flex flex-col">
                         <span>
                           {item.timestamp
@@ -122,7 +121,7 @@ export default function TrackOrderDialog({ open, onOpenChange, orderId }) {
           </div>
         )}
         <div className="flex justify-end mt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onClose(false)}>
             Close
           </Button>
         </div>

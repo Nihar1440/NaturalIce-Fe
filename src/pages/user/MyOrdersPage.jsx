@@ -293,7 +293,7 @@ const MyOrdersPage = () => {
                               <button
                                 className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-md"
                                 onClick={() => {
-                                  setSelectedOrderId(order._id);
+                                  setSelectedOrder(order);
                                   setTrackDialogOpen(true);
                                 }}
                               >
@@ -305,7 +305,7 @@ const MyOrdersPage = () => {
                             {(order.status?.toLowerCase() === "delivered" ||
                               order.status?.toLowerCase() === "completed") && (
                               <button
-                                className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md"
+                                className="inline-flex items-center px-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md"
                                 onClick={() =>
                                   alert(`Reordering Order ID: ${order._id}`)
                                 }
@@ -492,11 +492,14 @@ const MyOrdersPage = () => {
             )}
           </DialogContent>
         </Dialog>
-        <TrackOrderDialog
-          open={trackDialogOpen}
-          onOpenChange={setTrackDialogOpen}
-          orderId={selectedOrderId}
-        />
+        {selectedOrder && (
+          <TrackOrderDialog
+            isOpen={trackDialogOpen}
+            onClose={() => setTrackDialogOpen(false)}
+            trackingId={selectedOrder._id}
+            estimatedDeliveryDate={selectedOrder.estimatedDeliveryDate}
+          />
+        )}
       </div>
     </div>
   );
