@@ -30,8 +30,24 @@ import MyOrdersPage from "./pages/user/MyOrdersPage";
 import ShippingAddressPage from "./pages/user/ShippingAddressPage";
 import ChangePasswordPage from "./pages/user/ChangePasswordPage";
 import ContactForm from "./component/ContactForm";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { fetchNotifications } from "./features/notification/notificationSlice";
 import ManageUsers from "./pages/admin/ManageUsers";
+import NotificationsPage from "./pages/user/NotificationsPage";
+
+const AppInitializer = () => {
+  const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchNotifications(user._id));
+    }
+  }, [dispatch, user]);
+
+  return null;
+};
 
 const App = () => {
   const location = useLocation();
@@ -49,6 +65,8 @@ const App = () => {
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gray-100">
+      <AppInitializer />
+      <Toaster richColors position="top-right" />
       {!isAdminRoute &&
         !isLoginPage &&
         !isRegisterPage &&
@@ -77,7 +95,7 @@ const App = () => {
               path="manage-users"
               element={
                 <div className="p-4">
-                 <ManageUsers/>
+                  <ManageUsers/>
                 </div>
               }
             />
@@ -89,25 +107,24 @@ const App = () => {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
-            {/* <Route path="/register" element={<RegisterPage />} /> */}
+            <Route path="/register" element={<RegisterPage />} />
             <Route
               path="/forgot-password"
               element={<RequestResetPasswordPage />}
             />
             <Route
-              path="/forgot-password/:token"
+              path="/reset-password/:token"
               element={<SetNewPasswordPage />}
             />
             <Route path="/about" element={<AboutAllFixPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/invoice" element={<InvoicePage />} />
-            {/* <Route path="/wishlist" element={<WishlistPage />} /> */}
+            <Route path="/user/notifications" element={<NotificationsPage />} />
             <Route path="/payment" element={<PaymentPage />} />
             <Route path="/contactUs" element={<ContactForm />} />
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="/product/:id" element={<ProductDetailsPage />} />
-            {/* <Route path="/add-product" element={<AddProductPage />} /> */}
 
             <Route path="/success" element={<SuccessPage />} />
             <Route path="/cancel" element={<ErrorPage />} />
@@ -121,10 +138,6 @@ const App = () => {
                     <Route path="orders" element={<MyOrdersPage />} />
                     <Route path="wishlist" element={<WishlistPage />} />
                     <Route path="shipping" element={<ShippingAddressPage />} />
-                    {/* <Route
-                    path="payment-methods"
-                    element={<PaymentMethodsPage />}
-                  /> */}
                     <Route
                       path="change-password"
                       element={<ChangePasswordPage />}
@@ -139,8 +152,6 @@ const App = () => {
         </div>
       )}
 
-
-
       {!isAdminRoute &&
         !isCartPage &&
         !isProductDetailsPage &&
@@ -151,7 +162,6 @@ const App = () => {
         !isCheckoutPage &&
         !isWishlistRoute &&
         !isProfileRoute && <Footer />}
-      <Toaster />
     </div>
   );
 };

@@ -13,7 +13,10 @@ export const fetchNotifications = createAsyncThunk(
   "notifications/fetchNotifications",
   async (userId, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(`${API_URL}/api/notifications/${userId}`, getAuthHeaders());
+      const { data } = await axios.get(
+        `${API_URL}/api/notifications/${userId}`,
+        getAuthHeaders()
+      );
       if (data.notifications) {
         return data.notifications;
       }
@@ -29,8 +32,47 @@ export const markNotificationAsRead = createAsyncThunk(
   async (notificationId, { rejectWithValue }) => {
     try {
       // The second argument for axios.put is the body, which is empty here.
-      const { data } = await axios.put(`${API_URL}/api/notifications/read/${notificationId}`, {}, getAuthHeaders());
+      const { data } = await axios.put(
+        `${API_URL}/api/notifications/read/${notificationId}`,
+        {},
+        getAuthHeaders()
+      );
       return data.notification;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+export const markAllNotificationsAsRead = createAsyncThunk(
+  "notifications/markAllAsRead",
+  async (userId, { rejectWithValue }) => {
+    try {
+      await axios.put(
+        `${API_URL}/api/notifications/read-all/${userId}`,
+        {},
+        getAuthHeaders()
+      );
+      return userId;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+export const deleteAllNotifications = createAsyncThunk(
+  "notifications/deleteAll",
+  async ({ userId, notificationIds }, { rejectWithValue }) => {
+    try {
+      const config = {
+        ...getAuthHeaders(),
+        data: { notification: notificationIds },
+      };
+      await axios.delete(
+        `${API_URL}/api/notifications/delete-all/${userId}`,
+        config
+      );
+      return { notificationIds };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -41,7 +83,10 @@ export const deleteUserNotification = createAsyncThunk(
   "notifications/deleteUserNotification",
   async (notificationId, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/api/notifications/delete/${notificationId}`, getAuthHeaders());
+      await axios.delete(
+        `${API_URL}/api/notifications/delete/${notificationId}`,
+        getAuthHeaders()
+      );
       return notificationId;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -62,6 +107,41 @@ const notificationSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(markAllNotificationsAsRead.fulfilled, (state) => {
+        state.notifications.forEach(
+          (notification) => (notification.isRead = true)
+        );
+        state.unreadCount = 0;
+      })
+      .addCase(deleteAllNotifications.fulfilled, (state, action) => {
+        const { notificationIds } = action.payload;
+        if (notificationIds && notificationIds.length > 0) {
+          const deletedUnreadCount = state.notifications.filter(
+            (n) => notificationIds.includes(n._id) && !n.isRead
+          ).length;
+          state.unreadCount = Math.max(
+            0,
+            state.unreadCount - deletedUnreadCount
+          );
+          state.notifications = state.notifications.filter(
+            (n) => !notificationIds.includes(n._id)
+          );
+        } else {
+          state.notifications = [];
+          state.unreadCount = 0;
+        }
+      })
+      .addCase(deleteUserNotification.fulfilled, (state, action) => {
+        const deletedNotification = state.notifications.find(
+          (n) => n._id === action.payload
+        );
+        if (deletedNotification && !deletedNotification.isRead) {
+          state.unreadCount = Math.max(0, state.unreadCount - 1);
+        }
+        state.notifications = state.notifications.filter(
+          (notification) => notification._id !== action.payload
+        );
+      })
       .addCase(fetchNotifications.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -85,17 +165,8 @@ const notificationSlice = createSlice({
           }
           state.notifications[index] = action.payload;
         }
-      })
-      .addCase(deleteUserNotification.fulfilled, (state, action) => {
-        const index = state.notifications.findIndex((n) => n._id === action.payload);
-        if (index !== -1) {
-          if (!state.notifications[index].isRead) {
-            state.unreadCount = Math.max(0, state.unreadCount - 1);
-          }
-          state.notifications = state.notifications.filter(n => n._id !== action.payload);
-        }
       });
   },
 });
 
-export default notificationSlice.reducer; 
+export default notificationSlice.reducer;
