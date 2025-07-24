@@ -16,8 +16,10 @@ import {
   markNotificationAsRead,
 } from "@/features/notification/notificationSlice";
 import { formatDistanceToNow } from "date-fns";
+import { useState } from "react";
 
 const NotificationBell = () => {
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -42,11 +44,12 @@ const NotificationBell = () => {
     if (!notification.isRead) {
       handleMarkAsRead(notification._id);
     }
+    setIsOpen(false);
     navigate(`/user/notifications`);
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger
         asChild
         onClick={() => user?._id && dispatch(fetchNotifications(user._id))}
@@ -75,7 +78,10 @@ const NotificationBell = () => {
             <Link
               to="/user/notifications"
               className="text-xs text-blue-600 hover:underline"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(false);
+              }}
             >
               View All
             </Link>
