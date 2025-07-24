@@ -124,6 +124,7 @@ export const refreshToken = createAsyncThunk(
         }
       );
       localStorage.setItem("accessToken", response.data.accessToken);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
       return response.data;
     } catch (error) {
       localStorage.removeItem("accessToken");
