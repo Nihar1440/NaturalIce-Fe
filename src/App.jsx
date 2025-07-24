@@ -35,6 +35,7 @@ import { useEffect } from "react";
 import { fetchNotifications } from "./features/notification/notificationSlice";
 import ManageUsers from "./pages/admin/ManageUsers";
 import NotificationsPage from "./pages/user/NotificationsPage";
+import useSocket from "./lib/socket";
 
 const AppInitializer = () => {
   const { user } = useSelector((state) => state.auth);
@@ -62,6 +63,8 @@ const App = () => {
   const isCheckoutPage = location.pathname === "/checkout";
   const isProfileRoute = location.pathname.startsWith("/profile");
   const isWishlistRoute = location.pathname === "/wishlist";
+
+  useSocket(user?._id)
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gray-100">

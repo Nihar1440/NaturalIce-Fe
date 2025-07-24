@@ -104,7 +104,12 @@ const initialState = {
 const notificationSlice = createSlice({
   name: "notifications",
   initialState,
-  reducers: {},
+  reducers: {
+      addNotification: (state, action) => {
+        state.notifications.unshift(action.payload)
+        state.unreadCount += 1;
+      }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(markAllNotificationsAsRead.fulfilled, (state) => {
@@ -170,3 +175,4 @@ const notificationSlice = createSlice({
 });
 
 export default notificationSlice.reducer;
+export const { addNotification } = notificationSlice.actions
