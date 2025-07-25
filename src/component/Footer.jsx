@@ -4,7 +4,7 @@ import React from "react";
 
 const Footer = () => {
   return (
-    <footer className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-16 px-4">
+    <footer className="bg-gradient-to-r from-sky-400 to-sky-600 text-white py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {/* Location Section */}

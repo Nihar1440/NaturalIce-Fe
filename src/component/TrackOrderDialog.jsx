@@ -78,9 +78,15 @@ export default function TrackOrderDialog({
             <div className="mb-2">
               <span className="font-semibold">Estimated Delivery:</span>{" "}
               {estimatedDeliveryDate
-                ? new Date(estimatedDeliveryDate).toLocaleDateString()
+                ? new Date(estimatedDeliveryDate).toLocaleDateString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
                 : "N/A"}
             </div>
+
             <div className="mb-4">
               <span className="font-semibold">Current Location:</span>{" "}
               {tracking.currentLocation || "N/A"}

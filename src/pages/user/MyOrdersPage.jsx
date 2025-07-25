@@ -18,6 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cancelOrder, fetchMyOrders } from "@/features/order/orderSlice";
+import { fetchPaymentDetailsByOrderId } from "@/features/payment/paymentSlice";
 import { format } from "date-fns";
 import { Eye, Package, RotateCcw, Truck, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -108,9 +109,10 @@ const MyOrdersPage = () => {
     (state) => state.order
   );
   const { user, accessToken } = useSelector((state) => state.auth);
+  const { paymentDetails, loading: paymentLoading, error: paymentError } = useSelector((state) => state.payment);
+  console.log('paymentDetails', paymentDetails)
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  console.log("selectedOrder", selectedOrder);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [trackDialogOpen, setTrackDialogOpen] = useState(false);
 
@@ -118,14 +120,13 @@ const MyOrdersPage = () => {
     if (user?._id) {
       dispatch(fetchMyOrders({ userId: user?._id, accessToken }));
     }
-    // return () => {
-    //   dispatch(clearOrders());
-    // };
-  }, [dispatch, user]);
+  }, [dispatch, user, accessToken]);
 
   const handleViewDetails = (order) => {
+    console.log('order', order)
     setSelectedOrder(order);
     setIsDialogOpen(true);
+    dispatch(fetchPaymentDetailsByOrderId({ orderId: order._id }));
   };
 
   const handleCancelOrder = async () => {
@@ -155,7 +156,6 @@ const MyOrdersPage = () => {
       </div>
     );
   }
-  // const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -195,7 +195,6 @@ const MyOrdersPage = () => {
                 </TableHeader>
                 <TableBody className="bg-white divide-y divide-gray-100">
                   {orders?.map((order) => {
-                    console.log("orders", orders);
                     const orderDate = new Date(order.createdAt);
                     const numberOfItems = order.items ? order.items.length : 0;
 
@@ -358,8 +357,7 @@ const MyOrdersPage = () => {
                     <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
                       <p className="text-gray-700">
                         <strong>Recipient:</strong>{" "}
-                        {selectedOrder?.shippingAddress?.fullName ||
-                          "Customer Name"}{" "}
+                        {selectedOrder?.shippingAddress?.fullName || "Customer Name"}
                       </p>
                       <p className="text-gray-700">
                         <strong>Address:</strong>{" "}
@@ -370,16 +368,14 @@ const MyOrdersPage = () => {
                         {selectedOrder?.shippingAddress?.phoneNumber}
                       </p>
                       <p className="text-gray-700">
-                        <strong>City:</strong>{" "}
-                        {selectedOrder?.shippingAddress?.city}
+                        <strong>City:</strong> {selectedOrder?.shippingAddress?.city}
                       </p>
                       <p className="text-gray-700">
                         <strong>Postal Code:</strong>{" "}
                         {selectedOrder?.shippingAddress?.postalCode}
                       </p>
                       <p className="text-gray-700">
-                        <strong>State</strong>{" "}
-                        {selectedOrder?.shippingAddress?.state}
+                        <strong>State</strong> {selectedOrder?.shippingAddress?.state}
                       </p>
                       <p className="text-gray-700">
                         <strong>Country</strong>{" "}
@@ -392,26 +388,55 @@ const MyOrdersPage = () => {
                       Payment Details
                     </h3>
                     <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
-                      <p className="text-gray-700">
-                        <strong>Method:</strong> Credit Card (**** **** ****
-                        1234){" "}
-                      </p>
-                      <p className="text-gray-700">
-                        <strong>Transaction ID:</strong> TXN123456789{" "}
-                      </p>
-                      <p className="text-gray-700">
-                        <strong>Total Paid:</strong>{" "}
-                        {formatCurrency(selectedOrder.totalAmount)}
-                      </p>
+                      {paymentLoading ? (
+                        <p>Loading payment details...</p>
+                      ) : paymentError ? (
+                        <p className="text-red-500">
+                          Error:{" "}
+                          {paymentError.message ||
+                            "Failed to load payment details."}
+                        </p>
+                      ) : paymentDetails ? (
+                        <>
+                          <p className="text-gray-700">
+                            <strong>Payment Method:</strong>{" "}
+                            {capitalizeFirstLetter(
+                              paymentDetails.paymentMethod
+                            )}
+                          </p>
+                          <p className="text-gray-700">
+                            <strong>Payment Status:</strong>{" "}
+                            <span
+                              className={`px-2 py-1 text-black rounded-full text-xs font-semibold ${getStatusClasses(
+                                paymentDetails.paymentStatus
+                              )}`}
+                            >
+                              {capitalizeFirstLetter(
+                                paymentDetails.paymentStatus
+                              )}
+                            </span>
+                          </p>
+                          <p className="text-gray-700">
+                            <strong>Transaction ID:</strong>{" "}
+                            {paymentDetails.transactionId}
+                          </p>
+                          <p className="text-gray-700">
+                            <strong>Amount:</strong>{" "}
+                            {formatCurrency(paymentDetails.amount)}
+                          </p>
+                        </>
+                      ) : (
+                        <p>No payment details available.</p>
+                      )}
                     </div>
                   </div>
+
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-3">
                       Order Timeline
                     </h3>
                     <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
                       <ul className="list-disc list-inside text-gray-700 space-y-1">
-                        {/* Timeline Events */}
                         <li>
                           <span className="font-medium">Order Placed:</span>{" "}
                           {format(
@@ -442,7 +467,6 @@ const MyOrdersPage = () => {
                           </li>
                         )}
 
-                        {/* Full Tracking History */}
                         {selectedOrder.trackingHistory?.length > 0 && (
                           <>
                             <hr className="my-3" />

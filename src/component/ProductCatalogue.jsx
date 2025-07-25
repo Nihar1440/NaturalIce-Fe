@@ -1,20 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Snowflake, Star, Heart } from "lucide-react";
-import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { addItem, addItemToCart } from '../../src/features/cart/cartSlice';
-import { addItemToWishList } from '../../src/features/wishlist/wishlistSlice';
-import AddToCartConfirmationPopup from './AddToCartConfirmationPopup';
-import LoginRequiredPopup from './LoginRequiredPopup';
+import { addItem, addItemToCart } from "../../src/features/cart/cartSlice";
+import { addItemToWishList } from "../../src/features/wishlist/wishlistSlice";
+import AddToCartConfirmationPopup from "./AddToCartConfirmationPopup";
+import LoginRequiredPopup from "./LoginRequiredPopup";
 
 const ProductCatalogue = ({ products, loading }) => {
   const dispatch = useDispatch();
-  const { user,accessToken } = useSelector((state) => state.auth);
+  const { user, accessToken } = useSelector((state) => state.auth);
   const [showLoginAlert, setShowLoginAlert] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  const [addedProductName, setAddedProductName] = useState('');
+  const [addedProductName, setAddedProductName] = useState("");
   const [addedProductQuantity, setAddedProductQuantity] = useState(0);
 
   let quantity = 1;
@@ -27,31 +27,33 @@ const ProductCatalogue = ({ products, loading }) => {
         if (!localStorage.getItem("guestId")) {
           localStorage.setItem("guestId", "GUEST_" + crypto.randomUUID());
         }
-        dispatch(addItem({
-          productId: product,
-          quantity: quantity,
-          price: product.price,
-        }));
-      }
-      else {
-        await dispatch(addItemToCart({
-          productId: product._id,
-          quantity: quantity,
-          price: product.price,
-          userId: user._id,
-          accessToken: accessToken,
-        })).unwrap();
+        dispatch(
+          addItem({
+            productId: product,
+            quantity: quantity,
+            price: product.price,
+          })
+        );
+      } else {
+        await dispatch(
+          addItemToCart({
+            productId: product._id,
+            quantity: quantity,
+            price: product.price,
+            userId: user._id,
+            accessToken: accessToken,
+          })
+        ).unwrap();
       }
       setAddedProductName(product.name);
       setAddedProductQuantity(quantity);
       setShowSuccessAlert(true);
     } catch (error) {
-      const errorMessage = error.message || 'Failed to add product to cart.';
+      const errorMessage = error.message || "Failed to add product to cart.";
       toast.error(errorMessage);
-      console.error('Failed to add to cart:', error);
+      console.error("Failed to add to cart:", error);
     }
-  }
-
+  };
 
   return (
     <section className="py-8 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 relative">
@@ -95,7 +97,10 @@ const ProductCatalogue = ({ products, loading }) => {
                 }}
               >
                 {/* Link wraps the image and details for navigation */}
-                <Link to={`/product/${product._id}`} className="block cursor-pointer">
+                <Link
+                  to={`/product/${product._id}`}
+                  className="block cursor-pointer"
+                >
                   <div className="relative overflow-hidden">
                     <img
                       src={product.image}
@@ -108,7 +113,9 @@ const ProductCatalogue = ({ products, loading }) => {
 
                     {/* Buttons overlay - appears on hover */}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="flex space-x-2"> {/* Container for both buttons */}
+                      <div className="flex space-x-2">
+                        {" "}
+                        {/* Container for both buttons */}
                         <Button
                           className="w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 sm:py-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base group/btn"
                           onClick={(e) => handleAddToCart(e, product)}
@@ -130,19 +137,28 @@ const ProductCatalogue = ({ products, loading }) => {
 
                             try {
                               // Dispatch the addItemToWishList thunk
-                              await dispatch(addItemToWishList(product._id)).unwrap();
-                              toast.success(`${product.name} added to wishlist!`);
+                              await dispatch(
+                                addItemToWishList(product._id)
+                              ).unwrap();
+                              toast.success(
+                                `${product.name} added to wishlist!`
+                              );
                             } catch (error) {
-                              const errorMessage = error.message || 'Failed to add to wishlist.';
+                              const errorMessage =
+                                error.message || "Failed to add to wishlist.";
                               toast.error(errorMessage);
-                              console.error('Failed to add to wishlist:', error);
+                              console.error(
+                                "Failed to add to wishlist:",
+                                error
+                              );
                             }
                           }}
                         >
                           <Heart className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover/btn:animate-bounce" />
                           Wishlist
                         </Button>
-                      </div> {/* End of buttons container */}
+                      </div>{" "}
+                      {/* End of buttons container */}
                     </div>
                   </div>
 
@@ -151,11 +167,18 @@ const ProductCatalogue = ({ products, loading }) => {
                     {/* Category and Rating */}
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs text-blue-500 font-semibold uppercase">
-                        {(product.category && product.category.name) || product.category || (product.type && product.type.name) || product.type || "CATEGORY"}
+                        {(product.category && product.category.name) ||
+                          product.category ||
+                          (product.type && product.type.name) ||
+                          product.type ||
+                          "CATEGORY"}
                       </span>
                       <div className="flex items-center">
                         {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                          <Star
+                            key={i}
+                            className="w-3 h-3 fill-yellow-400 text-yellow-400"
+                          />
                         ))}
                         <span className="ml-1 text-slate-500 text-xs">(0)</span>
                       </div>
@@ -169,7 +192,7 @@ const ProductCatalogue = ({ products, loading }) => {
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
                         <span className="text-xl sm:text-2xl font-bold text-blue-600 transition-colors duration-300">
-                          ₹{product.price}
+                          AED {Number(product.price).toFixed(2)}
                         </span>
                       </div>
                       {/* Small Shopping Bag Icon - positioned relative to the card, appears on hover */}
@@ -218,4 +241,4 @@ const ProductCatalogue = ({ products, loading }) => {
   );
 };
 
-export default ProductCatalogue; 
+export default ProductCatalogue;

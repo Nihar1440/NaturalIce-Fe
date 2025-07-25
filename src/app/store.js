@@ -11,6 +11,7 @@ import userReducer from '../features/user/userSlice';
 import categoryReducer from '../features/category/categorySlice';
 import shippingAddressReducer from '../features/shippingAddress/shippingAddressSlice';
 import notificationReducer from "../features/notification/notificationSlice";
+import paymentReducer from '../features/payment/paymentSlice';
 
 
 const rootReducer = combineReducers({
@@ -23,13 +24,14 @@ const rootReducer = combineReducers({
   order: orderReducer,
   shippingAddress: shippingAddressReducer,
   notifications: notificationReducer,
+  payment: paymentReducer,
 });
 
 // Configuration for redux-persist
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth', 'cart', 'shippingAddress','category'] // only persist these slices
+  whitelist: ['auth', 'cart', 'shippingAddress','category','payment']
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -39,7 +41,7 @@ export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false, // Required for Redux Persist
+      serializableCheck: false,
     }),
 });
 

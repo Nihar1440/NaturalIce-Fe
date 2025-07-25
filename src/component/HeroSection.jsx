@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Snowflake } from "lucide-react";
 
@@ -43,13 +43,14 @@ const HeroSection = () => {
           </div>
         </div>
 
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6 font-serif tracking-tight leading-snug">
+        <h1 className="text-2xl sm:text-2xl md:text-2xl font-bold text-white tracking-tight leading-snug kaushan-script-regular">
           Your Trusted Ice Supplier in The Global
         </h1>
 
-        <p className="text-sm sm:text-base text-blue-100 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-sm sm:text-base text-blue-100 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed kaushan-script-regular1">
           Your trusted partner for premium ice products across the globe
-        </p>
+</p>
+
 
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
           <Button
@@ -62,7 +63,7 @@ const HeroSection = () => {
           <Button
             variant="outline"
             size="lg"
-            className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-blue-900 font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-full transition-all duration-300 text-sm sm:text-base"
+            className="w-full sm:w-auto bg-white text-blue-900 hover:bg-blue-50 font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-xl text-sm sm:text-base"
           >
             Learn More
           </Button>
@@ -79,4 +80,4 @@ const HeroSection = () => {
   );
 };
 
-export default HeroSection; 
+export default HeroSection;
