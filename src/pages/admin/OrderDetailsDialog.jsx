@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Loader from "@/component/common/Loader";
-import { getStatusBadge } from "../../component/admin/orderUtils";
+import { getStatusBadge } from "../../lib/orderUtils";
 import { FileText, MapPin, Package, User } from "lucide-react";
 import { useRef, useState } from "react";
 import html2pdf from "html2pdf.js";

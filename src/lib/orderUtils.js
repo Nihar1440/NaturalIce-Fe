@@ -13,4 +13,9 @@ export function getStatusBadge(status) {
     default:
       return "bg-gray-100 text-gray-800";
   }
-} 
+}
+
+export const capitalizeFirstLetter = (string) => {
+    if (!string) return '';
+    return string.charAt(0).toUpperCase() + string.slice(1);
+};

@@ -6,9 +6,9 @@ import {
   Plus,
   Lock,
   ShoppingCart,
-  MapPin, // Added for address icon
-  User, // Added for address icon
-  Phone, // Added for address icon
+  MapPin, 
+  User, 
+  Phone, 
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
@@ -19,9 +19,9 @@ import {
   updateItemQuantity,
 } from "../../features/cart/cartSlice";
 import {
-  getShippingAddresses, // Import action to fetch addresses
-  clearShippingAddressError, // To clear address errors if any
-} from "../../features/shippingAddress/shippingAddressSlice"; // Import shipping address slice
+  getShippingAddresses, 
+  clearShippingAddressError, 
+} from "../../features/shippingAddress/shippingAddressSlice"; 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Loader from "@/component/common/Loader";
@@ -31,8 +31,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"; // Import shadcn select components
+} from "@/components/ui/select";
 import AddressDialog from "@/component/AddressDialog";
+import { formatCurrency } from "@/lib/currency";
 
 export default function CartPage() {
   const dispatch = useDispatch();
@@ -43,7 +44,7 @@ export default function CartPage() {
   } = useSelector((state) => state.cart);
   const { accessToken, user } = useSelector((state) => state.auth);
   // Access shipping addresses from the store
-  const { addresses: shippingAddresses, loading: addressLoading, error: addressError } = useSelector(
+  const { addresses: shippingAddresses, error: addressError } = useSelector(
     (state) => state.shippingAddress
   );
   const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -51,7 +52,7 @@ export default function CartPage() {
   const [email, setEmail] = useState("");
   const [showAddAddress, setShowAddAddress] = useState(false);
   const [promoCode, setPromoCode] = useState("");
-  const [selectedAddress, setSelectedAddress] = useState(null); // State for the selected shipping address
+  const [selectedAddress, setSelectedAddress] = useState(null); 
   const guestId = localStorage.getItem("guestId");
 
   // try {
@@ -81,7 +82,7 @@ export default function CartPage() {
       if (defaultAddress) {
         setSelectedAddress(defaultAddress);
       } else {
-        setSelectedAddress(shippingAddresses[0]); // Select the first address if no default
+        setSelectedAddress(shippingAddresses[0]);   
       }
       console.log("Loaded shipping addresses:", shippingAddresses);
       console.log("Selected shipping address (after effect):", selectedAddress);
@@ -343,7 +344,7 @@ export default function CartPage() {
                     </h3>
                     <div className="flex items-center gap-2 mb-4">
                       <span className="text-xl font-bold text-gray-900">
-                        ${item?.productId?.price}
+                        {formatCurrency(item?.productId?.price)}
                       </span>
                     </div>
 
@@ -392,7 +393,7 @@ export default function CartPage() {
                     <div className="text-right">
                       <div className="text-sm text-gray-500 mb-1">Subtotal</div>
                       <div className="text-xl font-bold text-gray-900">
-                        ${(item?.productId?.price * item?.quantity)?.toFixed(2)}
+                        {formatCurrency(item?.productId?.price * item?.quantity)}
                       </div>
                     </div>
                   </div>
@@ -421,7 +422,7 @@ export default function CartPage() {
                   <h4 className="text-sm font-medium text-gray-900 mb-1">
                     Phone Case
                   </h4>
-                  <p className="text-sm font-semibold text-gray-900">$24.99</p>
+                  <p className="text-sm font-semibold text-gray-900">{formatCurrency(24.99)}</p>
                 </div>
 
                 {/* Bluetooth Speaker */}
@@ -436,7 +437,7 @@ export default function CartPage() {
                   <h4 className="text-sm font-medium text-gray-900 mb-1">
                     Bluetooth Speaker
                   </h4>
-                  <p className="text-sm font-semibold text-gray-900">$89.99</p>
+                  <p className="text-sm font-semibold text-gray-900"> {formatCurrency(89.99)}</p>
                 </div>
 
                 {/* Laptop Stand */}
@@ -451,7 +452,7 @@ export default function CartPage() {
                   <h4 className="text-sm font-medium text-gray-900 mb-1">
                     Laptop Stand
                   </h4>
-                  <p className="text-sm font-semibold text-gray-900">$49.99</p>
+                  <p className="text-sm font-semibold text-gray-900"> {formatCurrency(49.99)}</p>
                 </div>
 
                 {/* USB Cable */}
@@ -466,7 +467,7 @@ export default function CartPage() {
                   <h4 className="text-sm font-medium text-gray-900 mb-1">
                     USB Cable
                   </h4>
-                  <p className="text-sm font-semibold text-gray-900">$14.99</p>
+                  <p className="text-sm font-semibold text-gray-900"> {formatCurrency(14.99)}</p>
                 </div>
               </div>
             </div>
@@ -489,7 +490,7 @@ export default function CartPage() {
                     Subtotal ({totalItems} items)
                   </span>
                   <span className="font-semibold text-gray-900">
-                    ${subtotal.toFixed(2)}
+                    {formatCurrency(subtotal)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -499,7 +500,7 @@ export default function CartPage() {
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Tax</span>
                   <span className="font-semibold text-gray-900">
-                    ${tax.toFixed(2)}
+                    {formatCurrency(tax)}
                   </span>
                 </div>
                 <div className="border-t pt-4">
@@ -508,7 +509,7 @@ export default function CartPage() {
                       Total
                     </span>
                     <span className="text-xl font-bold text-gray-900">
-                      ${total.toFixed(2)}
+                      {formatCurrency(total)}
                     </span>
                   </div>
                 </div>

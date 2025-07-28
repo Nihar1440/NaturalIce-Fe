@@ -12,6 +12,7 @@ import HomePage from "./pages/user/HomePage";
 import InvoicePage from "./pages/user/InvoicePage";
 import LoginPage from "./pages/user/LoginPage";
 import ManageProductsPage from "./pages/admin/ManageProductsPage";
+import ManageReturnRequests from "./pages/admin/ManageReturnRequests";
 import MessagesPage from "./pages/admin/MessagesPage";
 import OrderConfirmation from "./pages/user/OrderConfirmation";
 import OrdersPage from "./pages/admin/OrdersPage";
@@ -92,6 +93,7 @@ const App = () => {
             <Route path="orders" element={<OrdersPage />} />
             <Route path="manage-products" element={<ManageProductsPage />} />
             <Route path="messages" element={<MessagesPage />} />
+            <Route path="manage-return-requests" element={<ManageReturnRequests />} />
             <Route path="analytics" element={<AnalyticsPage />} />
             <Route path="manage-categories" element={<ManageCategory />} />
             <Route

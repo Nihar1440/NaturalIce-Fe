@@ -1,19 +1,11 @@
 // src/component/admin/OrderTable.jsx
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, Trash2, Truck } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Eye, Trash2, Truck } from "lucide-react";
 
 const statusClasses = {
   Delivered: "bg-green-300 text-green-800 border-green-200",

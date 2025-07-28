@@ -22,7 +22,7 @@ export const fetchOrders = createAsyncThunk(
   }
 );
 
-
+// Fetch my orders
 export const fetchMyOrders = createAsyncThunk(
   'order/fetchMyOrders',
   async ({userId, accessToken}, { rejectWithValue }) => {
@@ -91,6 +91,62 @@ export const returnOrder = createAsyncThunk(
   }
 );
 
+// Return order request
+export const returnOrderRequest = createAsyncThunk(
+  'order/returnOrderRequest',
+  async ({ orderId, formData }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/api/order/return-request/${orderId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data.order;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+// Cancel return request
+export const cancelReturnRequest = createAsyncThunk(
+  'order/cancelReturnRequest',
+  async (orderId, { rejectWithValue }) => {
+    try {
+      const response = await axios.patch(`${API_URL}/api/order/cancel-return-request/${orderId}`);
+      return response.data.order;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+// ADMIN: Fetch all return requests
+export const fetchAllReturnRequests = createAsyncThunk(
+  'order/fetchAllReturnRequests',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/order/return-request`);
+      return response.data.returnRequest;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+// ADMIN: Update return request status
+export const updateReturnRequestStatus = createAsyncThunk(
+  'order/updateReturnRequestStatus',
+  async ({ orderId, status }, { rejectWithValue }) => {
+    try {
+      const response = await axios.patch(`${API_URL}/api/order/update-return-request/${orderId}`, { status });
+      return response.data.order;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 // Cancel order thunk (keep this)
 export const cancelOrder = createAsyncThunk(
   'order/cancelOrder',
@@ -138,6 +194,14 @@ const orderSlice = createSlice({
     tracking: null,
     trackingLoading: false,
     trackingError: null,
+    returnRequestLoading: false,
+    returnRequestError: null,
+    cancelReturnRequestLoading: false,
+    cancelReturnRequestError: null,
+    // Admin state
+    returnRequests: [],
+    returnRequestsLoading: false,
+    returnRequestsError: null,
   },
   reducers: {
     clearOrders: (state) => {
@@ -260,6 +324,62 @@ const orderSlice = createSlice({
       .addCase(returnOrder.rejected, (state, action) => {
         state.returnLoading = false;
         state.returnError = action.payload;
+      })
+
+      // Return order request
+      .addCase(returnOrderRequest.pending, (state) => {
+        state.returnRequestLoading = true;
+        state.returnRequestError = null;
+      })
+      .addCase(returnOrderRequest.fulfilled, (state, action) => {
+        state.returnRequestLoading = false;
+        const index = state.orders.findIndex((order) => order._id === action.payload._id);
+        if (index !== -1) {
+          state.orders[index] = action.payload;
+        }
+      })
+      .addCase(returnOrderRequest.rejected, (state, action) => {
+        state.returnRequestLoading = false;
+        state.returnRequestError = action.payload;
+      })
+
+      // Cancel return request
+      .addCase(cancelReturnRequest.pending, (state) => {
+        state.cancelReturnRequestLoading = true;
+        state.cancelReturnRequestError = null;
+      })
+      .addCase(cancelReturnRequest.fulfilled, (state, action) => {
+        state.cancelReturnRequestLoading = false;
+        const index = state.orders.findIndex((order) => order._id === action.payload._id);
+        if (index !== -1) {
+          state.orders[index] = action.payload;
+        }
+      })
+      .addCase(cancelReturnRequest.rejected, (state, action) => {
+        state.cancelReturnRequestLoading = false;
+        state.cancelReturnRequestError = action.payload;
+      })
+
+      // ADMIN: Fetch all return requests
+      .addCase(fetchAllReturnRequests.pending, (state) => {
+        state.returnRequestsLoading = true;
+      })
+      .addCase(fetchAllReturnRequests.fulfilled, (state, action) => {
+        state.returnRequestsLoading = false;
+        state.returnRequests = action.payload;
+      })
+      .addCase(fetchAllReturnRequests.rejected, (state, action) => {
+        state.returnRequestsLoading = false;
+        state.returnRequestsError = action.payload;
+      })
+
+      // ADMIN: Update return request status
+      .addCase(updateReturnRequestStatus.fulfilled, (state, action) => {
+        const updatedOrder = action.payload;
+        const index = state.returnRequests.findIndex((req) => req._id === updatedOrder._id);
+        if (index !== -1) {
+          state.returnRequests[index] = updatedOrder;
+        }
       })
 
       // Cancel order (keep this)

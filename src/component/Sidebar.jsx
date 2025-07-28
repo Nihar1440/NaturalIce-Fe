@@ -9,6 +9,7 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
+  RotateCcw,
 } from "lucide-react";
 
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
@@ -46,7 +47,18 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
       path: "/admin/manage-users",
       icon: <Users className="h-5 w-5" />,
     },
+    {
+      name: "Manage Return Requests",
+      path: "/admin/manage-return-requests",
+      icon: <RotateCcw className="h-5 w-5" />,
+    },
   ];
+
+  const getLinkClass = (path) => {
+    return location.pathname.startsWith(path)
+      ? "bg-sky-300 font-semibold hover:border-l-4 hover:border-white"
+      : "hover:bg-gradient-to-r hover:from-white/50 hover:to-white/10 hover:shadow-md hover:scale-[1.02]";
+  };
 
   return (
     <>
@@ -80,11 +92,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                   to={link.path}
                   onClick={() => setIsSidebarOpen(false)}
                   className={`flex items-center gap-3 py-2 px-3 rounded transition duration-200
-                    ${
-                      location.pathname.startsWith(link.path)
-                        ? "bg-sky-300 font-semibold hover:border-l-4 hover:border-white"
-                        : "hover:bg-gradient-to-r hover:from-white/50 hover:to-white/10 hover:shadow-md hover:scale-[1.02]"
-                    }`}
+                    ${getLinkClass(link.path)}`}
                 >
                   {link.icon}
                   {!isCollapsed && <span>{link.name}</span>}
