@@ -364,7 +364,6 @@ const ManageUsers = () => {
               )}
               */}
               
-              {/* Example: 
               {selectedUser.createdAt && (
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
@@ -375,7 +374,7 @@ const ManageUsers = () => {
                   </div>
                 </div>
               )}
-              */}
+             
             </div>
           ) : (
             <div className="text-center py-8">

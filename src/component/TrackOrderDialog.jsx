@@ -78,11 +78,13 @@ export default function TrackOrderDialog({
             <div className="mb-2">
               <span className="font-semibold">Estimated Delivery:</span>{" "}
               {estimatedDeliveryDate
-                ? new Date(estimatedDeliveryDate).toLocaleDateString("en-US", {
+                ? new Date(estimatedDeliveryDate).toLocaleString("en-US", {
                     weekday: "long",
                     year: "numeric",
                     month: "long",
                     day: "numeric",
+                    hour: "numeric",
+                    minute: "numeric",
                   })
                 : "N/A"}
             </div>
@@ -116,11 +118,11 @@ export default function TrackOrderDialog({
               {/* Optionally show the next step if not delivered */}
               {tracking.status !== "delivered" && (
                 <div className="flex items-start gap-2 opacity-60">
-                  <span className="text-lg w-6 text-center">[ ]</span>
-                  <div>
+                  {/* <span className="text-lg w-6 text-center">[ ]</span> */}
+                  {/* <div>
                     <div className="font-medium">Delivered</div>
                     <div className="text-xs text-gray-500">Pending</div>
-                  </div>
+                  </div> */}
                 </div>
               )}
             </div>
