@@ -181,13 +181,13 @@ const ReturnRequestDetailsModal = ({
                   <strong>Comment:</strong>{" "}
                   {returnRequest.comment || "No comment provided."}
                 </p>
-                {returnRequest.image && (
+                {returnRequest.imageUrl && (
                   <div>
                     <strong>Return Image:</strong>
                     <img
-                      src={returnRequest.image.url}
+                      src={returnRequest.imageUrl}
                       alt="Return visual proof"
-                      className="mt-2 w-full max-w-xs h-auto rounded-lg border"
+                      className="mt-2 w-full max-w-md h-auto rounded-lg border"
                     />
                   </div>
                 )}

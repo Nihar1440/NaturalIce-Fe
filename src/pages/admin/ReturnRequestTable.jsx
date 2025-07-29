@@ -51,22 +51,21 @@ const ReturnRequestTable = ({ returnRequests, onStatusChange, onViewDetails }) =
                     <Select 
                       onValueChange={(value) => onStatusChange(order._id, value)} 
                       defaultValue={order.returnRequest.status}
-                      disabled={['Rejected', 'Refunded'].includes(order.returnRequest.status)}
                     >
                       <SelectTrigger className="w-[150px]">
                         <SelectValue placeholder="Update Status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Approved" disabled={order.returnRequest.status !== 'Pending'}>
+                        <SelectItem value="Approved" disabled={!['Pending'].includes(order.returnRequest.status)}>
                           Approve
                         </SelectItem>
-                        <SelectItem value="Rejected" disabled={order.returnRequest.status !== 'Pending'}>
+                        <SelectItem value="Rejected" disabled={!['Pending'].includes(order.returnRequest.status)}>
                           Reject
                         </SelectItem>
-                        <SelectItem value="Picked" disabled={order.returnRequest.status !== 'Approved'}>
+                        <SelectItem value="Picked" disabled={!['Approved'].includes(order.returnRequest.status)}>
                           Mark as Picked
                         </SelectItem>
-                        <SelectItem value="Refunded" disabled={order.returnRequest.status !== 'Picked'}>
+                        <SelectItem value="Refunded" disabled={!['Picked'].includes(order.returnRequest.status)}>
                           Mark as Refunded
                         </SelectItem>
                       </SelectContent>
@@ -109,22 +108,21 @@ const ReturnRequestTable = ({ returnRequests, onStatusChange, onViewDetails }) =
               <Select 
                 onValueChange={(value) => onStatusChange(order._id, value)} 
                 defaultValue={order.returnRequest.status}
-                disabled={['Rejected', 'Refunded'].includes(order.returnRequest.status)}
               >
                 <SelectTrigger className="flex-grow">
                   <SelectValue placeholder="Update Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Approved" disabled={order.returnRequest.status !== 'Pending'}>
+                  <SelectItem value="Approved" disabled={!['Pending'].includes(order.returnRequest.status)}>
                     Approve
                   </SelectItem>
-                  <SelectItem value="Rejected" disabled={order.returnRequest.status !== 'Pending'}>
+                  <SelectItem value="Rejected" disabled={!['Pending'].includes(order.returnRequest.status)}>
                     Reject
                   </SelectItem>
-                  <SelectItem value="Picked" disabled={order.returnRequest.status !== 'Approved'}>
+                  <SelectItem value="Picked" disabled={!['Approved'].includes(order.returnRequest.status)}>
                     Mark as Picked
                   </SelectItem>
-                  <SelectItem value="Refunded" disabled={order.returnRequest.status !== 'Picked'}>
+                  <SelectItem value="Refunded" disabled={!['Picked'].includes(order.returnRequest.status)}>
                     Mark as Refunded
                   </SelectItem>
                 </SelectContent>
