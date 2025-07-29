@@ -330,7 +330,7 @@ const MyOrdersPage = () => {
                               </button>
                             )}
 
-                            {(order.status?.toLowerCase() === "delivered" ||
+                            {/* {(order.status?.toLowerCase() === "delivered" ||
                               order.status?.toLowerCase() === "completed") && (
                               <button
                                 className="inline-flex items-center px-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md"
@@ -341,7 +341,7 @@ const MyOrdersPage = () => {
                                 <RotateCcw className="w-3 h-3 mr-1" />
                                 Reorder
                               </button>
-                            )}
+                            )} */}
                             {(order.status?.toLowerCase() === "delivered" ||
                               order.status?.toLowerCase() === "completed") &&
                               !order.returnRequest?.isRequested && (
