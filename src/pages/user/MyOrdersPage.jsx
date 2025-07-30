@@ -105,7 +105,7 @@ const OrderItemDetails = ({ item }) => {
 
 const MyOrdersPage = () => {
   const dispatch = useDispatch();
-  const { orders, loading, cancelLoading, cancelError } = useSelector(
+  const { orders, loading, cancelLoading, cancelError, returnRequests } = useSelector(
     (state) => state.order
   );
   const { user, accessToken } = useSelector((state) => state.auth);
@@ -154,6 +154,7 @@ const MyOrdersPage = () => {
   };
 
   const handleReturnClick = (order) => {
+    setSelectedOrder(order);
     setSelectedOrderIdForReturn(order._id);
     setReturnModalOpen(true);
   };
@@ -233,7 +234,7 @@ const MyOrdersPage = () => {
                         className="hover:bg-gray-50 transition-colors"
                       >
                         <TableCell className="px-4 py-3 font-mono text-sm text-gray-700">
-                          {order._id.substring(0, 30)}
+                          {order.orderId}
                         </TableCell>
                         <TableCell className="px-4 py-3 font-mono text-sm text-gray-700">
                           {order.items.length > 1
@@ -249,7 +250,7 @@ const MyOrdersPage = () => {
                               order.status
                             )}`}
                           >
-                            {capitalizeFirstLetter(order?.status)}
+                            {order?.status}
                           </span>
                         </TableCell>
                         <TableCell className="px-4 py-3 text-middle text-sm font-medium text-gray-800">
@@ -270,7 +271,7 @@ const MyOrdersPage = () => {
                               </button>
                             </DialogTrigger>
 
-                            {order.status?.toLowerCase() === "pending" && (
+                            {order.status?.toLowerCase() === "processing" && (
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <button
@@ -682,13 +683,13 @@ const MyOrdersPage = () => {
             estimatedDeliveryDate={selectedOrder.estimatedDeliveryDate}
           />
         )}
-        {selectedOrder && (
+        {/* {selectedOrder && (
           <ReturnRequestModal
             isOpen={returnDialogOpen}
             onClose={() => setReturnDialogOpen(false)}
             order={selectedOrder}
           />
-        )}
+        )} */}
         {selectedOrder && (
           <ReturnRequestModal
             isOpen={isReturnModalOpen}
