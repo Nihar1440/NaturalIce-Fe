@@ -150,9 +150,11 @@ export const fetchUserReturnRequest = createAsyncThunk(
 // ADMIN: Update return request status
 export const updateReturnRequestStatus = createAsyncThunk(
   'order/updateReturnRequestStatus',
-  async ({ orderId, status }, { rejectWithValue }) => {
+  async ({ returnRequestId, status }, { rejectWithValue }) => {
+    console.log("returnRequestId", returnRequestId);
+    console.log("status", status);
     try {
-      const response = await axios.patch(`${API_URL}/api/order/update-return-request/${orderId}`, { status });
+      const response = await axios.patch(`${API_URL}/api/order/update-return-request/${returnRequestId}`, { status });
       return response.data.order;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);

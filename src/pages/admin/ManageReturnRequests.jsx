@@ -35,6 +35,7 @@ const ManageReturnRequests = () => {
   }
 
   return (
+    <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-md">
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Manage Return Requests</h1>
       <div className="p-4 lg:p-6">
@@ -60,6 +61,8 @@ const ManageReturnRequests = () => {
         returnRequest={selectedReturnRequest}
         onUpdateStatus={handleStatusChange}
       />
+    </div>
+
     </div>
   );
 };

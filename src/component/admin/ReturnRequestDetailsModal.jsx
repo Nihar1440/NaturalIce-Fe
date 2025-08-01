@@ -22,6 +22,8 @@ import { format } from "date-fns";
 import { formatCurrency } from "@/lib/currency";
 import { capitalizeFirstLetter } from "@/lib/orderUtils";
 
+const statusOrder = ["Pending", "Approved", "Picked", "Refunded"];
+
 const getStatusBadgeVariant = (status) => {
   switch (status?.toLowerCase()) {
     case "approved":
@@ -87,10 +89,39 @@ const ReturnRequestDetailsModal = ({
   onClose,
   returnRequest,
   onUpdateStatus,
-    }) => {
+}) => {
   if (!isOpen || !returnRequest) return null;
 
   console.log("returnRequest", returnRequest);
+
+  const renderActionButtons = () => {
+    const { _id, status } = returnRequest;
+
+    if (status === "Pending") {
+      return (
+        <>
+          <Button size="sm" variant="success" onClick={() => onUpdateStatus(_id, "Approved")}>
+            Approve
+          </Button>
+          <Button size="sm" variant="destructive" onClick={() => onUpdateStatus(_id, "Rejected")}>
+            Reject
+          </Button>
+        </>
+      );
+    }
+
+    const currentIndex = statusOrder.indexOf(status);
+    if (currentIndex > -1 && currentIndex < statusOrder.length - 1) {
+      const nextStatus = statusOrder[currentIndex + 1];
+      return (
+        <Button size="sm" variant="default" onClick={() => onUpdateStatus(_id, nextStatus)}>
+          Mark as {nextStatus}
+        </Button>
+      );
+    }
+
+    return null;
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -124,8 +155,8 @@ const ReturnRequestDetailsModal = ({
                     : "N/A"}
                 </p>
                 <p>
-                <strong>Ordered Items:</strong>{" "}
-                {returnRequest?.orderId?.items?.length}
+                  <strong>Ordered Items:</strong>{" "}
+                  {returnRequest?.orderId?.items?.length}
                 </p>
               </div>
             </div>
@@ -269,42 +300,7 @@ const ReturnRequestDetailsModal = ({
 
         <DialogFooter className="flex-col sm:flex-row sm:justify-between items-center pt-4 border-t">
           <div className="flex gap-2 flex-wrap">
-            {returnRequest.status === "Pending" && (
-              <>
-                <Button
-                  size="sm"
-                  variant="success"
-                  onClick={() => onUpdateStatus(returnRequest._id, "Approved")}
-                >
-                  Approve
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => onUpdateStatus(returnRequest._id, "Rejected")}
-                >
-                  Reject
-                </Button>
-              </>
-            )}
-            {returnRequest.status === "Approved" && (
-              <Button
-                size="sm"
-                variant="default"
-                onClick={() => onUpdateStatus(returnRequest._id, "Picked")}
-              >
-                Mark as Picked
-              </Button>
-            )}
-            {returnRequest.status === "Picked" && (
-              <Button
-                size="sm"
-                variant="success"
-                onClick={() => onUpdateStatus(returnRequest._id, "Refunded")}
-              >
-                Mark as Refunded
-              </Button>
-            )}
+            {renderActionButtons()}
           </div>
           <DialogClose asChild>
             <Button type="button" variant="secondary">

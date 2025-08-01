@@ -300,25 +300,25 @@ const ReturnRequest = () => {
                                             <strong>Refund Status:</strong>{" "}
                                             <span
                                                 className={`px-2 py-1 text-black rounded-full text-xs font-semibold ${getRefundStatusClasses(
-                                                    selectedReturnRequest.refundStatus
+                                                    selectedReturnRequest?.status
                                                 )}`}
                                             >
-                                                {selectedReturnRequest.refundStatus}
+                                                {selectedReturnRequest?.status}
                                             </span>
                                         </p>
                                         <p className="text-gray-700">
                                             <strong>Refund Amount:</strong>{" "}
-                                            {formatCurrency(selectedReturnRequest.refundAmount)}
+                                            {formatCurrency(selectedReturnRequest?.refundAmount)}
                                         </p>
                                         <p className="text-gray-700">
                                             <strong>Refund Date:</strong>{" "}
-                                            {selectedReturnRequest.refundedAt ? format(new Date(selectedReturnRequest?.refundedAt), "MMM d, yyyy") : "N/A"}
+                                            {selectedReturnRequest?.refundedAt ? format(new Date(selectedReturnRequest?.refundedAt), "MMM d, yyyy") : "N/A"}
                                         </p>
 
-                                        {selectedReturnRequest.refundStatus === "Failed" && (
+                                        {selectedReturnRequest?.refundStatus === "Failed" && (
                                             <p className="text-gray-700">
                                                 <strong>Refund Failed Reason:</strong>{" "}
-                                                {selectedReturnRequest.refundFailureReason || "Not specified"}
+                                                {selectedReturnRequest?.refundFailureReason || "Not specified"}
                                             </p>
                                         )}
 

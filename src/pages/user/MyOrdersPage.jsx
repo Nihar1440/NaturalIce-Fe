@@ -43,11 +43,12 @@ import ReturnRequestModal from "@/component/ReturnRequestModal";
 import { formatCurrency } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
 import ReturnRequest from "@/component/ReturnRequest";
+import { capitalizeFirstLetter } from "@/lib/orderUtils";
 
-export const capitalizeFirstLetter = (string) => {
-  if (!string) return "";
-  return string.charAt(0).toUpperCase() + string.slice(1);
-};
+// export const capitalizeFirstLetter = (string) => {
+//   if (!string) return "";
+//   return string.charAt(0).toUpperCase() + string.slice(1);
+// };
 
 const getStatusClasses = (status) => {
   switch (status?.toLowerCase()) {
@@ -153,7 +154,6 @@ const MyOrdersPage = () => {
 
   const handleReturnClick = (order) => {
     setSelectedOrder(order);
-    setSelectedOrderIdForReturn(order._id);
     setReturnModalOpen(true);
   };
 
@@ -596,13 +596,6 @@ const MyOrdersPage = () => {
             estimatedDeliveryDate={selectedOrder.estimatedDeliveryDate}
           />
         )}
-        {/* {selectedOrder && (
-          <ReturnRequestModal
-            isOpen={returnDialogOpen}
-            onClose={() => setReturnDialogOpen(false)}
-            order={selectedOrder}
-          />
-        )} */}
         {selectedOrder && (
           <ReturnRequestModal
             isOpen={isReturnModalOpen}
