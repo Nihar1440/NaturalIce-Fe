@@ -10,19 +10,19 @@ const ManageReturnRequests = () => {
   const dispatch = useDispatch();
   const {returnRequests, returnRequestsLoading, returnRequestsError } = useSelector((state) => state.order);
   const [isDetailsModalOpen, setDetailsModalOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedReturnRequest, setSelectedReturnRequest] = useState(null);
 
   useEffect(() => {
     dispatch(fetchAllReturnRequests());
   }, [dispatch]);
 
-  const handleStatusChange = (orderId, status) => {
-    dispatch(updateReturnRequestStatus({ orderId, status }));
+  const handleStatusChange = (returnRequestId, status) => {
+    dispatch(updateReturnRequestStatus({ returnRequestId, status }));
   };
 
-  const handleViewDetails = (orderId) => {
-    const orderToShow = returnRequests.find((order) => order._id === orderId);
-    setSelectedOrder(orderToShow);
+  const handleViewDetails = (returnRequestId) => {
+    const returnRequestToShow = returnRequests.find((returnRequest) => returnRequest._id === returnRequestId);
+    setSelectedReturnRequest(returnRequestToShow);
     setDetailsModalOpen(true);
   };
 
@@ -57,7 +57,7 @@ const ManageReturnRequests = () => {
       <ReturnRequestDetailsModal
         isOpen={isDetailsModalOpen}
         onClose={() => setDetailsModalOpen(false)}
-        order={selectedOrder}
+        returnRequest={selectedReturnRequest}
         onUpdateStatus={handleStatusChange}
       />
     </div>

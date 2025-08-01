@@ -40,32 +40,32 @@ const ReturnRequestTable = ({ returnRequests, onStatusChange, onViewDetails }) =
             </tr>
           </thead>
           <tbody className="text-left">
-            {returnRequests.map((order) => (
-              <tr key={order._id} className="border-b last:border-b-0 hover:bg-gray-100 transition-colors">
-                <td className="px-6 py-4 text-sm font-medium text-gray-900">{order.items.map((item) => item.name).join(', ')}</td>
-                <td className="px-2 py-1 text-sm font-medium text-gray-900">{order.user?.name || 'Guest'}</td>
-                <td className="px-6 py-4 text-sm text-gray-700">{order.returnRequest.reason}</td>
-                <td className="px-6 py-4">{getStatusBadge(order.returnRequest.status)}</td>
+            {returnRequests.map((returnRequest) => (
+              <tr key={returnRequest._id} className="border-b last:border-b-0 hover:bg-gray-100 transition-colors">
+                <td className="px-6 py-4 text-sm font-medium text-gray-900">{returnRequest.items.map((item) => item.name).join(', ')}</td>
+                <td className="px-2 py-1 text-sm font-medium text-gray-900">{returnRequest.user?.name || 'Guest'}</td>
+                <td className="px-6 py-4 text-sm text-gray-700">{returnRequest.reason}</td>
+                <td className="px-6 py-4">{getStatusBadge(returnRequest.status)}</td>
                 <td className="px-6 py-4">
                   <div className="flex justify-center items-center space-x-2">
                     <Select 
-                      onValueChange={(value) => onStatusChange(order._id, value)} 
-                      defaultValue={order.returnRequest.status}
+                      onValueChange={(value) => onStatusChange(returnRequest._id, value)} 
+                      defaultValue={returnRequest.status}
                     >
                       <SelectTrigger className="w-[150px]">
                         <SelectValue placeholder="Update Status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Approved" disabled={!['Pending'].includes(order.returnRequest.status)}>
+                        <SelectItem value="Approved" disabled={!['Pending'].includes(returnRequest.status)}>
                           Approve
                         </SelectItem>
-                        <SelectItem value="Rejected" disabled={!['Pending'].includes(order.returnRequest.status)}>
+                        <SelectItem value="Rejected" disabled={!['Pending'].includes(returnRequest.status)}>
                           Reject
                         </SelectItem>
-                        <SelectItem value="Picked" disabled={!['Approved'].includes(order.returnRequest.status)}>
+                        <SelectItem value="Picked" disabled={!['Approved'].includes(returnRequest.status)}>
                           Mark as Picked
                         </SelectItem>
-                        <SelectItem value="Refunded" disabled={!['Picked'].includes(order.returnRequest.status)}>
+                        <SelectItem value="Refunded" disabled={!['Picked'].includes(returnRequest.status)}>
                           Mark as Refunded
                         </SelectItem>
                       </SelectContent>
@@ -76,7 +76,7 @@ const ReturnRequestTable = ({ returnRequests, onStatusChange, onViewDetails }) =
                           variant="outline"
                           size="sm"
                           className="text-blue-600 hover:text-blue-800 hover:bg-blue-200"
-                          onClick={() => onViewDetails(order._id)}>
+                          onClick={() => onViewDetails(returnRequest._id)}>
                           <Eye className="h-4 w-4" />
                         </Button>
                       </TooltipTrigger>
@@ -94,35 +94,35 @@ const ReturnRequestTable = ({ returnRequests, onStatusChange, onViewDetails }) =
 
       {/* Mobile Card View */}
       <div className="lg:hidden space-y-4">
-        {returnRequests.map((order) => (
-          <div key={order._id} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        {returnRequests.map((returnRequest) => (
+          <div key={returnRequest._id} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-sm font-medium text-gray-900">{order.items.map((item) => item.name).join(', ')}</p>
-                <p className="text-sm text-gray-500">{order.user?.name || 'Guest'}</p>
-                <p className="text-sm text-gray-500">{order.returnRequest.reason}</p>
+                <p className="text-sm font-medium text-gray-900">{returnRequest.items.map((item) => item.name).join(', ')}</p>
+                <p className="text-sm text-gray-500">{returnRequest.user?.name || 'Guest'}</p>
+                <p className="text-sm text-gray-500">{returnRequest.reason}</p>
               </div>
-              {getStatusBadge(order.returnRequest.status)}
+              {getStatusBadge(returnRequest.status)}
             </div>
             <div className="mt-4 flex items-center space-x-2">
               <Select 
-                onValueChange={(value) => onStatusChange(order._id, value)} 
-                defaultValue={order.returnRequest.status}
+                onValueChange={(value) => onStatusChange(returnRequest._id, value)} 
+                defaultValue={returnRequest.status}
               >
                 <SelectTrigger className="flex-grow">
                   <SelectValue placeholder="Update Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Approved" disabled={!['Pending'].includes(order.returnRequest.status)}>
+                  <SelectItem value="Approved" disabled={!['Pending'].includes(returnRequest.status)}>
                     Approve
                   </SelectItem>
-                  <SelectItem value="Rejected" disabled={!['Pending'].includes(order.returnRequest.status)}>
+                  <SelectItem value="Rejected" disabled={!['Pending'].includes(returnRequest.status)}>
                     Reject
                   </SelectItem>
-                  <SelectItem value="Picked" disabled={!['Approved'].includes(order.returnRequest.status)}>
+                  <SelectItem value="Picked" disabled={!['Approved'].includes(returnRequest.status)}>
                     Mark as Picked
                   </SelectItem>
-                  <SelectItem value="Refunded" disabled={!['Picked'].includes(order.returnRequest.status)}>
+                  <SelectItem value="Refunded" disabled={!['Picked'].includes(returnRequest.status)}>
                     Mark as Refunded
                   </SelectItem>
                 </SelectContent>
@@ -133,7 +133,7 @@ const ReturnRequestTable = ({ returnRequests, onStatusChange, onViewDetails }) =
                     variant="outline"
                     size="icon"
                     className="text-blue-600 hover:text-blue-800 hover:bg-blue-200"
-                    onClick={() => onViewDetails(order._id)}>
+                    onClick={() => onViewDetails(returnRequest._id)}>
                     <Eye className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>

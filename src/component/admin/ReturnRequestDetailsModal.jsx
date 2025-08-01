@@ -85,13 +85,11 @@ const TimelineItem = ({ status, date, isLast = false }) => (
 const ReturnRequestDetailsModal = ({
   isOpen,
   onClose,
-  order,
+  returnRequest,
   onUpdateStatus,
-}) => {
-  console.log("order", order);
-  if (!isOpen || !order) return null;
+    }) => {
+  if (!isOpen || !returnRequest) return null;
 
-  const { returnRequest } = order;
   console.log("returnRequest", returnRequest);
 
   return (
@@ -99,7 +97,7 @@ const ReturnRequestDetailsModal = ({
       <DialogContent className="sm:max-w-2xl lg:max-w-4xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <DialogHeader>
           <DialogTitle>Return Request Details</DialogTitle>
-          <DialogDescription>Order ID: {order._id}</DialogDescription>
+          <DialogDescription>Return Request ID: {returnRequest._id}</DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4 max-h-[75vh] overflow-y-auto pr-2">
@@ -111,19 +109,23 @@ const ReturnRequestDetailsModal = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm bg-gray-50 p-4 rounded-lg">
                 <p>
                   <strong>Order Status:</strong>{" "}
-                  <Badge variant={getStatusBadgeVariant(order.status)}>
-                    {capitalizeFirstLetter(order.status)}
+                  <Badge variant={getStatusBadgeVariant(returnRequest.orderId.status)}>
+                    {capitalizeFirstLetter(returnRequest.orderId.status)}
                   </Badge>
                 </p>
                 <p>
                   <strong>Total Amount:</strong>{" "}
-                  {formatCurrency(order.totalAmount)}
+                  {formatCurrency(returnRequest.orderId.totalAmount)}
                 </p>
                 <p>
                   <strong>Delivery Date:</strong>{" "}
-                  {order.deliveredAt
-                    ? format(new Date(order.deliveredAt), "PPP")
+                  {returnRequest.orderId.deliveredAt
+                    ? format(new Date(returnRequest.orderId.deliveredAt), "PPP")
                     : "N/A"}
+                </p>
+                <p>
+                <strong>Ordered Items:</strong>{" "}
+                {returnRequest?.orderId?.items?.length}
                 </p>
               </div>
             </div>
@@ -140,7 +142,7 @@ const ReturnRequestDetailsModal = ({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {order.items.map(
+                  {returnRequest.items.map(
                     (item) => (
                       console.log(item, "item"),
                       (
@@ -202,13 +204,13 @@ const ReturnRequestDetailsModal = ({
               <h3 className="font-semibold text-lg mb-2">User Information</h3>
               <div className="text-sm bg-gray-50 p-4 rounded-lg space-y-1">
                 <p>
-                  <strong>Name:</strong> {order.user?.name}
+                  <strong>Name:</strong> {returnRequest.user?.name}
                 </p>
                 <p>
-                  <strong>Email:</strong> {order.user?.email}
+                  <strong>Email:</strong> {returnRequest.user?.email}
                 </p>
                 <p>
-                  <strong>Phone:</strong> {order.shippingAddress?.phoneNumber}
+                  <strong>Phone:</strong> {returnRequest.pickUpAddress?.phoneNumber}
                 </p>
               </div>
             </div>
@@ -272,14 +274,14 @@ const ReturnRequestDetailsModal = ({
                 <Button
                   size="sm"
                   variant="success"
-                  onClick={() => onUpdateStatus(order._id, "Approved")}
+                  onClick={() => onUpdateStatus(returnRequest._id, "Approved")}
                 >
                   Approve
                 </Button>
                 <Button
                   size="sm"
                   variant="destructive"
-                  onClick={() => onUpdateStatus(order._id, "Rejected")}
+                  onClick={() => onUpdateStatus(returnRequest._id, "Rejected")}
                 >
                   Reject
                 </Button>
@@ -289,7 +291,7 @@ const ReturnRequestDetailsModal = ({
               <Button
                 size="sm"
                 variant="default"
-                onClick={() => onUpdateStatus(order._id, "Picked")}
+                onClick={() => onUpdateStatus(returnRequest._id, "Picked")}
               >
                 Mark as Picked
               </Button>
@@ -298,7 +300,7 @@ const ReturnRequestDetailsModal = ({
               <Button
                 size="sm"
                 variant="success"
-                onClick={() => onUpdateStatus(order._id, "Refunded")}
+                onClick={() => onUpdateStatus(returnRequest._id, "Refunded")}
               >
                 Mark as Refunded
               </Button>
