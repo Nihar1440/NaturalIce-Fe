@@ -114,7 +114,7 @@ export const cancelReturnRequest = createAsyncThunk(
   async (orderId, { rejectWithValue }) => {
     try {
       const response = await axios.patch(`${API_URL}/api/order/cancel-return-request/${orderId}`);
-      return response.data.order;
+      return response.data.returnRequest;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -133,6 +133,19 @@ export const fetchAllReturnRequests = createAsyncThunk(
     }
   }
 );
+
+export const fetchUserReturnRequest = createAsyncThunk(
+  'order/fetchUserReturnRequest',
+  async (userId, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/order/user-return-request/${userId}`);
+      return response.data.returnRequests;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 
 // ADMIN: Update return request status
 export const updateReturnRequestStatus = createAsyncThunk(
@@ -350,9 +363,9 @@ const orderSlice = createSlice({
       })
       .addCase(cancelReturnRequest.fulfilled, (state, action) => {
         state.cancelReturnRequestLoading = false;
-        const index = state.orders.findIndex((order) => order._id === action.payload._id);
+        const index = state.returnRequests.findIndex((returnRequest) => returnRequest._id === action.payload._id);
         if (index !== -1) {
-          state.orders[index] = action.payload;
+          state.returnRequests[index] = action.payload;
         }
       })
       .addCase(cancelReturnRequest.rejected, (state, action) => {
@@ -369,6 +382,18 @@ const orderSlice = createSlice({
         state.returnRequests = action.payload;
       })
       .addCase(fetchAllReturnRequests.rejected, (state, action) => {
+        state.returnRequestsLoading = false;
+        state.returnRequestsError = action.payload;
+      })
+
+      .addCase(fetchUserReturnRequest.pending, (state) => {
+        state.returnRequestsLoading = true;
+      })
+      .addCase(fetchUserReturnRequest.fulfilled, (state, action) => {
+        state.returnRequestsLoading = false;
+        state.returnRequests = action.payload;
+      })
+      .addCase(fetchUserReturnRequest.rejected, (state, action) => {
         state.returnRequestsLoading = false;
         state.returnRequestsError = action.payload;
       })
