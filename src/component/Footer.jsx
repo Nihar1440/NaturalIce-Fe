@@ -11,17 +11,15 @@ const Footer = () => {
             <div className="text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start mb-4">
                 <MapPin className="w-6 h-6 text-red-400 mr-2" />
-                <h3 className="text-xl font-bold">Our Location</h3>
+                <h3 className="text-xl font-bold kaushan-script-regular-footer">Our Location</h3>
               </div>
               <p className="text-blue-100 mb-6 leading-relaxed">
                 22nd St - Al Quoz - Al Quoz Industrial Area 3 -<br />
-                Dubai UAE
+                Dubai - United Arab Emirates
               </p>
-              
-              {/* Map Placeholder */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-                <div className="w-full h-48 bg-slate-200 rounded-xl flex items-center justify-center text-slate-600">
-                  <div className="text-center">
+              <div className="bg-white p-2 rounded-2xl shadow-lg w-full h-48 overflow-hidden">
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <div className="text-center text-gray-600">
                     <MapPin className="w-12 h-12 mx-auto mb-2 text-red-500" />
                     <p className="font-semibold">Ice Natural Ice Industry LLC</p>
                     <p className="text-sm">Al Quoz Industrial Area 3, Dubai</p>
@@ -34,17 +32,11 @@ const Footer = () => {
             <div className="text-center">
               <div className="flex items-center justify-center mb-4">
                 <QrCode className="w-6 h-6 text-orange-400 mr-2" />
-                <h3 className="text-xl font-bold">Scan Me</h3>
+                <h3 className="text-xl font-bold kaushan-script-regular-footer">Scan Me</h3>
               </div>
               
-              <div className="bg-white p-6 rounded-2xl inline-block shadow-lg">
-                <div className="w-48 h-48 bg-black flex items-center justify-center rounded-xl">
-                  <div className="text-white text-center">
-                    <QrCode className="w-16 h-16 mx-auto mb-2" />
-                    <p className="text-xs">QR Code</p>
-                    <p className="text-xs">Scan for more info</p>
-                  </div>
-                </div>
+              <div className="bg-white p-2 rounded-2xl inline-block shadow-lg w-48 h-48 overflow-hidden">
+                  <img src="/src/assets/images/image_50_1.jpeg" alt="QR Code for more info" className="w-full h-full object-cover" />
               </div>
             </div>
 
@@ -52,7 +44,7 @@ const Footer = () => {
             <div className="text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start mb-4">
                 <Phone className="w-6 h-6 text-green-400 mr-2" />
-                <h3 className="text-xl font-bold">Contact Us</h3>
+                <h3 className="text-xl font-bold kaushan-script-regular-footer">Contact Us</h3>
               </div>
               
               <div className="space-y-4 mb-6">
@@ -91,7 +83,7 @@ const Footer = () => {
           {/* Bottom Section */}
           <div className="border-t border-white/20 mt-12 pt-8 text-center">
             <p className="text-blue-100 mb-4">
-              © 2025 Natural Ice. All rights reserved.
+              2025 Natural Ice. All rights reserved.
             </p>
             <div className="flex justify-center space-x-4 text-sm">
               <a href="#" className="text-blue-200 hover:text-white transition-colors">

@@ -197,7 +197,14 @@
   font-family: "Kaushan Script", cursive;
   font-weight: 400;
   font-style: normal;
-  font-size: 70px;
+  font-size: 65px;
+  max-width: 100% !important;
+}
+.kaushan-script-regular-footer {
+  font-family: "Kaushan Script", cursive;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 25px;
   max-width: 100% !important;
 }
 .kaushan-script-regular1 {
@@ -205,5 +212,71 @@
   font-weight: 400;
   font-style: normal;
   font-size: 25px;
+}
+.kaushan-script-regular2 {
+  font-family: "Kaushan Script", cursive;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 17px;
+  max-width: 100%;
+}
+
+.learn-more-container {
+  max-width: 1024px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  margin-top: 6rem;
+}
+
+.learn-more-title {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  font-size: 2.5rem;
+}
+
+.learn-more-section {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.learn-more-section:last-child {
+  border-bottom: none;
+}
+
+.learn-more-section h2 {
+  color: #3498db;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.learn-more-section p {
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .learn-more-container {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+
+  .learn-more-title {
+    font-size: 2rem;
+  }
+
+  .learn-more-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .learn-more-section p {
+    font-size: 0.9rem;
+  }
 }
 

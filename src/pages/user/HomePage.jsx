@@ -33,7 +33,9 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <HeroSection />
-      <ProductCatalogue products={products} loading={loading} />
+      <div id="product-catalog">
+        <ProductCatalogue products={products} loading={loading} />
+      </div>
       <ContactForm API_BASE_URL={API_BASE_URL} />
 
       {/* Custom styles for animations - you might consider moving these to a global CSS file or a dedicated style component if they become very large */}

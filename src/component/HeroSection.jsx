@@ -1,8 +1,18 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Snowflake } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+
+  const handleScrollToProducts = () => {
+    const productSection = document.getElementById('product-catalog');
+    if (productSection) {
+      productSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <section className="relative min-h-screen max-w-full flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
       {/* Background image + gradient overlay */}
@@ -11,7 +21,7 @@ const HeroSection = () => {
           className="w-full h-full bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: `url('/src/hero-background.jpg')` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/70 via-blue-800/60 to-slate-900/70" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/70 via-blue-800/80 to-blue-900/70" />
       </div>
 
       {/* Floating particles */}
@@ -49,11 +59,12 @@ const HeroSection = () => {
 
         <p className="text-sm sm:text-base text-blue-100 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed kaushan-script-regular1">
           Your trusted partner for premium ice products across the globe
-</p>
-
+        </p>
+        <p className="text-lg text-gray-600 mb-8">Your one-stop shop for all-natural, refreshing ice products.</p>
 
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
           <Button
+            onClick={handleScrollToProducts}
             size="lg"
             className="w-full sm:w-auto bg-white text-blue-900 hover:bg-blue-50 font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-xl text-sm sm:text-base"
           >
@@ -61,6 +72,7 @@ const HeroSection = () => {
             <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
           </Button>
           <Button
+            onClick={() => navigate('/learn-more')}
             variant="outline"
             size="lg"
             className="w-full sm:w-auto bg-white text-blue-900 hover:bg-blue-50 font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-xl text-sm sm:text-base"

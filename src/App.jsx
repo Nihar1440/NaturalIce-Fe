@@ -11,6 +11,7 @@ import DashboardHomePage from "./pages/admin/DashboardHomePage";
 import HomePage from "./pages/user/HomePage";
 import InvoicePage from "./pages/user/InvoicePage";
 import LoginPage from "./pages/user/LoginPage";
+import LearnMorePage from "./pages/user/LearnMorePage";
 import ManageProductsPage from "./pages/admin/ManageProductsPage";
 import ManageReturnRequests from "./pages/admin/ManageReturnRequests";
 import MessagesPage from "./pages/admin/MessagesPage";
@@ -122,6 +123,7 @@ const App = () => {
               element={<SetNewPasswordPage />}
             />
             <Route path="/about" element={<AboutAllFixPage />} />
+            <Route path="/learn-more" element={<LearnMorePage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/invoice" element={<InvoicePage />} />

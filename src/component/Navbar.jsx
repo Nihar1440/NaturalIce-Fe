@@ -111,12 +111,12 @@ const Navbar = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-sky-400 text-slate-50 shadow">
-      <div className="flex items-center justify-between px-4 md:px-6 lg:px-8 py-3 w-full">
+      <div className="flex items-center justify-between px-4 md:px-6 lg:px-8 w-full">
         <Link to="/" className="flex items-center font-bold text-xl">
           <img
-            src="/src/assets/images/navbar_logo.png"
+            src="/src/assets/images/logo.jpeg"
             alt="Logo"
-            className="h-16 w-16 mr-2"
+            className="h-20 w-20 color-black"
           />
           NaturalIce
         </Link>
