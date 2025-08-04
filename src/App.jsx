@@ -17,7 +17,6 @@ import ManageReturnRequests from "./pages/admin/ManageReturnRequests";
 import MessagesPage from "./pages/admin/MessagesPage";
 import OrderConfirmation from "./pages/user/OrderConfirmation";
 import OrdersPage from "./pages/admin/OrdersPage";
-import PaymentPage from "./pages/user/PaymentPage";
 import RegisterPage from "./pages/user/RegisterPage";
 import WishlistPage from "./pages/user/WishlistPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -128,7 +127,6 @@ const App = () => {
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/invoice" element={<InvoicePage />} />
             <Route path="/user/notifications" element={<NotificationsPage />} />
-            <Route path="/payment" element={<PaymentPage />} />
             <Route path="/contactUs" element={<ContactForm />} />
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="/product/:id" element={<ProductDetailsPage />} />

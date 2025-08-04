@@ -20,10 +20,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import {
+  Bell,
   ClipboardList,
-  Edit,
   Heart,
   Home,
+  Lock,
   LogIn,
   LogOut,
   Mail,
@@ -34,8 +35,6 @@ import {
   User,
   UserCircle,
   X,
-  Lock,
-  Bell,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -43,7 +42,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { logout } from "../features/auth/authSlice";
 import { clearCart, fetchCartItems } from "../features/cart/cartSlice";
-import NotificationBell from './NotificationBell';
+import NotificationBell from "./NotificationBell";
 
 const Navbar = () => {
   const location = useLocation();
@@ -58,7 +57,10 @@ const Navbar = () => {
   const isAdmin = user?.role === "admin";
 
   const { items: cartItems } = useSelector((state) => state.cart);
-  const totalCartItems = cartItems?.reduce((acc, item) => acc + item.quantity, 0);
+  const totalCartItems = cartItems?.reduce(
+    (acc, item) => acc + item.quantity,
+    0
+  );
 
   useEffect(() => {
     if (accessToken && user?._id) {
@@ -121,44 +123,50 @@ const Navbar = () => {
           NaturalIce
         </Link>
 
-        <ul className="hidden md:flex items-center gap-6">
-          {navItems.map((item) => (
-            <li key={item.to}>
-              <Link
-                to={item.to}
-                className={cn(
-                  "flex items-center gap-1 text-white text-base hover:text-blue-200 transition-colors",
-                  location.pathname === item.to ? "underline font-semibold" : ""
-                )}
-              >
-                {item.icon}
-                {item.label}
-                {item.to === "/cart" && totalCartItems > 0 && (
-                  <span className="ml-1 bg-gray-300 text-black rounded-full px-2 py-0.5 text-xs font-bold relative bottom-[10px] right-[10px]">
-                    {totalCartItems}
-                  </span>
-                )}
-              </Link>
-            </li>
-          ))}
-          {/* User Profile Dropdown / Login-Register Links (Desktop) */}
+        {/* Centered Navigation Links for desktop */}
+        <div className="hidden md:flex flex-grow justify-center">
+          <ul className="flex items-center space-x-8">
+            {navItems.slice(0, 3).map((item) => (
+              <li key={item.to}>
+                <Link
+                  to={item.to}
+                  className={cn(
+                    "flex items-center gap-1 text-white text-base hover:text-blue-200 transition-colors",
+                    location.pathname === item.to ? "underline font-semibold" : ""
+                  )}
+                >
+                  {item.icon}
+                  {item.label}
+                  {item.to === "/cart" && totalCartItems > 0 && (
+                    <span className="ml-1 bg-gray-300 text-black rounded-full px-2 py-0.5 text-xs font-bold relative bottom-[10px] right-[10px]">
+                      {totalCartItems}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Right side icons and user menu */}
+        <div className="flex items-center">
           {isLoggedIn && !isAdmin ? (
-            <>
-              <li>
-                <NotificationBell />
+            <ul className="flex items-center gap-4">
+              <li className="relative">
+                <NotificationBell className="w-16 h-16" />
               </li>
               <li className="relative">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2 text-white text-base hover:text-blue-200 transition-colors focus:outline-none">
+                    <div className="flex items-center gap-2 text-white hover:text-blue-200 transition-colors focus:outline-none cursor-pointer">
                       {user?.avatar ? (
                         <img
                           src={user.avatar}
                           alt="User Avatar"
-                          className="w-8 h-8 rounded-full border-2 border-white"
+                          className="w-12 h-12 rounded-full border-2 border-white"
                         />
                       ) : (
-                        <UserCircle className="w-8 h-8" />
+                        <UserCircle className="w-12 h-12" />
                       )}
                       <span className="font-semibold">
                         {user?.name || user?.email || "Profile"}
@@ -177,7 +185,7 @@ const Navbar = () => {
                           d="M19 9l-7 7-7-7"
                         ></path>
                       </svg>
-                    </button>
+                    </div>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-48">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
@@ -234,11 +242,10 @@ const Navbar = () => {
                     >
                       <AlertDialogTrigger asChild>
                         <DropdownMenuItem
-                          onSelect={(e) => e.preventDefault()} 
+                          onSelect={(e) => e.preventDefault()}
                           className="text-red-600 focus:bg-red-50 flex items-center"
                         >
-                          <LogOut className="mr-2 h-4 w-4" />{" "}
-                          Logout
+                          <LogOut className="mr-2 h-4 w-4" /> Logout
                         </DropdownMenuItem>
                       </AlertDialogTrigger>
                       <AlertDialogContent className="max-w-md">
@@ -264,24 +271,26 @@ const Navbar = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </li>
-            </>
+            </ul>
           ) : !isLoggedIn && !isAdmin ? (
-            <li>
-              <Link
-                to="/login"
-                className={cn(
-                  "flex items-center gap-1 text-white text-base hover:text-blue-200 transition-colors",
-                  location.pathname === "/login"
-                    ? "underline font-semibold"
-                    : ""
-                )}
-              >
-                <LogIn className="w-5 h-5" />
-                Login
-              </Link>
-            </li>
+            <ul className="flex items-center gap-4">
+              <li>
+                <Link
+                  to="/login"
+                  className={cn(
+                    "flex items-center gap-1 text-white text-base hover:text-blue-200 transition-colors",
+                    location.pathname === "/login"
+                      ? "underline font-semibold"
+                      : ""
+                  )}
+                >
+                  <LogIn className="w-5 h-5" />
+                  Login
+                </Link>
+              </li>
+            </ul>
           ) : null}
-        </ul>
+        </div>
 
         <button
           className="md:hidden"
@@ -441,8 +450,7 @@ const Navbar = () => {
           </ul>
         </div>
       )}
-      <div className="flex items-center gap-4">
-      </div>
+      <div className="flex items-center gap-4"></div>
     </nav>
   );
 };

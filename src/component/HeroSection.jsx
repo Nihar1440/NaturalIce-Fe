@@ -60,8 +60,6 @@ const HeroSection = () => {
         <p className="text-sm sm:text-base text-blue-100 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed kaushan-script-regular1">
           Your trusted partner for premium ice products across the globe
         </p>
-        <p className="text-lg text-gray-600 mb-8">Your one-stop shop for all-natural, refreshing ice products.</p>
-
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
           <Button
             onClick={handleScrollToProducts}

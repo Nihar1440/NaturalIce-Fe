@@ -77,7 +77,7 @@ export default function CartPage() {
 
   // Effect to set the default or first address when addresses are loaded
   useEffect(() => {
-    if (shippingAddresses && shippingAddresses.length > 0 && !selectedAddress) {
+    if (user && shippingAddresses && shippingAddresses.length > 0 && !selectedAddress) {
       const defaultAddress = shippingAddresses.find(addr => addr.isDefault);
       if (defaultAddress) {
         setSelectedAddress(defaultAddress);
@@ -94,7 +94,7 @@ export default function CartPage() {
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [shippingAddresses, selectedAddress, dispatch, addressError]);
+  }, [shippingAddresses, selectedAddress, dispatch, addressError, user]);
 
 
   const handleQuantityChange = (productId, currentQuantity, change) => {
@@ -535,9 +535,18 @@ export default function CartPage() {
                 <h3 className="text-md font-semibold text-gray-800 mb-3 flex items-center">
                   <MapPin className="h-4 w-4 mr-2 text-blue-600" />
                   Delivery Address
-                </h3>{guestId && !user && (
+                </h3>
+                {/* For Guest Users */}
+                {guestId && !user && (
                   <Button onClick={() => setShowAddAddress(true)}>
                     {selectedAddress ? "Edit Shipping Address" : "Add Shipping Address"}
+                  </Button>
+                )}
+
+                {/* For Logged-in Users with no address */}
+                {user && shippingAddresses.length === 0 && (
+                  <Button onClick={() => setShowAddAddress(true)}>
+                    Add Shipping Address
                   </Button>
                 )}
 

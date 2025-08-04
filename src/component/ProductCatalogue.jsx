@@ -80,7 +80,7 @@ const ProductCatalogue = ({ products, loading }) => {
   };
 
   return (
-    <section className="py-4 sm:py-6 lg:py-8 px-4 sm:px-6 lg:px-8 relative">
+    <section className="py-4 sm:py-6 lg:py-8 px-4 sm:px-6 lg:px-8 relative bg-gradient-to-br from-slate-300 to-white">
       <div className="w-full">
         {/* Section header */}
         <div className="text-center mb-2 sm:mb-4">
