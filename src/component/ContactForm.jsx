@@ -62,14 +62,14 @@ const ContactForm = ({ API_BASE_URL }) => {
   };
 
   return (
-    <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-100 to-white">
+    <section className="py-4 sm:py-6 lg:py-8 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-200 to-white">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8 sm:mb-12">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-800 mb-3 sm:mb-4 font-serif">
+        <div className="text-center mb-2 sm:mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-800 mb-3 sm:mb-4 font-serif kaushan-script-regular">
             Contact Us
           </h2>
           <div className="w-16 sm:w-20 lg:w-24 h-1 bg-gradient-to-r from-blue-600 to-blue-400 mx-auto mb-4 sm:mb-6 rounded-full" />
-          <p className="text-base sm:text-lg text-slate-600 px-2">
+          <p className="text-base sm:text-lg text-slate-600 px-2 kaushan-script-regular2">
             Get in touch with us for your ice supply needs
           </p>
         </div>
