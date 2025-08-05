@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { toast } from "sonner";
-import { loginUser, logout } from "../../features/auth/authSlice";
-import { registerUser } from "../../features/auth/authSlice";
-import { motion, AnimatePresence } from "framer-motion";
-import googleIcon from "../../assets/svg/google.svg";
-import facebookIcon from "../../assets/svg/facebook.svg";
-import twitterIcon from "../../assets/svg/twitter.svg";
-import { Eye, EyeOff, User, Mail, Lock } from "lucide-react";
 import { mergeCartItems } from "@/features/cart/cartSlice";
+import { AnimatePresence, motion } from "framer-motion";
+import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import facebookIcon from "../../assets/svg/facebook.svg";
+import googleIcon from "../../assets/svg/google.svg";
+import twitterIcon from "../../assets/svg/twitter.svg";
+import { loginUser, logout, registerUser } from "../../features/auth/authSlice";
 
 const AuthTogglePage = () => {
   const dispatch = useDispatch();
@@ -18,16 +17,18 @@ const AuthTogglePage = () => {
     (state) => state.auth
   );
   const { items: cartItems } = useSelector((state) => state.cart);
-  const { loading: userLoading, error: userError, registrationSuccess } = useSelector(
-    (state) => state.user
-  );
+  const {
+    loading: userLoading,
+    error: userError,
+    registrationSuccess,
+  } = useSelector((state) => state.user);
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
-    address: "", 
+    address: "",
   });
 
   const toggleMode = () => {
@@ -42,10 +43,17 @@ const AuthTogglePage = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    try { 
-      const response = await dispatch(loginUser({ email: formData.email, password: formData.password }));
-      if(response.payload.accessToken){
-        dispatch(mergeCartItems({accessToken:response.payload.accessToken, cartItems}));
+    try {
+      const response = await dispatch(
+        loginUser({ email: formData.email, password: formData.password })
+      );
+      if (response.payload.accessToken) {
+        dispatch(
+          mergeCartItems({
+            accessToken: response.payload.accessToken,
+            cartItems,
+          })
+        );
       }
     } catch (error) {
       toast.error("Login Failed", {
@@ -57,17 +65,16 @@ const AuthTogglePage = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     const response = await dispatch(registerUser(formData));
-    if(response.payload.success){
+    if (response.payload.success) {
       toast.success("Registration Successful!", {
         description: "You can now sign in with your new account.",
       });
-      setIsSignUp(false); 
-      setFormData({ name: "", email: "", password: "", address: "" }); 
+      setIsSignUp(false);
+      setFormData({ name: "", email: "", password: "", address: "" });
     }
   };
 
   useEffect(() => {
-
     if (user?.role === "admin") {
       toast.success("Login Successful", {
         description: "Welcome to the Admin Dashboard!",
@@ -96,16 +103,16 @@ const AuthTogglePage = () => {
       toast.success("Registration Successful!", {
         description: "You can now sign in with your new account.",
       });
-      setIsSignUp(false); 
-      setFormData({ name: "", email: "", password: "", address: "" }); 
+      setIsSignUp(false);
+      setFormData({ name: "", email: "", password: "", address: "" });
     }
     if (userError) {
       toast.error("Registration Failed", {
-        description: userError || "An unknown error occurred during registration.",
+        description:
+          userError || "An unknown error occurred during registration.",
       });
     }
   }, [registrationSuccess, userError, dispatch]);
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -156,9 +163,7 @@ const AuthTogglePage = () => {
                   </p>
                 </div>
 
-                <form
-                  onSubmit={isSignUp ? handleRegister : handleLogin}
-                >
+                <form onSubmit={isSignUp ? handleRegister : handleLogin}>
                   <div className="space-y-6">
                     {isSignUp && (
                       <div className="relative">
@@ -278,33 +283,39 @@ const AuthTogglePage = () => {
                   <div className="mt-6 flex justify-center gap-4">
                     <button
                       key="google"
-                      onClick={() =>
-                        toast.info(`Attempting google login...`)
-                      }
+                      onClick={() => toast.info(`Attempting google login...`)}
                       className="w-12 h-12 rounded-full bg-white border border-gray-300 flex items-center justify-center shadow-sm hover:shadow-md hover:scale-110 transition"
                       title={`Sign in with google`}
                     >
-                      <img src={googleIcon} alt="Google" className="w-12 h-12" />
+                      <img
+                        src={googleIcon}
+                        alt="Google"
+                        className="w-12 h-12"
+                      />
                     </button>
                     <button
                       key="facebook"
-                      onClick={() =>
-                        toast.info(`Attempting facebook login...`)
-                      }
+                      onClick={() => toast.info(`Attempting facebook login...`)}
                       className="w-12 h-12 rounded-full bg-white border border-gray-300 flex items-center justify-center shadow-sm hover:shadow-md hover:scale-110 transition"
                       title={`Sign in with facebook`}
                     >
-                      <img src={facebookIcon} alt="Facebook" className="w-12 h-12" />
+                      <img
+                        src={facebookIcon}
+                        alt="Facebook"
+                        className="w-12 h-12"
+                      />
                     </button>
                     <button
                       key="twitter"
-                      onClick={() =>
-                        toast.info(`Attempting twitter login...`)
-                      }
+                      onClick={() => toast.info(`Attempting twitter login...`)}
                       className="w-12 h-12 rounded-full bg-white border border-gray-300 flex items-center justify-center shadow-sm hover:shadow-md hover:scale-110 transition"
                       title={`Sign in with twitter`}
                     >
-                      <img src={twitterIcon} alt="Twitter" className="w-12 h-12" />
+                      <img
+                        src={twitterIcon}
+                        alt="Twitter"
+                        className="w-12 h-12"
+                      />
                     </button>
                   </div>
                 </div>
