@@ -5,10 +5,11 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import facebookIcon from "../../assets/svg/facebook.svg";
+import { loginUser, logout } from "../../features/auth/authSlice";
+import { registerUser } from "../../features/auth/authSlice";
 import googleIcon from "../../assets/svg/google.svg";
+import facebookIcon from "../../assets/svg/facebook.svg";
 import twitterIcon from "../../assets/svg/twitter.svg";
-import { loginUser, logout, registerUser } from "../../features/auth/authSlice";
 
 const AuthTogglePage = () => {
   const dispatch = useDispatch();
