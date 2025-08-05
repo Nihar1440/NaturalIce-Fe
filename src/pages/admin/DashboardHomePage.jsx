@@ -1,30 +1,26 @@
 // File: src/pages/DashboardHomePage.jsx
-import React, { useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  CreditCard,
-  ShoppingCart,
-  Package,
-  Users,
-  BarChart2,
-  ChevronDown,
-} from "lucide-react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-import { getSalesOverview } from "@/features/order/orderSlice";
-import { Link } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
 import {
   fetchRecentOrders,
-  fetchYearlyRevenue,
+  fetchYearlyRevenue, getSalesOverview
 } from "@/features/order/orderSlice";
+import {
+  ChevronDown,
+  CreditCard,
+  Package,
+  ShoppingCart,
+  Users
+} from "lucide-react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 const DashboardHomePage = () => {
   const dispatch = useDispatch();
