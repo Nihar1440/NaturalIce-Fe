@@ -5,9 +5,9 @@ import { toast } from "sonner";
 import { loginUser, logout } from "../../features/auth/authSlice";
 import { registerUser } from "../../features/auth/authSlice";
 import { motion, AnimatePresence } from "framer-motion";
-import googleIcon from "../../assets/svg/google.svg";
-import facebookIcon from "../../assets/svg/facebook.svg";
-import twitterIcon from "../../assets/svg/twitter.svg";
+import googleIcon from "@/assets/svg/google.svg";
+import facebookIcon from "@/assets/svg/facebook.svg";
+import twitterIcon from "@/assets/svg/twitter.svg";
 import { Eye, EyeOff, User, Mail, Lock } from "lucide-react";
 import { mergeCartItems } from "@/features/cart/cartSlice";
 
