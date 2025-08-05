@@ -279,18 +279,6 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(registerUser.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(registerUser.fulfilled, (state) => {
-        state.loading = false;
-        state.error = null;
-      })
-      .addCase(registerUser.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -302,12 +290,23 @@ const authSlice = createSlice({
         state.isAdmin = action.payload.user?.role === "admin" || false;
       })
       .addCase(loginUser.rejected, (state, action) => {
-        console.log("action", action);
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || action.error.message;
         state.user = null;
         state.accessToken = null;
         state.isAdmin = false;
+      })
+      .addCase(registerUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       })
       
       // Handlers for logoutUser

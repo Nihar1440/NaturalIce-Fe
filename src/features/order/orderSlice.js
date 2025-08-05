@@ -1,11 +1,11 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 // Fetch all orders
 export const fetchOrders = createAsyncThunk(
-  'order/fetchOrders',
+  "order/fetchOrders",
   async (params = {}, { rejectWithValue }) => {
     try {
       // Build query string from params
@@ -14,7 +14,9 @@ export const fetchOrders = createAsyncThunk(
       if (params.status) query.append("status", params.status);
       if (params.date) query.append("date", params.date);
       const queryString = query.toString() ? `?${query.toString()}` : "";
-      const response = await axios.get(`${API_URL}/api/order/orders${queryString}`);
+      const response = await axios.get(
+        `${API_URL}/api/order/orders${queryString}`
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -24,15 +26,18 @@ export const fetchOrders = createAsyncThunk(
 
 // Fetch my orders
 export const fetchMyOrders = createAsyncThunk(
-  'order/fetchMyOrders',
-  async ({userId, accessToken}, { rejectWithValue }) => {
+  "order/fetchMyOrders",
+  async ({ userId, accessToken }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/api/order/user-orders/${userId}`,{
-        headers: {
-          Authorization: `Bearer ${accessToken}`
+      const response = await axios.get(
+        `${API_URL}/api/order/user-orders/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
-      });
-      return response.data
+      );
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -41,10 +46,12 @@ export const fetchMyOrders = createAsyncThunk(
 
 // Fetch single order
 export const fetchOrderById = createAsyncThunk(
-  'order/fetchOrderById',
+  "order/fetchOrderById",
   async (orderId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/api/order/orders/${orderId}`);
+      const response = await axios.get(
+        `${API_URL}/api/order/orders/${orderId}`
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -54,10 +61,13 @@ export const fetchOrderById = createAsyncThunk(
 
 // Update order status
 export const updateOrderStatus = createAsyncThunk(
-  'order/updateOrderStatus',
+  "order/updateOrderStatus",
   async ({ orderId, status }, { rejectWithValue }) => {
     try {
-      const response = await axios.patch(`${API_URL}/api/order/update-status/${orderId}`, { status });
+      const response = await axios.patch(
+        `${API_URL}/api/order/update-status/${orderId}`,
+        { status }
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -67,7 +77,7 @@ export const updateOrderStatus = createAsyncThunk(
 
 // Delete order
 export const deleteOrder = createAsyncThunk(
-  'order/deleteOrder',
+  "order/deleteOrder",
   async (orderId, { rejectWithValue }) => {
     try {
       await axios.delete(`${API_URL}/api/order/orders/${orderId}`);
@@ -80,10 +90,12 @@ export const deleteOrder = createAsyncThunk(
 
 // Return order
 export const returnOrder = createAsyncThunk(
-  'order/returnOrder',
+  "order/returnOrder",
   async (orderId, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/api/order/orders/${orderId}/return`);
+      const response = await axios.post(
+        `${API_URL}/api/order/orders/${orderId}/return`
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -93,14 +105,18 @@ export const returnOrder = createAsyncThunk(
 
 // Return order request
 export const returnOrderRequest = createAsyncThunk(
-  'order/returnOrderRequest',
+  "order/returnOrderRequest",
   async ({ orderId, formData }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/api/order/return-request/${orderId}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await axios.post(
+        `${API_URL}/api/order/return-request/${orderId}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -110,10 +126,12 @@ export const returnOrderRequest = createAsyncThunk(
 
 // Cancel return request
 export const cancelReturnRequest = createAsyncThunk(
-  'order/cancelReturnRequest',
+  "order/cancelReturnRequest",
   async (orderId, { rejectWithValue }) => {
     try {
-      const response = await axios.patch(`${API_URL}/api/order/cancel-return-request/${orderId}`);
+      const response = await axios.patch(
+        `${API_URL}/api/order/cancel-return-request/${orderId}`
+      );
       return response.data.returnRequest;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -123,7 +141,7 @@ export const cancelReturnRequest = createAsyncThunk(
 
 // ADMIN: Fetch all return requests
 export const fetchAllReturnRequests = createAsyncThunk(
-  'order/fetchAllReturnRequests',
+  "order/fetchAllReturnRequests",
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${API_URL}/api/order/return-request`);
@@ -135,10 +153,12 @@ export const fetchAllReturnRequests = createAsyncThunk(
 );
 
 export const fetchUserReturnRequest = createAsyncThunk(
-  'order/fetchUserReturnRequest',
+  "order/fetchUserReturnRequest",
   async (userId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/api/order/user-return-request/${userId}`);
+      const response = await axios.get(
+        `${API_URL}/api/order/user-return-request/${userId}`
+      );
       return response.data.returnRequests;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -146,15 +166,17 @@ export const fetchUserReturnRequest = createAsyncThunk(
   }
 );
 
-
 // ADMIN: Update return request status
 export const updateReturnRequestStatus = createAsyncThunk(
-  'order/updateReturnRequestStatus',
+  "order/updateReturnRequestStatus",
   async ({ returnRequestId, status }, { rejectWithValue }) => {
     console.log("returnRequestId", returnRequestId);
     console.log("status", status);
     try {
-      const response = await axios.patch(`${API_URL}/api/order/update-return-request/${returnRequestId}`, { status });
+      const response = await axios.patch(
+        `${API_URL}/api/order/update-return-request/${returnRequestId}`,
+        { status }
+      );
       return response.data.order;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -164,10 +186,12 @@ export const updateReturnRequestStatus = createAsyncThunk(
 
 // Cancel order thunk (keep this)
 export const cancelOrder = createAsyncThunk(
-  'order/cancelOrder',
+  "order/cancelOrder",
   async (orderId, { rejectWithValue }) => {
     try {
-      const response = await axios.patch(`${API_URL}/api/order/orders/${orderId}/cancel`);
+      const response = await axios.patch(
+        `${API_URL}/api/order/orders/${orderId}/cancel`
+      );
       return response.data.order;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -177,10 +201,12 @@ export const cancelOrder = createAsyncThunk(
 
 // Track order
 export const trackOrder = createAsyncThunk(
-  'order/trackOrder',
+  "order/trackOrder",
   async (orderId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/api/order/orders/track/${orderId}`);
+      const response = await axios.get(
+        `${API_URL}/api/order/orders/track/${orderId}`
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -188,8 +214,65 @@ export const trackOrder = createAsyncThunk(
   }
 );
 
+// Fetch recent orders for admin dashboard
+export const fetchRecentOrders = createAsyncThunk(
+  "order/fetchRecentOrders",
+  // we expect an object with accessToken (string) optional pageSize
+  async ({ accessToken, limit = 5 } = {}, { rejectWithValue }) => {
+    try {
+      const config = accessToken
+        ? { headers: { Authorization: `Bearer ${accessToken}` } }
+        : {};
+      const response = await axios.get(
+        `${API_URL}/api/order/recent-orders?limit=${limit}`,
+        config
+      );
+      // backend returns { success: true, orders: [...] } per earlier code — adjust if different
+      return response.data.orders ?? response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+// Fetch yearly revenue for admin dashboard
+export const fetchYearlyRevenue = createAsyncThunk(
+  "order/fetchYearlyRevenue",
+  async ({ accessToken }, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/order/revenue`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      return response.data.totalRevenue;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+// Add this thunk to fetch sales overview
+export const getSalesOverview = createAsyncThunk(
+  'orders/getSalesOverview',
+  async ({ accessToken }, thunkAPI) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/order/sales-overview`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to fetch sales overview');
+    }
+  }
+);
+
+
+
 const orderSlice = createSlice({
-  name: 'order',
+  name: "order",
   initialState: {
     orders: [],
     order: null, // for single order view
@@ -217,6 +300,15 @@ const orderSlice = createSlice({
     returnRequests: [],
     returnRequestsLoading: false,
     returnRequestsError: null,
+    recentOrders: [],
+    recentOrdersLoading: false,
+    recentOrdersError: null,
+    yearlyRevenue: 0,
+    yearlyRevenueLoading: false,
+    yearlyRevenueError: null,
+    salesOverview: [],
+    salesOverviewLoading: false,
+    salesOverviewError: null,
   },
   reducers: {
     clearOrders: (state) => {
@@ -236,7 +328,7 @@ const orderSlice = createSlice({
       state.tracking = null;
       state.trackingLoading = false;
       state.trackingError = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -290,7 +382,7 @@ const orderSlice = createSlice({
       .addCase(updateOrderStatus.fulfilled, (state, action) => {
         state.updateStatusLoading = false;
         // Update the order in the orders array
-        state.orders = state.orders.map(order =>
+        state.orders = state.orders.map((order) =>
           order._id === action.payload.order._id ? action.payload.order : order
         );
         // If viewing this order, update it too
@@ -310,7 +402,9 @@ const orderSlice = createSlice({
       })
       .addCase(deleteOrder.fulfilled, (state, action) => {
         state.deleteLoading = false;
-        state.orders = state.orders.filter(order => order._id !== action.payload);
+        state.orders = state.orders.filter(
+          (order) => order._id !== action.payload
+        );
       })
       .addCase(deleteOrder.rejected, (state, action) => {
         state.deleteLoading = false;
@@ -325,11 +419,14 @@ const orderSlice = createSlice({
       })
       .addCase(returnOrder.fulfilled, (state, action) => {
         state.returnLoading = false;
-        state.returnSuccess = action.payload?.message || "Return request placed successfully.";
+        state.returnSuccess =
+          action.payload?.message || "Return request placed successfully.";
         // Optionally update order status in list
         if (action.payload?.order) {
-          state.orders = state.orders.map(order =>
-            order._id === action.payload.order._id ? action.payload.order : order
+          state.orders = state.orders.map((order) =>
+            order._id === action.payload.order._id
+              ? action.payload.order
+              : order
           );
           if (state.order && state.order._id === action.payload.order._id) {
             state.order = action.payload.order;
@@ -348,7 +445,9 @@ const orderSlice = createSlice({
       })
       .addCase(returnOrderRequest.fulfilled, (state, action) => {
         state.returnRequestLoading = false;
-        const index = state.orders.findIndex((order) => order._id === action.payload.order._id);
+        const index = state.orders.findIndex(
+          (order) => order._id === action.payload.order._id
+        );
         if (index !== -1) {
           state.orders[index] = action.payload.order;
         }
@@ -365,7 +464,9 @@ const orderSlice = createSlice({
       })
       .addCase(cancelReturnRequest.fulfilled, (state, action) => {
         state.cancelReturnRequestLoading = false;
-        const index = state.returnRequests.findIndex((returnRequest) => returnRequest._id === action.payload._id);
+        const index = state.returnRequests.findIndex(
+          (returnRequest) => returnRequest._id === action.payload._id
+        );
         if (index !== -1) {
           state.returnRequests[index] = action.payload;
         }
@@ -403,7 +504,9 @@ const orderSlice = createSlice({
       // ADMIN: Update return request status
       .addCase(updateReturnRequestStatus.fulfilled, (state, action) => {
         const updatedOrder = action.payload;
-        const index = state.returnRequests.findIndex((req) => req._id === updatedOrder._id);
+        const index = state.returnRequests.findIndex(
+          (req) => req._id === updatedOrder._id
+        );
         if (index !== -1) {
           state.returnRequests[index] = updatedOrder;
         }
@@ -417,7 +520,7 @@ const orderSlice = createSlice({
       .addCase(cancelOrder.fulfilled, (state, action) => {
         state.cancelLoading = false;
         const updatedOrder = action.payload;
-        state.orders = state.orders.map(order =>
+        state.orders = state.orders.map((order) =>
           order._id === updatedOrder._id ? updatedOrder : order
         );
       })
@@ -439,9 +542,49 @@ const orderSlice = createSlice({
       .addCase(trackOrder.rejected, (state, action) => {
         state.trackingLoading = false;
         state.trackingError = action.payload;
-      });
+      })
+      // Fetch recent orders
+      .addCase(fetchRecentOrders.pending, (state) => {
+        state.recentOrdersLoading = true;
+        state.recentOrdersError = null;
+      })
+      .addCase(fetchRecentOrders.fulfilled, (state, action) => {
+        state.recentOrdersLoading = false;
+        state.recentOrders = action.payload || [];
+      })
+      .addCase(fetchRecentOrders.rejected, (state, action) => {
+        state.recentOrdersLoading = false;
+        state.recentOrdersError = action.payload || action.error?.message;
+      })
+      // Fetch yearly revenue
+      .addCase(fetchYearlyRevenue.pending, (state) => {
+        state.yearlyRevenueLoading = true;
+        state.yearlyRevenueError = null;
+      })
+      .addCase(fetchYearlyRevenue.fulfilled, (state, action) => {
+        state.yearlyRevenueLoading = false;
+        state.yearlyRevenue = action.payload;
+      })
+      .addCase(fetchYearlyRevenue.rejected, (state, action) => {
+        state.yearlyRevenueLoading = false;
+        state.yearlyRevenueError = action.payload;
+      })
+      // Fetch sales overview
+      .addCase(getSalesOverview.pending, state => {
+        state.salesOverviewLoading = true;
+        state.salesOverviewError = null;
+      })
+      .addCase(getSalesOverview.fulfilled, (state, action) => {
+        state.salesOverviewLoading = false;
+        state.salesOverview = action.payload || [];
+      })
+      .addCase(getSalesOverview.rejected, (state, action) => {
+        state.salesOverviewLoading = false;
+        state.salesOverviewError = action.payload;
+      });      
   },
 });
 
-export const { clearOrders, clearOrder, clearReturnStatus, clearTracking } = orderSlice.actions;
-export default orderSlice.reducer; 
+export const { clearOrders, clearOrder, clearReturnStatus, clearTracking, selectRecentOrders, selectRecentOrdersLoading, selectRecentOrdersError } =
+  orderSlice.actions;
+export default orderSlice.reducer;

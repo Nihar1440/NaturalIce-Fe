@@ -28,8 +28,10 @@ const AdminDashboard = () => {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   useEffect(() => {
-
-    if ((!accessToken || !user || user.role !== 'admin') && location.pathname !== "/login") {
+    if (
+      (!accessToken || !user || user.role !== "admin") &&
+      location.pathname !== "/login"
+    ) {
       Swal.fire(
         "Access Denied",
         "Only admins can access the dashboard.",
@@ -62,7 +64,8 @@ const AdminDashboard = () => {
       console.error("Logout failed:", error);
       setShowLogoutDialog(false);
       toast.error("Logout Failed", {
-        description: error.message || "An unexpected error occurred during logout.",
+        description:
+          error.message || "An unexpected error occurred during logout.",
       });
       localStorage.removeItem("accessToken");
       localStorage.removeItem("user");
@@ -100,7 +103,9 @@ const AdminDashboard = () => {
             <Bell className="h-6 w-6 cursor-pointer" />
             <div className="flex items-center space-x-2 bg-sky-300 hover:bg-sky-500 px-3 py-2 rounded-full">
               <User className="h-5 w-5" />
-              <span className="text-sm hidden md:block">Admin User</span>
+              <span className="text-sm hidden md:block">
+                {user?.name?.charAt(0).toUpperCase() + user?.name?.slice(1)}
+              </span>
             </div>
             <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
               <DialogTrigger asChild>
@@ -122,7 +127,10 @@ const AdminDashboard = () => {
                   <DialogClose asChild>
                     <Button variant="outline">Cancel</Button>
                   </DialogClose>
-                  <Button onClick={performLogout} className="bg-red-500 hover:bg-red-600">
+                  <Button
+                    onClick={performLogout}
+                    className="bg-red-500 hover:bg-red-600"
+                  >
                     Yes, Log Out
                   </Button>
                 </DialogFooter>

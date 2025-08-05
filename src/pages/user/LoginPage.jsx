@@ -5,6 +5,9 @@ import { toast } from "sonner";
 import { loginUser, logout } from "../../features/auth/authSlice";
 import { registerUser } from "../../features/auth/authSlice";
 import { motion, AnimatePresence } from "framer-motion";
+import googleIcon from "../../assets/svg/google.svg";
+import facebookIcon from "../../assets/svg/facebook.svg";
+import twitterIcon from "../../assets/svg/twitter.svg";
 import { Eye, EyeOff, User, Mail, Lock } from "lucide-react";
 import { mergeCartItems } from "@/features/cart/cartSlice";
 
@@ -109,7 +112,7 @@ const AuthTogglePage = () => {
       <div className="w-full max-w-6xl bg-white rounded-3xl shadow-2xl overflow-hidden">
         <div className="flex flex-col lg:flex-row min-h-[600px] relative">
           {/* Left Panel */}
-          <div className="lg:w-1/2 bg-gradient-to-br from-black to-gray-600 p-8 lg:p-12 flex flex-col justify-center items-center text-white relative overflow-hidden">
+          <div className="lg:w-1/2 bg-gradient-to-br from-sky-400 to-blue-500 p-8 lg:p-12 flex flex-col justify-center items-center text-white relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-full bg-black opacity-10 z-0"></div>
             <div className="absolute top-10 right-10 w-32 h-32 bg-white opacity-10 rounded-full z-0"></div>
             <div className="absolute bottom-10 left-10 w-24 h-24 bg-white opacity-10 rounded-full z-0"></div>
@@ -218,7 +221,7 @@ const AuthTogglePage = () => {
                     {isSignUp && (
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <Mail className="h-5 w-5 text-gray-400" />
+                          <User className="h-5 w-5 text-gray-400" />
                         </div>
                         <input
                           type="text"
@@ -236,7 +239,7 @@ const AuthTogglePage = () => {
                       <div className="text-right">
                         <Link
                           to="/forgot-password"
-                          className="text-red-500 hover:text-red-600 font-medium transition-colors"
+                          className="text-sky-400 hover:text-sky-600 font-medium transition-colors"
                         >
                           Forgot your password?
                         </Link>
@@ -246,7 +249,7 @@ const AuthTogglePage = () => {
                     <button
                       type="submit"
                       disabled={isSignUp ? userLoading : loading}
-                      className="w-full py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white font-bold rounded-xl hover:from-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full py-3 bg-gradient-to-r from-sky-400 to-sky-600 text-white font-bold rounded-xl hover:from-sky-600 hover:to-sky-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isSignUp
                         ? userLoading
@@ -273,22 +276,36 @@ const AuthTogglePage = () => {
                   </div>
 
                   <div className="mt-6 flex justify-center gap-4">
-                    {["google", "facebook", "github"].map((icon) => (
-                      <button
-                        key={icon}
-                        onClick={() =>
-                          toast.info(`Attempting ${icon} login...`)
-                        }
-                        className="w-12 h-12 rounded-full bg-white border border-gray-300 flex items-center justify-center shadow-sm hover:shadow-md hover:scale-110 transition"
-                        title={`Sign in with ${icon}`}
-                      >
-                        <img
-                          src={`/${icon}.svg`}
-                          alt={icon}
-                          className="w-6 h-6"
-                        />
-                      </button>
-                    ))}
+                    <button
+                      key="google"
+                      onClick={() =>
+                        toast.info(`Attempting google login...`)
+                      }
+                      className="w-12 h-12 rounded-full bg-white border border-gray-300 flex items-center justify-center shadow-sm hover:shadow-md hover:scale-110 transition"
+                      title={`Sign in with google`}
+                    >
+                      <img src={googleIcon} alt="Google" className="w-12 h-12" />
+                    </button>
+                    <button
+                      key="facebook"
+                      onClick={() =>
+                        toast.info(`Attempting facebook login...`)
+                      }
+                      className="w-12 h-12 rounded-full bg-white border border-gray-300 flex items-center justify-center shadow-sm hover:shadow-md hover:scale-110 transition"
+                      title={`Sign in with facebook`}
+                    >
+                      <img src={facebookIcon} alt="Facebook" className="w-12 h-12" />
+                    </button>
+                    <button
+                      key="twitter"
+                      onClick={() =>
+                        toast.info(`Attempting twitter login...`)
+                      }
+                      className="w-12 h-12 rounded-full bg-white border border-gray-300 flex items-center justify-center shadow-sm hover:shadow-md hover:scale-110 transition"
+                      title={`Sign in with twitter`}
+                    >
+                      <img src={twitterIcon} alt="Twitter" className="w-12 h-12" />
+                    </button>
                   </div>
                 </div>
               </motion.div>
