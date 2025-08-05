@@ -116,7 +116,7 @@ const Navbar = () => {
       <div className="flex items-center justify-between px-4 md:px-6 lg:px-8 w-full">
         <Link to="/" className="flex items-center font-bold text-xl">
           <img
-            src="/src/assets/images/logo.jpeg"
+            src="https://res.cloudinary.com/dthcotva4/image/upload/v1754404267/logo_nui2db.png"
             alt="Logo"
             className="h-20 w-20 color-black"
           />

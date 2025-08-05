@@ -44,7 +44,7 @@ const HeroSection = () => {
         <div className="mb-6 sm:mb-8 animate-fade-in">
           <div className="relative inline-block">
             <img
-              src="/src/assets/images/logo_natural_1.png"
+              src="https://res.cloudinary.com/dthcotva4/image/upload/v1754404321/logo_natural_1_xj1c9j.png"
               alt="Premium Ice Supply"
               className="w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-4 sm:mb-6 drop-shadow-2xl animate-float"
             />

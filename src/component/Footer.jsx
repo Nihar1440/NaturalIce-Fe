@@ -36,7 +36,7 @@ const Footer = () => {
               </div>
               
               <div className="bg-white p-2 rounded-2xl inline-block shadow-lg w-48 h-48 overflow-hidden">
-                  <img src="/src/assets/images/image_50_1.jpeg" alt="QR Code for more info" className="w-full h-full object-cover" />
+                  <img src="https://res.cloudinary.com/dthcotva4/image/upload/v1754404288/image_50_1_dhruwg.jpg" alt="QR Code for more info" className="w-full h-full object-cover" />
               </div>
             </div>
 
