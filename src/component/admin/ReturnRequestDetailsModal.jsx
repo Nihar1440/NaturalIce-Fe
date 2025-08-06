@@ -97,7 +97,7 @@ const ReturnRequestDetailsModal = ({
   const renderActionButtons = () => {
     const { _id, status } = returnRequest;
 
-    if (status === "Pending") {
+    if (status === "Requested") {
       return (
         <>
           <Button size="sm" variant="success" onClick={() => onUpdateStatus(_id, "Approved")}>
@@ -110,13 +110,23 @@ const ReturnRequestDetailsModal = ({
       );
     }
 
-    const currentIndex = statusOrder.indexOf(status);
-    if (currentIndex > -1 && currentIndex < statusOrder.length - 1) {
-      const nextStatus = statusOrder[currentIndex + 1];
+    if (status === "Approved") {
       return (
-        <Button size="sm" variant="default" onClick={() => onUpdateStatus(_id, nextStatus)}>
-          Mark as {nextStatus}
-        </Button>
+        <>
+          <Button size="sm" variant="default" onClick={() => onUpdateStatus(_id, "Picked")}>
+            Mark as Picked
+          </Button>
+        </>
+      );
+    }
+
+    if (status === "Picked") {
+      return (
+        <>
+          <Button size="sm" variant="default" onClick={() => onUpdateStatus(_id, "InitiateRefund")}>
+            Initiate Refund
+          </Button>
+        </>
       );
     }
 

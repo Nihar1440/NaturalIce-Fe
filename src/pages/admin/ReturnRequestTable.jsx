@@ -22,7 +22,7 @@ const statusClasses = {
   Picked: "bg-blue-300 text-blue-800 border-blue-200",
   Refunded: "bg-purple-300 text-purple-800 border-purple-200",
   Rejected: "bg-red-300 text-red-800 border-red-200",
-  Pending: "bg-yellow-300 text-yellow-800 border-yellow-200",
+  Requested: "bg-yellow-300 text-yellow-800 border-yellow-200",
 };
 
 function getStatusBadge(status) {
@@ -47,39 +47,17 @@ const ReturnRequestTable = ({
 
   const isStatusDisabled = (currentStatus, optionStatus) => {
     switch (currentStatus) {
-      case "Pending":
+      case "Requested":
         return !["Approved", "Rejected"].includes(optionStatus);
       case "Approved":
         return optionStatus !== "Picked";
       case "Picked":
-        return optionStatus !== "Refunded";
+        return optionStatus !== "InitiateRefund";
       default:
         return true;
     }
   };
 
-  const handleStatusChange = async (returnOrderId, newStatus) => {
-    console.log('newStatus', newStatus)
-    try {
-     const result = await dispatch(updateReturnRequestStatus({ returnRequestId: returnOrderId, status: newStatus })).unwrap();
-     console.log('result', result)
-      toast.success("Status updated successfully!");
-
-      if (newStatus === 'Refunded') {
-        const result = await dispatch(initiateReturnRefund(returnOrderId));
-        if (initiateReturnRefund.fulfilled.match(result)) {
-          toast.success("Refund initiated successfully!");
-        } else {
-          toast.error("Failed to initiate refund.");
-        }
-      }
-
-      onStatusChange(); // Refresh the data
-    } catch (error) {
-      toast.error("Failed to update status.");
-      console.error(error);
-    }
-  };
 
   return (
     <>
@@ -105,7 +83,7 @@ const ReturnRequestTable = ({
                 <td className="px-6 py-4">
                   <div className="flex justify-center items-center space-x-2">
                     <Select 
-                      onValueChange={(value) => handleStatusChange(returnRequest._id, value)} 
+                      onValueChange={(value) => onStatusChange(returnRequest._id, value)} 
                       value={returnRequest.status}
                       disabled={["Rejected", "Refunded"].includes(returnRequest.status)}
                     >
@@ -122,8 +100,8 @@ const ReturnRequestTable = ({
                         <SelectItem value="Picked">
                           Mark as Picked
                         </SelectItem>
-                        <SelectItem value="Refunded">
-                          Mark as Refunded
+                        <SelectItem value="InitiateRefund">
+                          Initiate Refund
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -173,7 +151,7 @@ const ReturnRequestTable = ({
             </div>
             <div className="mt-4 flex items-center space-x-2">
               <Select
-                onValueChange={(value) => handleStatusChange(returnRequest._id, value)}
+                onValueChange={(value) => onStatusChange(returnRequest._id, value)}
                 value={returnRequest.status}
                 disabled={["Rejected", "Refunded"].includes(returnRequest.status)}
               >
@@ -190,8 +168,8 @@ const ReturnRequestTable = ({
                   <SelectItem value="Picked" disabled={isStatusDisabled(returnRequest.status, "Picked")}>
                     Mark as Picked
                   </SelectItem>
-                  <SelectItem value="Refunded" disabled={isStatusDisabled(returnRequest.status, "Refunded")}>
-                    Mark as Refunded
+                  <SelectItem value="InitiateRefund" disabled={isStatusDisabled(returnRequest.status, "InitiateRefund")}>
+                    Initiate Refund
                   </SelectItem>
                 </SelectContent>
               </Select>

@@ -272,7 +272,7 @@ export const initiateReturnRefund = createAsyncThunk(
   'orders/initiateReturnRefund',
   async (returnOrderId, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/api/payment/initiate-refund/return-order/${returnOrderId}`);
+      const response = await axios.post(`${API_URL}/api/payment/initiate-refund/returned-order/${returnOrderId}`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
