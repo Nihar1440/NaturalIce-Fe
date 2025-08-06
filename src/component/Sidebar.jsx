@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   RotateCcw,
+  Ban,
 } from "lucide-react";
 
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
@@ -51,6 +52,11 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
       name: "Manage Return Requests",
       path: "/admin/manage-return-requests",
       icon: <RotateCcw className="h-5 w-5" />,
+    },
+    {
+      name: "Cancelled Orders",
+      path: "/admin/cancelled-orders",
+      icon: <Ban className="h-5 w-5" />,
     },
   ];
 

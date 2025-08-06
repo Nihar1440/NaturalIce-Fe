@@ -170,14 +170,12 @@ export const fetchUserReturnRequest = createAsyncThunk(
 export const updateReturnRequestStatus = createAsyncThunk(
   "order/updateReturnRequestStatus",
   async ({ returnRequestId, status }, { rejectWithValue }) => {
-    console.log("returnRequestId", returnRequestId);
-    console.log("status", status);
     try {
       const response = await axios.patch(
         `${API_URL}/api/order/update-return-request/${returnRequestId}`,
         { status }
       );
-      return response.data.order;
+      return response.data.returnOrder;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -269,7 +267,18 @@ export const getSalesOverview = createAsyncThunk(
   }
 );
 
-
+// Initiate return refund
+export const initiateReturnRefund = createAsyncThunk(
+  'orders/initiateReturnRefund',
+  async (returnOrderId, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/api/payment/initiate-refund/return-order/${returnOrderId}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
 
 const orderSlice = createSlice({
   name: "order",
@@ -309,6 +318,8 @@ const orderSlice = createSlice({
     salesOverview: [],
     salesOverviewLoading: false,
     salesOverviewError: null,
+    initiateReturnRefundLoading: false,
+    initiateReturnRefundError: null,
   },
   reducers: {
     clearOrders: (state) => {
@@ -581,6 +592,19 @@ const orderSlice = createSlice({
       .addCase(getSalesOverview.rejected, (state, action) => {
         state.salesOverviewLoading = false;
         state.salesOverviewError = action.payload;
+      })
+      // Initiate return refund
+      .addCase(initiateReturnRefund.pending, (state) => {
+        state.initiateReturnRefundLoading = true;
+        state.initiateReturnRefundError = null;
+      })
+      .addCase(initiateReturnRefund.fulfilled, (state, action) => {
+        state.initiateReturnRefundLoading = false;
+        // Optionally update state based on response
+      })
+      .addCase(initiateReturnRefund.rejected, (state, action) => {
+        state.initiateReturnRefundLoading = false;
+        state.initiateReturnRefundError = action.payload;
       });      
   },
 });

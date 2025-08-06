@@ -14,6 +14,7 @@ import LoginPage from "./pages/user/LoginPage";
 import LearnMorePage from "./pages/user/LearnMorePage";
 import ManageProductsPage from "./pages/admin/ManageProductsPage";
 import ManageReturnRequests from "./pages/admin/ManageReturnRequests";
+import CancelledOrdersPage from "./pages/admin/CancelledOrdersPage";
 import MessagesPage from "./pages/admin/MessagesPage";
 import OrderConfirmation from "./pages/user/OrderConfirmation";
 import OrdersPage from "./pages/admin/OrdersPage";
@@ -94,6 +95,7 @@ const App = () => {
             <Route path="manage-products" element={<ManageProductsPage />} />
             <Route path="messages" element={<MessagesPage />} />
             <Route path="manage-return-requests" element={<ManageReturnRequests />} />
+            <Route path="cancelled-orders" element={<CancelledOrdersPage />} />
             <Route path="analytics" element={<AnalyticsPage />} />
             <Route path="manage-categories" element={<ManageCategory />} />
             <Route

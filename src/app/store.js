@@ -9,6 +9,7 @@ import productReducer from '../features/product/productSlice';
 import wishlistReducer from '../features/wishlist/wishlistSlice';
 import userReducer from '../features/user/userSlice';
 import categoryReducer from '../features/category/categorySlice';
+import cancelledOrdersReducer from '../features/order/cancelledOrderSlice';
 import shippingAddressReducer from '../features/shippingAddress/shippingAddressSlice';
 import notificationReducer from "../features/notification/notificationSlice";
 import paymentReducer from '../features/payment/paymentSlice';
@@ -22,6 +23,7 @@ const rootReducer = combineReducers({
   product: productReducer,
   wishlist: wishlistReducer,
   order: orderReducer,
+  cancelledOrders: cancelledOrdersReducer,
   shippingAddress: shippingAddressReducer,
   notifications: notificationReducer,
   payment: paymentReducer,
@@ -46,4 +48,3 @@ export const store = configureStore({
 });
 
 export const persistor = persistStore(store);
-

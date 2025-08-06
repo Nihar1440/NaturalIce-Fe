@@ -12,6 +12,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Eye } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { updateReturnRequestStatus } from "@/features/order/orderSlice";
+import { toast } from "sonner";
+import { initiateReturnRefund } from "@/features/order/orderSlice";
 
 const statusClasses = {
   Approved: "bg-green-300 text-green-800 border-green-200",
@@ -38,7 +42,8 @@ const ReturnRequestTable = ({
   onStatusChange,
   onViewDetails,
 }) => {
-  console.log("returnRequests", returnRequests);
+  console.log('returnRequests', returnRequests)
+  const dispatch = useDispatch();
 
   const isStatusDisabled = (currentStatus, optionStatus) => {
     switch (currentStatus) {
@@ -48,11 +53,31 @@ const ReturnRequestTable = ({
         return optionStatus !== "Picked";
       case "Picked":
         return optionStatus !== "Refunded";
-      case "Rejected":
-      case "Refunded":
-        return true; // All options disabled for final states
       default:
         return true;
+    }
+  };
+
+  const handleStatusChange = async (returnOrderId, newStatus) => {
+    console.log('newStatus', newStatus)
+    try {
+     const result = await dispatch(updateReturnRequestStatus({ returnRequestId: returnOrderId, status: newStatus })).unwrap();
+     console.log('result', result)
+      toast.success("Status updated successfully!");
+
+      if (newStatus === 'Refunded') {
+        const result = await dispatch(initiateReturnRefund(returnOrderId));
+        if (initiateReturnRefund.fulfilled.match(result)) {
+          toast.success("Refund initiated successfully!");
+        } else {
+          toast.error("Failed to initiate refund.");
+        }
+      }
+
+      onStatusChange(); // Refresh the data
+    } catch (error) {
+      toast.error("Failed to update status.");
+      console.error(error);
     }
   };
 
@@ -80,24 +105,24 @@ const ReturnRequestTable = ({
                 <td className="px-6 py-4">
                   <div className="flex justify-center items-center space-x-2">
                     <Select 
-                      onValueChange={(value) => onStatusChange(returnRequest._id, value)} 
-                      defaultValue={returnRequest.status}
+                      onValueChange={(value) => handleStatusChange(returnRequest._id, value)} 
+                      value={returnRequest.status}
                       disabled={["Rejected", "Refunded"].includes(returnRequest.status)}
                     >
                       <SelectTrigger className="w-[150px]">
                         <SelectValue placeholder="Update Status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Approved" disabled={isStatusDisabled(returnRequest.status, "Approved")}>
+                        <SelectItem value="Approved">
                           Approve
                         </SelectItem>
-                        <SelectItem value="Rejected" disabled={isStatusDisabled(returnRequest.status, "Rejected")}>
+                        <SelectItem value="Rejected">
                           Reject
                         </SelectItem>
-                        <SelectItem value="Picked" disabled={isStatusDisabled(returnRequest.status, "Picked")}>
+                        <SelectItem value="Picked">
                           Mark as Picked
                         </SelectItem>
-                        <SelectItem value="Refunded" disabled={isStatusDisabled(returnRequest.status, "Refunded")}>
+                        <SelectItem value="Refunded">
                           Mark as Refunded
                         </SelectItem>
                       </SelectContent>
@@ -148,8 +173,8 @@ const ReturnRequestTable = ({
             </div>
             <div className="mt-4 flex items-center space-x-2">
               <Select
-                onValueChange={(value) => onStatusChange(returnRequest._id, value)}
-                defaultValue={returnRequest?.status}
+                onValueChange={(value) => handleStatusChange(returnRequest._id, value)}
+                value={returnRequest.status}
                 disabled={["Rejected", "Refunded"].includes(returnRequest.status)}
               >
                 <SelectTrigger className="flex-grow">
