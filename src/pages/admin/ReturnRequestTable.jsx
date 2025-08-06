@@ -24,13 +24,26 @@ const statusClasses = {
   Rejected: "bg-red-300 text-red-800 border-red-200",
   Requested: "bg-yellow-300 text-yellow-800 border-yellow-200",
 };
+export const isRefundProceed = (refundStatus) => {
+  switch (refundStatus) {
+    case "Pending":
+      return false;
+    case "Initiated":
+      return true;
+    case "Succeeded":
+      return true;
+    case "Failed":
+      return false;
+    default:
+      return false;
+  }
+}
 
 function getStatusBadge(status) {
   return (
     <span
-      className={`px-3 py-2 rounded-full text-xs font-semibold border ${
-        statusClasses[status] || "bg-gray-100 text-gray-800 border-gray-200"
-      }`}
+      className={`px-3 py-2 rounded-full text-xs font-semibold border ${statusClasses[status] || "bg-gray-100 text-gray-800 border-gray-200"
+        }`}
     >
       {status}
     </span>
@@ -58,7 +71,6 @@ const ReturnRequestTable = ({
     }
   };
 
-
   return (
     <>
       {/* Desktop Table View */}
@@ -82,8 +94,8 @@ const ReturnRequestTable = ({
                 <td className="px-6 py-4">{getStatusBadge(returnRequest.status)}</td>
                 <td className="px-6 py-4">
                   <div className="flex justify-center items-center space-x-2">
-                    <Select 
-                      onValueChange={(value) => onStatusChange(returnRequest._id, value)} 
+                    <Select
+                      onValueChange={(value) => onStatusChange(returnRequest._id, value)}
                       value={returnRequest.status}
                       disabled={["Rejected", "Refunded"].includes(returnRequest.status)}
                     >
@@ -91,16 +103,16 @@ const ReturnRequestTable = ({
                         <SelectValue placeholder="Update Status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Approved">
+                        <SelectItem value="Approved" disabled={isStatusDisabled(returnRequest.status, "Approved")}>
                           Approve
                         </SelectItem>
-                        <SelectItem value="Rejected">
+                        <SelectItem value="Rejected" disabled={isStatusDisabled(returnRequest.status, "Rejected")}>
                           Reject
                         </SelectItem>
-                        <SelectItem value="Picked">
+                        <SelectItem value="Picked" disabled={isStatusDisabled(returnRequest.status, "Picked")}>
                           Mark as Picked
                         </SelectItem>
-                        <SelectItem value="InitiateRefund">
+                        <SelectItem value="InitiateRefund" disabled={isStatusDisabled(returnRequest.status, "InitiateRefund") || isRefundProceed(returnRequest.refundStatus)}>
                           Initiate Refund
                         </SelectItem>
                       </SelectContent>
@@ -168,7 +180,7 @@ const ReturnRequestTable = ({
                   <SelectItem value="Picked" disabled={isStatusDisabled(returnRequest.status, "Picked")}>
                     Mark as Picked
                   </SelectItem>
-                  <SelectItem value="InitiateRefund" disabled={isStatusDisabled(returnRequest.status, "InitiateRefund")}>
+                  <SelectItem value="InitiateRefund" disabled={isStatusDisabled(returnRequest.status, "InitiateRefund") || isRefundProceed(returnRequest.refundStatus)}>
                     Initiate Refund
                   </SelectItem>
                 </SelectContent>

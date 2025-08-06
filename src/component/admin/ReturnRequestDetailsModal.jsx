@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { formatCurrency } from "@/lib/currency";
 import { capitalizeFirstLetter } from "@/lib/orderUtils";
+import { isRefundProceed } from "@/pages/admin/ReturnRequestTable";
 
 const statusOrder = ["Pending", "Approved", "Picked", "Refunded"];
 
@@ -120,7 +121,7 @@ const ReturnRequestDetailsModal = ({
       );
     }
 
-    if (status === "Picked") {
+    if (status === "Picked" && !isRefundProceed(returnRequest.refundStatus)) {
       return (
         <>
           <Button size="sm" variant="default" onClick={() => onUpdateStatus(_id, "InitiateRefund")}>
