@@ -1,4 +1,5 @@
 // File: src/pages/DashboardHomePage.jsx
+import Loader from "@/component/common/Loader";
 import {
   fetchRecentOrders,
   fetchYearlyRevenue, getSalesOverview
@@ -21,6 +22,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { formatCurrency } from "@/lib/currency";
 
 const DashboardHomePage = () => {
   const dispatch = useDispatch();
@@ -55,7 +57,7 @@ const DashboardHomePage = () => {
   const statsCards = [
     {
       title: "Total Revenue",
-      value: yearlyRevenueLoading ? "Loading..." : `₹${yearlyRevenue}`,
+      value: yearlyRevenueLoading ? <Loader /> : formatCurrency(yearlyRevenue),
       icon: <CreditCard className="h-6 w-6 text-blue-600" />,
     },
     {
@@ -191,7 +193,7 @@ const DashboardHomePage = () => {
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-gray-900">
-                      ₹{order.totalAmount}
+                      {formatCurrency(order.totalAmount)}
                     </p>
                     <span
                       className={`inline-block px-2 py-1 text-xs rounded-full font-medium ${getStatusClasses(

@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
 const ReturnRequestModal = ({ isOpen, onClose, order }) => {
+  console.log('order', order)
   const [reason, setReason] = useState('');
   const [comment, setComment] = useState('');
   const [image, setImage] = useState(null);
@@ -29,9 +30,7 @@ const ReturnRequestModal = ({ isOpen, onClose, order }) => {
       toast.error('Please select at least one product to return');
       return;
     }
-
     try {
-      
       const formData = new FormData();
       formData.append('reason', reason);
       formData.append('comment', comment);
@@ -39,15 +38,11 @@ const ReturnRequestModal = ({ isOpen, onClose, order }) => {
       if (image) {
         formData.append('image', image);
       }
-      const result = await dispatch(returnOrderRequest({ orderId: order._id, formData }));
-      console.log(result);
-      if (result.payload.success) {
-        toast.success('Return request submitted successfully');
-      } else {
-        toast.error(result.payload || 'Failed to submit return request');
-      }
+      const result = await dispatch(returnOrderRequest({ orderId: order._id, formData })).unwrap();
+      toast.success(result.message || 'Return request submitted successfully');
     } catch (error) {
-      toast.error('Failed to submit return request');
+      console.error('error', error);
+      toast.error(error || 'Failed to submit return request');
     } finally {
       setReason('');
       setComment('');

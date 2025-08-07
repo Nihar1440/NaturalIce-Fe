@@ -132,7 +132,7 @@ export const cancelReturnRequest = createAsyncThunk(
       const response = await axios.patch(
         `${API_URL}/api/order/cancel-return-request/${orderId}`
       );
-      return response.data.returnRequest;
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -456,11 +456,23 @@ const orderSlice = createSlice({
       })
       .addCase(returnOrderRequest.fulfilled, (state, action) => {
         state.returnRequestLoading = false;
-        const index = state.orders.findIndex(
-          (order) => order._id === action.payload.order._id
-        );
-        if (index !== -1) {
-          state.orders[index] = action.payload.order;
+        const { returnOrder } = action.payload;
+        const orderIndex = state.orders.findIndex((o) => o._id === returnOrder.orderId);
+
+        if (orderIndex !== -1) {
+          const orderToUpdate = state.orders[orderIndex];
+          // Update item quantities immutably
+          const updatedItems = orderToUpdate.items.map(item => {
+            const returnedItem = returnOrder.items.find(ri => ri.productId === item.productId);
+            if (returnedItem) {
+              return {
+                ...item,
+                returnedQuantity: (item.returnedQuantity || 0) + returnedItem.quantity,
+              };
+            }
+            return item;
+          });
+          state.orders[orderIndex] = { ...orderToUpdate, items: updatedItems };
         }
       })
       .addCase(returnOrderRequest.rejected, (state, action) => {
@@ -598,7 +610,7 @@ const orderSlice = createSlice({
         state.initiateReturnRefundLoading = true;
         state.initiateReturnRefundError = null;
       })
-      .addCase(initiateReturnRefund.fulfilled, (state, action) => {
+      .addCase(initiateReturnRefund.fulfilled, (state) => {
         state.initiateReturnRefundLoading = false;
         // Optionally update state based on response
       })

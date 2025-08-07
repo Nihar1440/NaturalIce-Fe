@@ -171,7 +171,7 @@ const ManageUsers = () => {
                           {user.role}
                         </td>
                         <td className="px-6 py-4 text-gray-700">
-                          {user.status == "active" ? (
+                          {user.status == "Active" || user.status == "active" ? (
                             <span className="text-green-600 font-semibold">
                               Active
                             </span>
@@ -246,12 +246,12 @@ const ManageUsers = () => {
                         <span className="capitalize">{user.role}</span>
                         <span
                           className={
-                            user.status === "active"
+                            user.status == "Active"
                               ? "text-green-600 font-semibold"
                               : "text-red-600 font-semibold"
                           }
                         >
-                          {user.status === "active" ? "Active" : "Inactive"}
+                          {user.status == "Active" || user.status == "active" ? "Active" : "Inactive"}
                         </span>
                       </div>
                     </div>
@@ -298,7 +298,7 @@ const ManageUsers = () => {
                     className="w-60 h-60 sm:w-44 sm:h-40 object-cover rounded-full shadow-lg border-4 border-white ring-4 ring-blue-100"
                   />
                   <div className={`absolute -bottom-2 -right-2 w-6 h-6 sm:w-8 sm:h-8 rounded-full border-4 border-white shadow-lg ${
-                    selectedUser.status === "active" ? "bg-green-500" : "bg-red-500"
+                    selectedUser.status === "Active" || selectedUser.status === "active" ? "bg-green-500" : "bg-red-500"
                   }`}></div>
                 </div>
                 
@@ -329,12 +329,12 @@ const ManageUsers = () => {
                   </div>
                   <div className="mt-2 flex items-center">
                     <div className={`w-3 h-3 rounded-full mr-2 ${
-                      selectedUser.status === "active" ? "bg-green-500" : "bg-red-500"
+                      selectedUser.status === "Active" || selectedUser.status === "active" ? "bg-green-500" : "bg-red-500"
                     }`}></div>
                     <span className={`text-lg font-semibold ${
-                      selectedUser.status === "active" ? "text-green-600" : "text-red-600"
+                      selectedUser.status === "Active" || selectedUser.status === "active" ? "text-green-600" : "text-red-600"
                     }`}>
-                      {selectedUser.status === "active" ? "Active" : "Inactive"}
+                      {selectedUser.status === "Active" || selectedUser.status === "active" ? "Active" : "Inactive"}
                     </span>
                   </div>
                 </div>

@@ -37,6 +37,7 @@ import {
   fetchProducts,
 } from "../../features/product/productSlice";
 import useDebounce from "../../lib/useDebounce";
+import { formatCurrency } from "@/lib/currency";
 
 const ManageProductsPage = () => {
   const dispatch = useDispatch();
@@ -284,7 +285,7 @@ const ManageProductsPage = () => {
                           {product?.category?.name}
                         </td>
                         <td className="px-6 py-4 font-medium text-gray-900">
-                          ${product.price.toFixed(2)}
+                          {formatCurrency(product.price)}
                         </td>
                         <td className="px-6 py-4 text-gray-700">
                           {product.stock}
@@ -365,7 +366,7 @@ const ManageProductsPage = () => {
                           <div>
                             <span className="text-gray-500">Price:</span>
                             <span className="ml-1 font-medium text-gray-900">
-                              ${product.price.toFixed(2)}
+                              {formatCurrency(product.price)}
                             </span>
                           </div>
                           <div>

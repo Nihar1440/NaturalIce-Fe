@@ -67,11 +67,12 @@ const ReturnRequest = () => {
         if (selectedReturnRequestId) {
             try {
                 await dispatch(cancelReturnRequest(selectedReturnRequestId)).unwrap();
-                toast.success("Return request cancelled successfully!");
-            } catch (err) {
-                toast.error(err || "Failed to cancel return request");
-            } finally {
+                toast.success("Return request cancelled successfully");
                 setSelectedReturnRequestId(null);
+                dispatch(fetchUserReturnRequest(user?._id));
+            } catch (err) {
+                const errorMessage = err.message || (typeof err === 'string' ? err : "Failed to cancel return request");
+                toast.error(errorMessage);
             }
         }
     };
@@ -85,7 +86,6 @@ const ReturnRequest = () => {
             <h1 className="text-2xl font-extrabold text-gray-900 mt-10 mb-6">
                 Your Return Request
             </h1>
-
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <div className="rounded-lg overflow-hidden shadow-md bg-white">
                     <div className="overflow-x-auto">
