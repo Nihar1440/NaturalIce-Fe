@@ -10,12 +10,15 @@ import AddToCartConfirmationPopup from "./AddToCartConfirmationPopup";
 import LoginRequiredPopup from "./LoginRequiredPopup";
 
 const ProductCatalogue = ({ products, loading }) => {
+  console.log('products', products)
   const dispatch = useDispatch();
   const { user, accessToken } = useSelector((state) => state.auth);
   const [showLoginAlert, setShowLoginAlert] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [addedProductName, setAddedProductName] = useState("");
   const [addedProductQuantity, setAddedProductQuantity] = useState(0);
+  const { reviews  } = useSelector((state) => state.reviews);
+  console.log('reviews', reviews)
 
   let quantity = 1;
 
@@ -51,7 +54,6 @@ const ProductCatalogue = ({ products, loading }) => {
     } catch (error) {
       const errorMessage = error.message || "Failed to add product to cart.";
       toast.error(errorMessage);
-      console.error("Failed to add to cart:", error);
     }
   };
   const handleAddToWishlist = async (e, product) => {
@@ -72,10 +74,6 @@ const ProductCatalogue = ({ products, loading }) => {
       const errorMessage =
         error.message || "Failed to add to wishlist.";
       toast.error(errorMessage);
-      console.error(
-        "Failed to add to wishlist:",
-        error
-      );
     }
   };
 
@@ -114,11 +112,11 @@ const ProductCatalogue = ({ products, loading }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-6 lg:gap-4">
             {products?.map((product, index) => (
               <div
-                key={product._id}
-                className="product-card group relative bg-[#2A223A] border border-[#2A223A] overflow-hidden shadow-lg transition-all duration-500 transform"
-                style={{
-                  animationDelay: `${index * 100}ms`,
-                }}
+              key={product._id}
+              className="product-card group relative bg-[#2A223A] border border-[#2A223A] overflow-hidden shadow-lg transition-all duration-500 transform"
+              style={{
+                animationDelay: `${index * 100}ms`,
+              }}
               >
                 {/* Link wraps the image and details for navigation */}
                 <Link
@@ -167,15 +165,14 @@ const ProductCatalogue = ({ products, loading }) => {
                     <h3 className="text-lg sm:text-xl font-bold text-slate-200 mb-2 transition-colors duration-300">
                       {product.name}
                     </h3>
-                      <div className="flex items-center">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className="w-3 h-3 fill-yellow-400 text-yellow-400"
-                          />
-                        ))}
-                        <span className="ml-1 text-slate-500 text-xs">(0)</span>
-                      </div>
+                      {product.ratings > 0 && (
+                        <div className="flex items-center">
+                          <span className="bg-green-600 text-white text-xs font-bold px-2 py-1 rounded-sm flex items-center">
+                            {product.ratings.toFixed(1)} <Star className="w-3 h-3 ml-1" />
+                          </span>
+                          <span className="ml-2 text-slate-400 text-xs">({product.numReviews})</span>
+                        </div>
+                      )}
                     </div>
                    
                     <p className="text-slate-200 mb-4 text-sm leading-relaxed line-clamp-2">

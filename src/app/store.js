@@ -13,7 +13,7 @@ import cancelledOrdersReducer from '../features/order/cancelledOrderSlice';
 import shippingAddressReducer from '../features/shippingAddress/shippingAddressSlice';
 import notificationReducer from "../features/notification/notificationSlice";
 import paymentReducer from '../features/payment/paymentSlice';
-
+import reviewReducer from '../features/review/reviewSlice';
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -27,13 +27,14 @@ const rootReducer = combineReducers({
   shippingAddress: shippingAddressReducer,
   notifications: notificationReducer,
   payment: paymentReducer,
+  reviews: reviewReducer,
 });
 
 // Configuration for redux-persist
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth', 'cart', 'shippingAddress','category','payment','order','recentOrders','user','product']
+  whitelist: ['auth', 'cart', 'shippingAddress','category','payment','order','recentOrders','user','product','reviews']
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
