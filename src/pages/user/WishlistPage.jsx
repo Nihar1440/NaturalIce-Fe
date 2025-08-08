@@ -97,12 +97,12 @@ const WishlistPage = () => {
     return <Loader />;
   }
 
-  const productsInWishlist = wishlist ? wishlist.products : [];
+  const productsInWishlist = wishlist ? wishlist?.products : [];
 
   return (
     <div className="px-10 py-6">
       <h2 className="text-3xl font-bold text-blue-700 mb-6">Your Wishlist</h2>
-      {productsInWishlist.length === 0 ? (
+      {productsInWishlist?.length === 0 ? (
         <div className="text-center py-10">
           <p className="text-gray-600 text-lg mb-4">Your wishlist is empty.</p>
           <Button onClick={() => (window.location.href = "/")}>
@@ -111,7 +111,7 @@ const WishlistPage = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {productsInWishlist.map((product) => (
+          {productsInWishlist?.map((product) => (
             <div
               key={product._id}
               className="border rounded-lg bg-white shadow p-4 flex flex-col"
