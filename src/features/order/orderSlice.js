@@ -13,6 +13,8 @@ export const fetchOrders = createAsyncThunk(
       if (params.name) query.append("name", params.name);
       if (params.status) query.append("status", params.status);
       if (params.date) query.append("date", params.date);
+      if (params.page) query.append("page", params.page);
+      if (params.limit) query.append("limit", params.limit);
       const queryString = query.toString() ? `?${query.toString()}` : "";
       const response = await axios.get(
         `${API_URL}/api/order/orders${queryString}`
@@ -142,12 +144,21 @@ export const cancelReturnRequest = createAsyncThunk(
 // ADMIN: Fetch all return requests
 export const fetchAllReturnRequests = createAsyncThunk(
   "order/fetchAllReturnRequests",
-  async (_, { rejectWithValue }) => {
+  async ({ page = 1 }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/api/order/return-request`);
-      return response.data.returnRequest;
+      const response = await axios.get(`${API_URL}/api/order/return-request`, {
+        params: { page },
+      });
+      console.log(response?.data, "jjjj")
+      // Match the backend response structure
+      return {
+        data: response?.data?.returnRequest || [], 
+        totalPages: response?.data?.totalPages || 1,
+        page: response?.data?.page || 1,
+        totalItems: response?.data?.totalItems || 0
+      };
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || error.message);
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch return requests");
     }
   }
 );
@@ -309,6 +320,8 @@ const orderSlice = createSlice({
     returnRequests: [],
     returnRequestsLoading: false,
     returnRequestsError: null,
+    returnRequestsTotalPages: 0,
+    returnRequestsCurrentPage: 1,
     recentOrders: [],
     recentOrdersLoading: false,
     recentOrdersError: null,
@@ -503,10 +516,14 @@ const orderSlice = createSlice({
       .addCase(fetchAllReturnRequests.pending, (state) => {
         state.returnRequestsLoading = true;
       })
-      .addCase(fetchAllReturnRequests.fulfilled, (state, action) => {
-        state.returnRequestsLoading = false;
-        state.returnRequests = action.payload;
-      })
+     // In orderSlice.js
+.addCase(fetchAllReturnRequests.fulfilled, (state, action) => {
+  state.returnRequestsLoading = false;
+  state.returnRequests = action.payload.data || [];  // Ensure this is an array
+  state.returnRequestsTotalPages = action.payload.totalPages || 1;
+  state.returnRequestsCurrentPage = action.payload.page || 1;
+  state.returnRequestsError = null;
+})
       .addCase(fetchAllReturnRequests.rejected, (state, action) => {
         state.returnRequestsLoading = false;
         state.returnRequestsError = action.payload;

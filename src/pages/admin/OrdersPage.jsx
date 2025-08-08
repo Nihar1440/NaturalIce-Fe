@@ -9,9 +9,14 @@ import OrderFilters from "./OrderFilters";
 import OrderSummary from "./OrderSummary";
 import OrderDetailsDialog from "./OrderDetailsDialog";
 import OrderStatusDialog from "./OrderStatusDialog";
-import { fetchOrders, updateOrderStatus, deleteOrder } from "@/features/order/orderSlice";
+import {
+  fetchOrders,
+  updateOrderStatus,
+  deleteOrder,
+} from "@/features/order/orderSlice";
 import { PackageOpen } from "lucide-react";
 import useDebounce from "@/lib/useDebounce";
+import PaginationDemo from "@/component/common/Pagination";
 
 const OrdersPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,15 +26,19 @@ const OrdersPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [showOrderDetailsDialog, setShowOrderDetailsDialog] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  console.log('selectedOrder', selectedOrder)
+  console.log("selectedOrder", selectedOrder);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [statusOrderId, setStatusOrderId] = useState(null);
   const [newStatus, setNewStatus] = useState("");
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalOrders, setTotalOrders] = useState(0);
 
   const dispatch = useDispatch();
-  const { orders, loading } = useSelector((state) => state.order);
+  const { orders, loading } = useSelector((state) => state.order.orders);
+  console.log('orders', orders)
 
   useEffect(() => {
     dispatch(
@@ -37,9 +46,14 @@ const OrdersPage = () => {
         name: debouncedSearchTerm,
         status: filterStatus !== "All" ? filterStatus : undefined,
         date: filterDate || undefined,
+        page: currentPage,
+        limit: 10,
       })
-    );
-  }, [dispatch, debouncedSearchTerm, filterStatus, filterDate]);
+    ).then((res) => {
+      setTotalOrders(res.payload.totalOrders);
+      setTotalPages(res.payload.totalPages);
+    });
+  }, [dispatch, debouncedSearchTerm, filterStatus, filterDate, currentPage]);
 
   // Handlers
   const handleViewDetails = (order) => {
@@ -70,10 +84,17 @@ const OrdersPage = () => {
           name: debouncedSearchTerm,
           status: filterStatus !== "All" ? filterStatus : undefined,
           date: filterDate || undefined,
+          page: currentPage,
+          limit: 10,
         })
-      );
+      ).then((res) => {
+        setTotalOrders(res.payload.totalOrders);
+        setTotalPages(res.payload.totalPages);
+      });
     } catch (err) {
-      toast.error("Failed to delete order", { description: err?.message || String(err) });
+      toast.error("Failed to delete order", {
+        description: err?.message || String(err),
+      });
       setOrderToDelete(null);
     }
   };
@@ -84,20 +105,35 @@ const OrdersPage = () => {
         name: searchTerm,
         status: filterStatus !== "All" ? filterStatus : undefined,
         date: filterDate || undefined,
+        page: 1,
+        limit: 10,
       })
-    );
+    ).then((res) => {
+      setTotalOrders(res.payload.totalOrders);
+      setTotalPages(res.payload.totalPages);
+      setCurrentPage(1);
+    });
   };
 
   const handleResetFilters = () => {
     setSearchTerm("");
     setFilterStatus("All");
     setFilterDate("");
-    dispatch(fetchOrders({}));
+    dispatch(
+      fetchOrders({
+        page: 1,
+        limit: 10,
+      })
+    ).then((res) => {
+      setTotalOrders(res.payload.totalOrders);
+      setTotalPages(res.payload.totalPages);
+      setCurrentPage(1);
+    });
   };
 
-  const statusOrder = orders.find((o) => o._id === statusOrderId);
+  const statusOrder = orders?.find((o) => o._id === statusOrderId);
 
-  const UpdateStatus = async() => {
+  const UpdateStatus = async () => {
     if (!newStatus) return;
     try {
       await dispatch(
@@ -108,11 +144,35 @@ const OrdersPage = () => {
       );
       toast.success("Order status updated successfully!");
       setShowStatusDialog(false);
-      dispatch(fetchOrders());
+      dispatch(
+        fetchOrders({
+          page: currentPage,
+          limit: 10,
+        })
+      ).then((res) => {
+        setTotalOrders(res.payload.totalOrders);
+        setTotalPages(res.payload.totalPages);
+      });
     } catch {
       toast.error("Failed to update status");
     }
-  }
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    dispatch(
+      fetchOrders({
+        name: debouncedSearchTerm,
+        status: filterStatus !== "All" ? filterStatus : undefined,
+        date: filterDate || undefined,
+        page: page,
+        limit: 10,
+      })
+    ).then((res) => {
+      setTotalOrders(res.payload.totalOrders);
+      setTotalPages(res.payload.totalPages);
+    });
+  };
 
   return (
     <div className="bg-gray-100 min-h-screen p-2">
@@ -122,93 +182,103 @@ const OrdersPage = () => {
           <h2 className="text-2xl lg:text-3xl font-bold text-gray-800">
             Orders Management
           </h2>
-        <div className="p-1 lg:p-2 border-b border-gray-200">
-          <OrderFilters
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            filterStatus={filterStatus}
-            setFilterStatus={setFilterStatus}
-            filterDate={filterDate}
-            setFilterDate={setFilterDate}
-            showFilters={showFilters}
-            setShowFilters={setShowFilters}
-            onSearch={handleSearch}
-            onReset={handleResetFilters}
-            totalOrders={orders.length}
-          />
+          <div className="p-1 lg:p-2 border-b border-gray-200">
+            <OrderFilters
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              filterStatus={filterStatus}
+              setFilterStatus={setFilterStatus}
+              filterDate={filterDate}
+              setFilterDate={setFilterDate}
+              showFilters={showFilters}
+              setShowFilters={setShowFilters}
+              onSearch={handleSearch}
+              onReset={handleResetFilters}
+              totalOrders={totalOrders}
+            />
 
-          {/* Content */}
-          {loading ? (
-            <Loader message={"Loading Orders..."} />
-          ) : orders?.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-              <PackageOpen className="h-16 w-16 mb-4 text-gray-400" />
-              <p className="text-xl font-semibold mb-2">No orders found</p>
-              <p className="text-md text-center">
-                Try adjusting your search or filters
+            {/* Content */}
+            {loading ? (
+              <Loader message={"Loading Orders..."} />
+            ) : orders?.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                <PackageOpen className="h-16 w-16 mb-4 text-gray-400" />
+                <p className="text-xl font-semibold mb-2">No orders found</p>
+                <p className="text-md text-center">
+                  Try adjusting your search or filters
+                </p>
+              </div>
+            ) : (
+              <>
+                <OrderTable
+                  orders={orders}
+                  onViewDetails={handleViewDetails}
+                  onUpdateStatus={handleUpdateStatus}
+                  onDeleteOrder={handleDeleteOrder}
+                />
+                <OrderCardList
+                  orders={orders}
+                  onViewDetails={handleViewDetails}
+                  onUpdateStatus={handleUpdateStatus}
+                />
+                {/* <OrderSummary orders={orders} /> */}
+                <PaginationDemo
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
+              </>
+            )}
+          </div>
+
+        </div>
+
+        {/* Delete Confirmation Dialog */}
+        {showDeleteConfirmDialog && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+              <h3 className="text-lg font-semibold mb-2">Confirm Deletion</h3>
+              <p className="mb-4">
+                Are you sure you want to delete this order? This action cannot
+                be undone.
               </p>
-            </div>
-          ) : (
-            <>
-              <OrderTable
-                orders={orders}
-                onViewDetails={handleViewDetails}
-                onUpdateStatus={handleUpdateStatus}
-                onDeleteOrder={handleDeleteOrder}
-              />
-              <OrderCardList
-                orders={orders}
-                onViewDetails={handleViewDetails}
-                onUpdateStatus={handleUpdateStatus}
-              />
-              <OrderSummary orders={orders} />
-            </>
-          )}
-        </div>
-        <div className="border border-b-1 w-full"></div>
-        </div>
-      </div>
-
-      {/* Delete Confirmation Dialog */}
-      {showDeleteConfirmDialog && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-2">Confirm Deletion</h3>
-            <p className="mb-4">Are you sure you want to delete this order? This action cannot be undone.</p>
-            <div className="flex justify-end gap-2">
-              <button
-                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
-                onClick={() => { setShowDeleteConfirmDialog(false); setOrderToDelete(null); }}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
-                onClick={confirmDeleteOrder}
-              >
-                Delete
-              </button>
+              <div className="flex justify-end gap-2">
+                <button
+                  className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+                  onClick={() => {
+                    setShowDeleteConfirmDialog(false);
+                    setOrderToDelete(null);
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                  onClick={confirmDeleteOrder}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <OrderDetailsDialog
-        open={showOrderDetailsDialog}
-        onOpenChange={setShowOrderDetailsDialog}
-        order={selectedOrder}
-      />
+        <OrderDetailsDialog
+          open={showOrderDetailsDialog}
+          onOpenChange={setShowOrderDetailsDialog}
+          order={selectedOrder}
+        />
 
-      <OrderStatusDialog
-        open={showStatusDialog}
-        onOpenChange={setShowStatusDialog}
-        orderId={statusOrderId}
-        newStatus={newStatus}
-        setNewStatus={setNewStatus}
-        currentStatus={statusOrder?.status}
-        onUpdate={UpdateStatus}
-
-      />
+        <OrderStatusDialog
+          open={showStatusDialog}
+          onOpenChange={setShowStatusDialog}
+          orderId={statusOrderId}
+          newStatus={newStatus}
+          setNewStatus={setNewStatus}
+          currentStatus={statusOrder?.status}
+          onUpdate={UpdateStatus}
+        />
+      </div>
     </div>
   );
 };

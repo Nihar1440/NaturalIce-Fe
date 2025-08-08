@@ -6,40 +6,76 @@ import Loader from '@/component/common/Loader';
 import ReturnRequestDetailsModal from '@/component/admin/ReturnRequestDetailsModal';
 import ReturnRequestTable from '@/pages/admin/ReturnRequestTable';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+
+const PaginationComponent = ({ currentPage, totalPages, onPageChange }) => {
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      onPageChange(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      onPageChange(currentPage + 1);
+    }
+  };
+
+  if (totalPages <= 1) {
+    return null;
+  }
+
+  return (
+    <div className="flex items-center justify-center space-x-4 mt-6">
+      <Button onClick={handlePrevious} disabled={currentPage === 1} variant="outline">
+        Previous
+      </Button>
+      <span className="text-sm font-medium">
+        Page {currentPage} of {totalPages}
+      </span>
+      <Button onClick={handleNext} disabled={currentPage === totalPages} variant="outline">
+        Next
+      </Button>
+    </div>
+  );
+};
 
 const ManageReturnRequests = () => {
   const dispatch = useDispatch();
-  const { returnRequests, returnRequestsLoading, returnRequestsError } = useSelector((state) => state.order);
+  const { 
+    returnRequests = [], 
+    returnRequestsLoading, 
+    returnRequestsError, 
+    returnRequestsTotalPages 
+  } = useSelector((state) => state.order);
+  
+  console.log('returnRequests', returnRequests)
+  const [currentPage, setCurrentPage] = useState(1);
   const [isDetailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedReturnRequest, setSelectedReturnRequest] = useState(null);
+  console.log('selectedReturnRequest', selectedReturnRequest)
 
   useEffect(() => {
-    dispatch(fetchAllReturnRequests());
-  }, [dispatch]);
+    dispatch(fetchAllReturnRequests({ page: currentPage }));
+  }, [dispatch, currentPage]);
 
   const handleStatusChange = async (returnRequestId, status) => {
-    if (!returnRequestId || !status) {
-      return
-    }
+    if (!returnRequestId || !status) return;
 
     if (status === 'InitiateRefund') {
       try {
-        const result = await dispatch(initiateReturnRefund(returnRequestId));
-        console.log(initiateReturnRefund.fulfilled, "hereeeee fullfillment")
-        if (initiateReturnRefund.fulfilled.match(result)) {
-          toast.success("Refund initiated successfully!");
-        } else {
-          toast.error("Failed to initiate refund.");
-        }
+        await dispatch(initiateReturnRefund(returnRequestId)).unwrap();
+        toast.success("Refund initiated successfully!");
       } catch (error) {
         toast.error("Failed to initiate refund.");
-        console.error(error)
+        console.error(error);
       }
-    }
-    else {
+    } else {
       try {
-        const result = await dispatch(updateReturnRequestStatus({ returnRequestId: returnRequestId, status: status })).unwrap();
-
+        await dispatch(updateReturnRequestStatus({ 
+          returnRequestId, 
+          status 
+        })).unwrap();
         toast.success("Status updated successfully!");
       } catch (error) {
         toast.error("Failed to update status.");
@@ -48,9 +84,8 @@ const ManageReturnRequests = () => {
     }
   };
 
-  const handleViewDetails = (returnRequestId) => {
-    const returnRequestToShow = returnRequests.find((returnRequest) => returnRequest._id === returnRequestId);
-    setSelectedReturnRequest(returnRequestToShow);
+  const handleViewDetails = (returnRequest) => {
+    setSelectedReturnRequest(returnRequest);
     setDetailsModalOpen(true);
   };
 
@@ -76,11 +111,18 @@ const ManageReturnRequests = () => {
               <p className="text-md">There are currently no pending or processed return requests.</p>
             </div>
           ) : (
-            <ReturnRequestTable
-              returnRequests={returnRequests}
-              onStatusChange={handleStatusChange}
-              onViewDetails={handleViewDetails}
-            />
+            <>
+              <ReturnRequestTable
+                returnRequests={Array.isArray(returnRequests) ? returnRequests : []}
+                onStatusChange={handleStatusChange}
+                onViewDetails={handleViewDetails}
+              />
+              <PaginationComponent 
+                currentPage={currentPage}
+                totalPages={returnRequestsTotalPages}
+                onPageChange={setCurrentPage}
+              />
+            </>
           )}
         </div>
         <ReturnRequestDetailsModal

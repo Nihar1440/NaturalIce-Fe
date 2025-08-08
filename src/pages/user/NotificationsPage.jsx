@@ -24,6 +24,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationLink,
+} from "@/components/ui/pagination";
+import {
   fetchNotifications,
   deleteUserNotification,
   markAllNotificationsAsRead,
@@ -33,16 +41,24 @@ import {
 const NotificationsPage = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { notifications, loading } = useSelector((state) => state.notifications);
+  const { notifications, loading, page, totalPages } = useSelector(
+    (state) => state.notifications
+  );
   const [selectedNotifications, setSelectedNotifications] = useState([]);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
 
   useEffect(() => {
     if (user?._id) {
-      dispatch(fetchNotifications(user._id));
+      dispatch(fetchNotifications({ userId: user._id, page: 1, limit: 10 }));
     }
   }, [dispatch, user?._id]);
+
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= totalPages && newPage !== page) {
+      dispatch(fetchNotifications({ userId: user._id, page: newPage, limit: 10 }));
+    }
+  };
 
   const openConfirmationDialog = (action) => {
     setConfirmAction(() => action);
@@ -108,6 +124,39 @@ const NotificationsPage = () => {
         error: 'Failed to delete notification.',
       });
     });
+  };
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    return (
+      <Pagination className="mt-6">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              onClick={() => handlePageChange(page - 1)}
+              disabled={page === 1}
+            />
+          </PaginationItem>
+          {[...Array(totalPages).keys()].map((p) => (
+            <PaginationItem key={p + 1}>
+              <PaginationLink
+                onClick={() => handlePageChange(p + 1)}
+                isActive={page === p + 1}
+              >
+                {p + 1}
+              </PaginationLink>
+            </PaginationItem>
+          ))}
+          <PaginationItem>
+            <PaginationNext
+              onClick={() => handlePageChange(page + 1)}
+              disabled={page === totalPages}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    );
   };
 
   return (
@@ -201,6 +250,8 @@ const NotificationsPage = () => {
           </Card>
         )}
 
+        {renderPagination()}
+
         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -228,7 +279,6 @@ const NotificationsPage = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-
       </div>
     </div>
   );

@@ -38,10 +38,12 @@ import {
 } from "../../features/product/productSlice";
 import useDebounce from "../../lib/useDebounce";
 import { formatCurrency } from "@/lib/currency";
+import PaginationDemo from "@/component/common/Pagination";
 
 const ManageProductsPage = () => {
   const dispatch = useDispatch();
   const { products, loading, error } = useSelector((state) => state.product);
+  console.log('products', products)
   const { categories } = useSelector((state) => state.category);
 
   const [searchInput, setSearchInput] = useState("");
@@ -52,6 +54,8 @@ const ManageProductsPage = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchProductsData = async () => {
     const token = localStorage.getItem("accessToken");
@@ -61,13 +65,25 @@ const ManageProductsPage = () => {
       });
       return;
     }
-    dispatch(
+    const resultAction = await dispatch(
       fetchProducts({
         accessToken: token,
         searchTerm: debouncedSearchTerm,
         category: filterCategory,
+        page: currentPage,
+        limit: 10, 
       })
     );
+
+    if (fetchProducts.fulfilled.match(resultAction)) {
+      console.log("API Response Payload:", resultAction.payload);
+      const totalPagesFromResponse = resultAction.payload.pages;
+      if (totalPagesFromResponse) {
+        setTotalPages(totalPagesFromResponse);
+      } else {
+        setTotalPages(1);
+      }
+    }
   };
 
   useEffect(() => {
@@ -75,39 +91,18 @@ const ManageProductsPage = () => {
     if (error) {
       toast.error("Error fetching products", { description: error });
     }
-  }, [debouncedSearchTerm, filterCategory, dispatch, error]);
-
-  // const productCategories = [
-  //   "Ice Tubes",
-  //   "Ice Cubes",
-  //   "Crushed Ice",
-  //   "Flakes Ice",
-  //   "Solid Ice",
-  //   "Ice Ball",
-  //   "Ice Sculpture",
-  //   "Custom Ice",
-  //   "Ice Cup",
-  //   "Dry Ice",
-  //   "Block Ice",
-  //   "Arctic Ice",
-  //   "Luxury Box",
-  //   "Freezers",
-  //   "Machines",
-  // ].sort();
+  }, [debouncedSearchTerm, filterCategory, currentPage, dispatch]);
 
   const handleSearch = () => {
+    setCurrentPage(1);
     fetchProductsData();
   };
 
   const resetFilters = () => {
     setSearchInput("");
     setFilterCategory("All");
+    setCurrentPage(1);
   };
-
-  // const handleEdit = (product) => {
-  //   setEditingProduct(product);
-  //   setIsModalOpen(true);
-  // };
 
   const handleDelete = (product) => {
     setProductToDelete(product);
@@ -150,6 +145,10 @@ const ManageProductsPage = () => {
     setIsModalOpen(false);
     setEditingProduct(null);
     fetchProductsData();
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -403,6 +402,13 @@ const ManageProductsPage = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+              <div className="mt-8">
+                <PaginationDemo
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
               </div>
             </>
           )}

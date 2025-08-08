@@ -5,12 +5,14 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export const getCancelledOrders = createAsyncThunk(
   'cancelledOrders/getCancelledOrders',
-  async (_, { rejectWithValue }) => {
+  async ({ page = 1, limit = 10 }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/api/order/cancelled-orders`);
-      return response.data.cancelledOrders;
+      const response = await axios.get(`${API_URL}/api/order/cancelled-orders`, {
+        params: { page, limit }
+      });
+      return response.data.cancelledOrders
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
@@ -22,7 +24,7 @@ export const initiateRefund = createAsyncThunk(
       const response = await axios.post(`${API_URL}/api/payment/initiate-refund/cancelled-order/${orderId}`);
       return response.data.order;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
@@ -33,8 +35,18 @@ const cancelledOrdersSlice = createSlice({
     orders: [],
     loading: false,
     error: null,
+    pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      totalItems: 0,
+      itemsPerPage: 10
+    }
   },
-  reducers: {},
+  reducers: {
+    setCurrentPage: (state, action) => {
+      state.pagination.currentPage = action.payload;
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getCancelledOrders.pending, (state) => {
@@ -44,6 +56,12 @@ const cancelledOrdersSlice = createSlice({
       .addCase(getCancelledOrders.fulfilled, (state, action) => {
         state.loading = false;
         state.orders = action.payload;
+        state.pagination = {
+          currentPage: action.payload.page,
+          totalPages: action.payload.totalPages,
+          totalItems: action.payload.totalItems,
+          itemsPerPage: action.payload.limit
+        };
       })
       .addCase(getCancelledOrders.rejected, (state, action) => {
         state.loading = false;
@@ -67,4 +85,5 @@ const cancelledOrdersSlice = createSlice({
   },
 });
 
+export const { setCurrentPage } = cancelledOrdersSlice.actions;
 export default cancelledOrdersSlice.reducer;

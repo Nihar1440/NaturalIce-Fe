@@ -11,16 +11,16 @@ const getAuthHeaders = () => ({
 
 export const fetchNotifications = createAsyncThunk(
   "notifications/fetchNotifications",
-  async (userId, { rejectWithValue }) => {
+  async ({ userId, page = 1, limit = 10 }, { rejectWithValue }) => {
     try {
       const { data } = await axios.get(
         `${API_URL}/api/notifications/${userId}`,
-        getAuthHeaders()
+        {
+          params: { page, limit },
+          ...getAuthHeaders(),
+        }
       );
-      if (data.notifications) {
-        return data.notifications;
-      }
-      return [];
+      return data; // Return the full response with pagination data
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -99,6 +99,10 @@ const initialState = {
   loading: false,
   error: null,
   unreadCount: 0,
+  // Add pagination state
+  page: 1,
+  totalPages: 1,
+  totalItems: 0,
 };
 
 const notificationSlice = createSlice({
@@ -153,8 +157,11 @@ const notificationSlice = createSlice({
       })
       .addCase(fetchNotifications.fulfilled, (state, action) => {
         state.loading = false;
-        state.notifications = action.payload;
-        state.unreadCount = action.payload.filter((n) => !n.isRead).length;
+        state.notifications = action.payload.notifications;
+        state.page = action.payload.page;
+        state.totalPages = action.payload.totalPages;
+        state.totalItems = action.payload.totalItems;
+        state.unreadCount = action.payload.notifications.filter((n) => !n.isRead).length;
       })
       .addCase(fetchNotifications.rejected, (state, action) => {
         state.loading = false;

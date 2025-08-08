@@ -12,11 +12,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Eye } from "lucide-react";
-import { useDispatch } from "react-redux";
-import { updateReturnRequestStatus } from "@/features/order/orderSlice";
-import { toast } from "sonner";
-import { initiateReturnRefund } from "@/features/order/orderSlice";
-
 const statusClasses = {
   Approved: "bg-green-300 text-green-800 border-green-200",
   Picked: "bg-blue-300 text-blue-800 border-blue-200",
@@ -55,8 +50,7 @@ const ReturnRequestTable = ({
   onStatusChange,
   onViewDetails,
 }) => {
-  console.log('returnRequests', returnRequests)
-  const dispatch = useDispatch();
+  console.log('returnRequestsssssss', returnRequests)
 
   const isStatusDisabled = (currentStatus, optionStatus) => {
     switch (currentStatus) {

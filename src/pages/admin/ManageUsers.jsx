@@ -28,10 +28,43 @@ import {
 import { toast } from "sonner";
 import useDebounce from "@/lib/useDebounce";
 
+const PaginationComponent = ({ currentPage, totalPages, onPageChange }) => {
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      onPageChange(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      onPageChange(currentPage + 1);
+    }
+  };
+
+  if (totalPages <= 1) {
+    return null;
+  }
+
+  return (
+    <div className="flex items-center justify-center space-x-4 mt-6">
+      <Button onClick={handlePrevious} disabled={currentPage === 1} variant="outline">
+        Previous
+      </Button>
+      <span className="text-sm font-medium">
+        Page {currentPage} of {totalPages}
+      </span>
+      <Button onClick={handleNext} disabled={currentPage === totalPages} variant="outline">
+        Next
+      </Button>
+    </div>
+  );
+};
+
 const ManageUsers = () => {
   const dispatch = useDispatch();
-  const { users, loading } = useSelector((state) => state.user);
+  const { users, loading, totalPages } = useSelector((state) => state.user);
 
+  const [currentPage, setCurrentPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearchInput = useDebounce(searchInput, 500);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -60,7 +93,7 @@ const ManageUsers = () => {
       ).unwrap();
       toast.success("User deleted successfully");
       // Optionally, refresh the user list
-      dispatch(fetchAllUsers(accessToken));
+      dispatch(fetchAllUsers({ name: debouncedSearchInput, page: currentPage, accessToken }));
     } catch (err) {
       // Optionally, show a toast here for error
       toast.error(typeof err === "string" ? err : err.message);
@@ -73,11 +106,21 @@ const ManageUsers = () => {
     localStorage.getItem("accessToken");
 
   useEffect(() => {
+    // When search input changes, reset to page 1
+    setCurrentPage(1);
+  }, [debouncedSearchInput]);
+
+  useEffect(() => {
     if (accessToken) {
-      // Pass the search param as "name"
-      dispatch(fetchAllUsers({ name: debouncedSearchInput, accessToken }));
+      dispatch(
+        fetchAllUsers({ 
+          name: debouncedSearchInput, 
+          page: currentPage, 
+          accessToken 
+        })
+      );
     }
-  }, [dispatch, accessToken, debouncedSearchInput]);
+  }, [dispatch, accessToken, debouncedSearchInput, currentPage]);
   // Remove the client-side filtering:
   // const filteredUsers = users?.filter(...);
   // Instead, just use the users from Redux:
@@ -274,6 +317,13 @@ const ManageUsers = () => {
                   </div>
                 ))}
               </div>
+
+              {/* Pagination Controls */}
+              <PaginationComponent 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
             </>
           )}
         </div>

@@ -1,7 +1,7 @@
-import { Facebook, Linkedin, ShoppingCart, Twitter } from "lucide-react";
+import { Facebook, Linkedin, ShoppingCart, Twitter, ArrowLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import AddToCartConfirmationPopup from '../../component/AddToCartConfirmationPopup';
 import { addItemToCart } from "../../features/cart/cartSlice";
@@ -17,7 +17,7 @@ import RatingsSummary from "@/component/RatingsSummary/RatingsSummary";
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
-  console.log("id", id);
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const { product, loading, } = useSelector((state) => state.product);
@@ -140,6 +140,10 @@ const ProductDetailsPage = () => {
     setZoomPosition({ x: clampedLeft, y: clampedTop });
   };
 
+  const handleBack = () => {
+    navigate(-1);
+  };
+
   if (loading) {
     return (
       <Loader message={"Loading Product Details..."}/>
@@ -157,6 +161,10 @@ const ProductDetailsPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <button onClick={handleBack} className="flex items-center text-gray-600 hover:text-gray-900 mb-3 font-semibold">
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          Back
+        </button>
         {/* Main Product Section */}
         <div className="bg-white rounded-lg shadow-sm mb-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 lg:p-8">

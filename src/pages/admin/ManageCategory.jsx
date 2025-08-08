@@ -7,7 +7,6 @@ import {
   PackageOpen,
   XCircle,
   CheckCircle2,
-  X,
   Search,
   RotateCcw,
 } from "lucide-react";
@@ -43,7 +42,6 @@ import {
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
 import { Toaster } from "../../components/ui/sonner";
-
 import {
   getCategories,
   createCategory,
@@ -58,6 +56,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import PaginationDemo from "@/component/common/Pagination";
 
 const ManageCategory = () => {
   const dispatch = useDispatch();
@@ -74,26 +73,33 @@ const ManageCategory = () => {
   const [searchInput, setSearchInput] = React.useState("");
   const debouncedSearchTerm = useDebounce(searchInput, 500);
   const [filterStatus, setFilterStatus] = React.useState("all");
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [totalPages, setTotalPages] = React.useState(1);
 
   const fetchCategoriesData = async () => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
-      console.warn("No access token found for fetching categories.");
       toast.warning("Authentication required. Please log in.");
       return;
     }
-    dispatch(
+    const resultAction = await dispatch(
       getCategories({
         accessToken: token,
         searchTerm: debouncedSearchTerm,
         status: filterStatus,
+        page: currentPage,
+        limit: 10,
       })
     );
+
+    if (getCategories.fulfilled.match(resultAction)) {
+      setTotalPages(resultAction.payload.totalPages || 1);
+    }
   };
 
   useEffect(() => {
     fetchCategoriesData();
-  }, [dispatch, debouncedSearchTerm, filterStatus]);
+  }, [dispatch, debouncedSearchTerm, filterStatus, currentPage]);
 
   const hasCategories = categories && categories.length > 0;
 
@@ -116,7 +122,6 @@ const ManageCategory = () => {
   const handleSubmitCategory = () => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
-      console.warn("No access token found for creating/updating category.");
       toast.warning("Authentication required. Please log in.");
       return;
     }
@@ -142,7 +147,6 @@ const ManageCategory = () => {
           toast.success("Category updated successfully!");
         })
         .catch((err) => {
-          console.error("Failed to update category:", err);
           toast.error(
             `Failed to update category: ${err.message || "Unknown error"}`
           );
@@ -156,7 +160,6 @@ const ManageCategory = () => {
           toast.success("Category created successfully!");
         })
         .catch((err) => {
-          console.error("Failed to create category:", err);
           toast.error(
             `Failed to create category: ${err.message || "Unknown error"}`
           );
@@ -173,7 +176,6 @@ const ManageCategory = () => {
     if (categoryToDelete) {
       const token = localStorage.getItem("accessToken");
       if (!token) {
-        console.warn("No access token found for deleting category.");
         toast.warning("Authentication required. Please log in.");
         return;
       }
@@ -188,7 +190,6 @@ const ManageCategory = () => {
           toast.success("Category deleted successfully!");
         })
         .catch((err) => {
-          console.error("Failed to delete category:", err);
           toast.error(
             `Failed to delete category: ${err.message || "Unknown error"}`
           );
@@ -200,7 +201,6 @@ const ManageCategory = () => {
     const newStatus = category.status === "Active" ? "Inactive" : "Active";
     const token = localStorage.getItem("accessToken");
     if (!token) {
-      console.warn("No access token found for updating category status.");
       toast.warning("Authentication required. Please log in.");
       return;
     }
@@ -217,7 +217,6 @@ const ManageCategory = () => {
         toast.success(`Category status updated to ${newStatus}.`);
       })
       .catch((err) => {
-        console.error("Failed to toggle category status:", err);
         toast.error(
           `Failed to update status: ${err.message || "Unknown error"}`
         );
@@ -226,7 +225,6 @@ const ManageCategory = () => {
 
   useEffect(() => {
     if (error) {
-      console.error("Category operation error:", error);
       toast.error(
         `Category operation error: ${error.message || "Unknown error"}`
       );
@@ -234,12 +232,18 @@ const ManageCategory = () => {
   }, [error]);
 
   const handleSearch = () => {
+    setCurrentPage(1);
     fetchCategoriesData();
   };
 
   const resetFilters = () => {
     setSearchInput("");
     setFilterStatus("all");
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -255,7 +259,7 @@ const ManageCategory = () => {
               <div className="flex">
                 <Input
                   type="text"
-                  placeholder="Search by name or description..."
+                  placeholder="Search by name..."
                   className="flex-1 rounded-r-none border-r-0"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
@@ -456,10 +460,10 @@ const ManageCategory = () => {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex space-x-2 justify-end">
-                            {/* Edit */}
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button variant="outline"
+                                <Button
+                                  variant="outline"
                                   className="cursor-pointer text-blue-600 hover:text-blue-800 p-1 rounded-md hover:bg-blue-100 transition-colors"
                                   onClick={() => handleEdit(category)}
                                 >
@@ -471,10 +475,10 @@ const ManageCategory = () => {
                               </TooltipContent>
                             </Tooltip>
 
-                            {/* Toggle Status */}
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button variant="outline"
+                                <Button
+                                  variant="outline"
                                   className={`cursor-pointer p-1 rounded-md transition-colors ${
                                     category?.status === "Active"
                                       ? "text-red-600 hover:text-red-800 hover:bg-red-100"
@@ -498,10 +502,10 @@ const ManageCategory = () => {
                               </TooltipContent>
                             </Tooltip>
 
-                            {/* Delete */}
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button variant="outline"
+                                <Button
+                                  variant="outline"
                                   className="cursor-pointer text-red-600 hover:text-red-800 p-1 rounded-md hover:bg-red-100 transition-colors"
                                   onClick={() => handleDelete(category)}
                                 >
@@ -518,6 +522,13 @@ const ManageCategory = () => {
                     ))}
                   </tbody>
                 </table>
+              </div>
+              <div className="mt-8">
+                <PaginationDemo
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
               </div>
             </>
           )}
@@ -537,7 +548,7 @@ const ManageCategory = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel variant="default">Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-500"
               onClick={confirmDelete}

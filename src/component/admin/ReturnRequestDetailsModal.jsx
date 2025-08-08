@@ -91,9 +91,10 @@ const ReturnRequestDetailsModal = ({
   returnRequest,
   onUpdateStatus,
 }) => {
+  console.log('returnRequestjjjj', returnRequest)
   if (!isOpen || !returnRequest) return null;
 
-  console.log("returnRequest", returnRequest);
+  console.log("returnRequesttttt", returnRequest);
 
   const renderActionButtons = () => {
     const { _id, status } = returnRequest;
@@ -121,7 +122,7 @@ const ReturnRequestDetailsModal = ({
       );
     }
 
-    if (status === "Picked" && !isRefundProceed(returnRequest.refundStatus)) {
+    if (status === "Picked" && !isRefundProceed(returnRequest?.refundStatus)) {
       return (
         <>
           <Button size="sm" variant="default" onClick={() => onUpdateStatus(_id, "InitiateRefund")}>
@@ -151,18 +152,18 @@ const ReturnRequestDetailsModal = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm bg-gray-50 p-4 rounded-lg">
                 <p>
                   <strong>Order Status:</strong>{" "}
-                  <Badge variant={getStatusBadgeVariant(returnRequest.orderId.status)}>
-                    {capitalizeFirstLetter(returnRequest.orderId.status)}
+                  <Badge variant={getStatusBadgeVariant(returnRequest?.orderId?.status)}>
+                    {capitalizeFirstLetter(returnRequest?.orderId?.status)}
                   </Badge>
                 </p>
                 <p>
                   <strong>Total Amount:</strong>{" "}
-                  {formatCurrency(returnRequest.orderId.totalAmount)}
+                  {formatCurrency(returnRequest?.orderId?.totalAmount)}
                 </p>
                 <p>
                   <strong>Delivery Date:</strong>{" "}
-                  {returnRequest.orderId.deliveredAt
-                    ? format(new Date(returnRequest.orderId.deliveredAt), "PPP")
+                  {returnRequest?.orderId?.deliveredAt
+                    ? format(new Date(returnRequest?.orderId?.deliveredAt), "PPP")
                     : "N/A"}
                 </p>
                 <p>
@@ -184,7 +185,7 @@ const ReturnRequestDetailsModal = ({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {returnRequest.items.map(
+                  {returnRequest?.items?.map(
                     (item) => (
                       console.log(item, "item"),
                       (
@@ -202,8 +203,8 @@ const ReturnRequestDetailsModal = ({
                               </p>
                             </div>
                           </TableCell>
-                          <TableCell>{item.quantity}</TableCell>
-                          <TableCell>{formatCurrency(item.price)}</TableCell>
+                          <TableCell>{item?.quantity}</TableCell>
+                          <TableCell>{formatCurrency(item?.price)}</TableCell>
                         </TableRow>
                       )
                     )
@@ -298,10 +299,10 @@ const ReturnRequestDetailsModal = ({
                 <h3 className="font-semibold text-lg mb-2">Pickup Agent</h3>
                 <div className="text-sm bg-gray-50 p-4 rounded-lg space-y-1">
                   <p>
-                    <strong>Name:</strong> {returnRequest.pickUpAgent.name}
+                    <strong>Name:</strong> {returnRequest?.pickUpAgent?.name}
                   </p>
                   <p>
-                    <strong>Phone:</strong> {returnRequest.pickUpAgent.phone}
+                    <strong>Phone:</strong> {returnRequest?.pickUpAgent?.phone}
                   </p>
                 </div>
               </div>
