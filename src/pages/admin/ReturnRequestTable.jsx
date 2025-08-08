@@ -117,7 +117,7 @@ const ReturnRequestTable = ({
                           variant="outline"
                           size="sm"
                           className="text-blue-600 hover:text-blue-800 hover:bg-blue-200"
-                          onClick={() => onViewDetails(returnRequest._id)}
+                          onClick={() => onViewDetails(returnRequest)}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>

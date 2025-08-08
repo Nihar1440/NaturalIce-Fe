@@ -48,7 +48,7 @@ const OrderTable = ({
         </tr>
       </thead>
       <tbody className="text-center">
-        {orders.map((order) => (
+        {orders?.map((order) => (
           <tr
             key={order._id}
             className="border-b last:border-b-0 hover:bg-gray-100 transition-colors"
