@@ -29,7 +29,7 @@ export const fetchOrders = createAsyncThunk(
 // Fetch my orders
 export const fetchMyOrders = createAsyncThunk(
   "order/fetchMyOrders",
-  async ({ userId, accessToken }, { rejectWithValue }) => {
+  async ({ userId, accessToken, page = 1, limit = 10 }, { rejectWithValue }) => {
     try {
       const response = await axios.get(
         `${API_URL}/api/order/user-orders/${userId}`,
@@ -37,9 +37,16 @@ export const fetchMyOrders = createAsyncThunk(
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
+          params: { page, limit },
         }
       );
-      return response.data;
+      return {
+        orders: response.data.orders,
+        page: response.data.page,
+        totalPages: response.data.totalPages,
+        totalItems: response.data.totalItems,
+        limit: response.data.limit,
+      };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -165,12 +172,19 @@ export const fetchAllReturnRequests = createAsyncThunk(
 
 export const fetchUserReturnRequest = createAsyncThunk(
   "order/fetchUserReturnRequest",
-  async (userId, { rejectWithValue }) => {
+  async ({ userId, page = 1, limit = 10 }, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        `${API_URL}/api/order/user-return-request/${userId}`
+        `${API_URL}/api/order/user-return-request/${userId}`,
+        { params: { page, limit } }
       );
-      return response.data.returnRequests;
+      return {
+        data: response.data.returnRequests || [],
+        page: response.data.page || page,
+        totalPages: response.data.totalPages || 1,
+        totalItems: response.data.totalItems || 0,
+        limit: response.data.limit || limit,
+      };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -322,6 +336,8 @@ const orderSlice = createSlice({
     returnRequestsError: null,
     returnRequestsTotalPages: 0,
     returnRequestsCurrentPage: 1,
+    returnRequestsLimit: 10,
+    returnRequestsTotalItems: 0,
     recentOrders: [],
     recentOrdersLoading: false,
     recentOrdersError: null,
@@ -333,6 +349,11 @@ const orderSlice = createSlice({
     salesOverviewError: null,
     initiateReturnRefundLoading: false,
     initiateReturnRefundError: null,
+    // My orders pagination
+    myOrdersTotalPages: 1,
+    myOrdersCurrentPage: 1,
+    myOrdersLimit: 10,
+    myOrdersTotalItems: 0,
   },
   reducers: {
     clearOrders: (state) => {
@@ -376,11 +397,20 @@ const orderSlice = createSlice({
       })
       .addCase(fetchMyOrders.fulfilled, (state, action) => {
         state.loading = false;
-        state.orders = action.payload.orders;
+        const sorted = (action.payload.orders || []).slice().sort((a, b) => {
+          const aDate = new Date(a?.createdAt || a?.orderDate || 0);
+          const bDate = new Date(b?.createdAt || b?.orderDate || 0);
+          return bDate - aDate;
+        });
+        state.orders = sorted;
+        state.myOrdersCurrentPage = action.payload.page;
+        state.myOrdersLimit = action.payload.limit;
+        state.myOrdersTotalPages = action.payload.totalPages;
+        state.myOrdersTotalItems = action.payload.totalItems;
       })
       .addCase(fetchMyOrders.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message;
+        state.error = action.payload || action.error?.message || null;
       })
 
       // Fetch single order
@@ -531,14 +561,19 @@ const orderSlice = createSlice({
 
       .addCase(fetchUserReturnRequest.pending, (state) => {
         state.returnRequestsLoading = true;
+        state.returnRequestsError = null;
       })
       .addCase(fetchUserReturnRequest.fulfilled, (state, action) => {
         state.returnRequestsLoading = false;
-        state.returnRequests = action.payload;
+        state.returnRequests = action.payload.data || [];
+        state.returnRequestsTotalPages = action.payload.totalPages || 1;
+        state.returnRequestsCurrentPage = action.payload.page || 1;
+        state.returnRequestsLimit = action.payload.limit || state.returnRequestsLimit;
+        state.returnRequestsTotalItems = action.payload.totalItems || 0;
       })
       .addCase(fetchUserReturnRequest.rejected, (state, action) => {
         state.returnRequestsLoading = false;
-        state.returnRequestsError = action.payload;
+        state.returnRequestsError = action.payload || action.error?.message || null;
       })
 
       // ADMIN: Update return request status
@@ -638,6 +673,6 @@ const orderSlice = createSlice({
   },
 });
 
-export const { clearOrders, clearOrder, clearReturnStatus, clearTracking, selectRecentOrders, selectRecentOrdersLoading, selectRecentOrdersError } =
-  orderSlice.actions;
+export const { clearOrders, clearOrder, clearReturnStatus, clearTracking } = orderSlice.actions;
+
 export default orderSlice.reducer;

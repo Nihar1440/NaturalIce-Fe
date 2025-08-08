@@ -37,6 +37,7 @@ import {
   markAllNotificationsAsRead,
   deleteAllNotifications,
 } from "@/features/notification/notificationSlice";
+import PaginationDemo from "@/component/common/Pagination";
 
 const NotificationsPage = () => {
   const dispatch = useDispatch();
@@ -47,16 +48,17 @@ const NotificationsPage = () => {
   const [selectedNotifications, setSelectedNotifications] = useState([]);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
+  const myOrdersLimit = 10;
 
   useEffect(() => {
     if (user?._id) {
-      dispatch(fetchNotifications({ userId: user._id, page: 1, limit: 10 }));
+      dispatch(fetchNotifications({ userId: user._id, page: page, limit: myOrdersLimit }));
     }
-  }, [dispatch, user?._id]);
+  }, [dispatch, user?._id, page]);
 
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages && newPage !== page) {
-      dispatch(fetchNotifications({ userId: user._id, page: newPage, limit: 10 }));
+      dispatch(fetchNotifications({ userId: user._id, page: newPage, limit: myOrdersLimit }));
     }
   };
 
@@ -126,38 +128,38 @@ const NotificationsPage = () => {
     });
   };
 
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
+  // const renderPagination = () => {
+  //   if (totalPages <= 1) return null;
 
-    return (
-      <Pagination className="mt-6">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page === 1}
-            />
-          </PaginationItem>
-          {[...Array(totalPages).keys()].map((p) => (
-            <PaginationItem key={p + 1}>
-              <PaginationLink
-                onClick={() => handlePageChange(p + 1)}
-                isActive={page === p + 1}
-              >
-                {p + 1}
-              </PaginationLink>
-            </PaginationItem>
-          ))}
-          <PaginationItem>
-            <PaginationNext
-              onClick={() => handlePageChange(page + 1)}
-              disabled={page === totalPages}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    );
-  };
+  //   return (
+  //     <Pagination className="mt-6">
+  //       <PaginationContent>
+  //         <PaginationItem>
+  //           <PaginationPrevious
+  //             onClick={() => handlePageChange(page - 1)}
+  //             disabled={page === 1}
+  //           />
+  //         </PaginationItem>
+  //         {[...Array(totalPages).keys()].map((p) => (
+  //           <PaginationItem key={p + 1}>
+  //             <PaginationLink
+  //               onClick={() => handlePageChange(p + 1)}
+  //               isActive={page === p + 1}
+  //             >
+  //               {p + 1}
+  //             </PaginationLink>
+  //           </PaginationItem>
+  //         ))}
+  //         <PaginationItem>
+  //           <PaginationNext
+  //             onClick={() => handlePageChange(page + 1)}
+  //             disabled={page === totalPages}
+  //           />
+  //         </PaginationItem>
+  //       </PaginationContent>
+  //     </Pagination>
+  //   );
+  // };
 
   return (
     <div className="bg-gray-50 min-h-screen mt-16">
@@ -250,8 +252,8 @@ const NotificationsPage = () => {
           </Card>
         )}
 
-        {renderPagination()}
-
+        {/* {renderPagination()} */}
+        <PaginationDemo totalPages={totalPages} currentPage={page} onPageChange={handlePageChange} />
         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
