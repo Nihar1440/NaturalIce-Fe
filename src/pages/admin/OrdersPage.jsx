@@ -37,7 +37,7 @@ const OrdersPage = () => {
   const [totalOrders, setTotalOrders] = useState(0);
 
   const dispatch = useDispatch();
-  const { orders, loading } = useSelector((state) => state.order.orders);
+  const { orders, loading } = useSelector((state) => state.order);
   console.log('orders', orders)
 
   useEffect(() => {
@@ -141,7 +141,8 @@ const OrdersPage = () => {
           orderId: statusOrderId,
           status: newStatus,
         })
-      );
+      ).unwrap();
+
       toast.success("Order status updated successfully!");
       setShowStatusDialog(false);
       dispatch(
@@ -153,7 +154,8 @@ const OrdersPage = () => {
         setTotalOrders(res.payload.totalOrders);
         setTotalPages(res.payload.totalPages);
       });
-    } catch {
+    } catch(err){
+      console.error("Error in updating status: ",err.message)
       toast.error("Failed to update status");
     }
   };
