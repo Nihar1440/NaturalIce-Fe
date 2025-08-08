@@ -126,83 +126,51 @@ export function PaginationDemo({ currentPage, totalPages, onPageChange }) {
 
   const renderPaginationItems = () => {
     const items = [];
-    const showEllipsis = totalPages > 7;
 
-    if (!showEllipsis) {
-      // Show all pages if 7 or fewer
-      for (let i = 1; i <= totalPages; i++) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationLink
-              isActive={currentPage === i}
-              onClick={() => handlePageChange(i)}
-            >
-              {i}
-            </PaginationLink>
-          </PaginationItem>
-        );
-      }
-    } else {
-      // Show first page
+    // Window of 3 pages max
+    if (totalPages === 0) return items;
+
+    let start = 1;
+    if (currentPage > 3) {
+      start = currentPage - 2;
+    }
+    const end = Math.min(start + 2, totalPages);
+
+    // Adjust start if we're near the end so we still show 3 items when possible
+    start = Math.max(1, Math.min(start, Math.max(1, totalPages - 2)));
+
+    for (let i = start; i <= end; i++) {
       items.push(
-        <PaginationItem key={1}>
+        <PaginationItem key={i}>
           <PaginationLink
-            isActive={currentPage === 1}
-            onClick={() => handlePageChange(1)}
+            isActive={currentPage === i}
+            onClick={() => handlePageChange(i)}
           >
-            1
+            {i}
           </PaginationLink>
         </PaginationItem>
       );
+    }
 
-      // Show ellipsis if current page is far from start
-      if (currentPage > 3) {
-        items.push(
-          <PaginationItem key="ellipsis-start">
-            <PaginationEllipsis />
-          </PaginationItem>
-        );
-      }
+    // Ellipsis if there are more pages after the current window
+    if (end < totalPages) {
+      items.push(
+        <PaginationItem key="ellipsis-after-window">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
 
-      // Show pages around current page
-      const start = Math.max(2, currentPage - 1);
-      const end = Math.min(totalPages - 1, currentPage + 1);
-
-      for (let i = start; i <= end; i++) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationLink
-              isActive={currentPage === i}
-              onClick={() => handlePageChange(i)}
-            >
-              {i}
-            </PaginationLink>
-          </PaginationItem>
-        );
-      }
-
-      // Show ellipsis if current page is far from end
-      if (currentPage < totalPages - 2) {
-        items.push(
-          <PaginationItem key="ellipsis-end">
-            <PaginationEllipsis />
-          </PaginationItem>
-        );
-      }
-
-      // Show last page
-      if (totalPages > 1) {
-        items.push(
-          <PaginationItem key={totalPages}>
-            <PaginationLink
-              isActive={currentPage === totalPages}
-              onClick={() => handlePageChange(totalPages)}
-            >
-              {totalPages}
-            </PaginationLink>
-          </PaginationItem>
-        );
-      }
+      // Show the last page button
+      items.push(
+        <PaginationItem key={totalPages}>
+          <PaginationLink
+            isActive={currentPage === totalPages}
+            onClick={() => handlePageChange(totalPages)}
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
     }
 
     return items;
