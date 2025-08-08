@@ -7,38 +7,7 @@ import ReturnRequestDetailsModal from '@/component/admin/ReturnRequestDetailsMod
 import ReturnRequestTable from '@/pages/admin/ReturnRequestTable';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-
-const PaginationComponent = ({ currentPage, totalPages, onPageChange }) => {
-  const handlePrevious = () => {
-    if (currentPage > 1) {
-      onPageChange(currentPage - 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentPage < totalPages) {
-      onPageChange(currentPage + 1);
-    }
-  };
-
-  if (totalPages <= 1) {
-    return null;
-  }
-
-  return (
-    <div className="flex items-center justify-center space-x-4 mt-6">
-      <Button onClick={handlePrevious} disabled={currentPage === 1} variant="outline">
-        Previous
-      </Button>
-      <span className="text-sm font-medium">
-        Page {currentPage} of {totalPages}
-      </span>
-      <Button onClick={handleNext} disabled={currentPage === totalPages} variant="outline">
-        Next
-      </Button>
-    </div>
-  );
-};
+import PaginationDemo from '@/component/common/Pagination';
 
 const ManageReturnRequests = () => {
   const dispatch = useDispatch();
@@ -117,7 +86,7 @@ const ManageReturnRequests = () => {
                 onStatusChange={handleStatusChange}
                 onViewDetails={handleViewDetails}
               />
-              <PaginationComponent 
+              <PaginationDemo 
                 currentPage={currentPage}
                 totalPages={returnRequestsTotalPages}
                 onPageChange={setCurrentPage}

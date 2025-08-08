@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { Eye, XCircle } from 'lucide-react';
 import { formatCurrency } from '@/lib/currency';
 import { toast } from 'sonner';
+import PaginationDemo from "@/component/common/Pagination";
 
 const getStatusClasses = (status) => {
     switch (status?.toLowerCase()) {
@@ -47,16 +48,45 @@ const getRefundStatusClasses = (status) => {
 const ReturnRequest = () => {
     const dispatch = useDispatch();
     const { user } = useSelector((state) => state.auth);
-    const { returnRequests, cancelLoading, cancelError } = useSelector((state) => state.order);
+    const {
+        returnRequests,
+        cancelLoading,
+        cancelError,
+        returnRequestsTotalPages,
+        returnRequestsLimit,
+    } = useSelector((state) => state.order);
+    console.log('returnRequestsLimit', returnRequestsLimit)
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedReturnRequest, setSelectedReturnRequest] = useState(null);
     const [selectedReturnRequestId, setSelectedReturnRequestId] = useState(null);
+    // Local page state
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
         if (user?._id) {
-            dispatch(fetchUserReturnRequest(user?._id));
+            dispatch(
+                fetchUserReturnRequest({
+                    userId: user?._id,
+                    page: currentPage,
+                    limit: returnRequestsLimit || 10,
+                })
+            );
         }
-    }, [dispatch, user]);
+    }, [dispatch, user, currentPage, returnRequestsLimit]);
+
+    const handlePageChange = (page) => {
+        if (page === currentPage) return;
+        setCurrentPage(page);
+        if (user?._id) {
+            dispatch(
+                fetchUserReturnRequest({
+                    userId: user?._id,
+                    page,
+                    limit: returnRequestsLimit || 10,
+                })
+            );
+        }
+    };
 
     const handleViewDetails = (returnRequest) => {
         setSelectedReturnRequest(returnRequest);
@@ -69,23 +99,23 @@ const ReturnRequest = () => {
                 await dispatch(cancelReturnRequest(selectedReturnRequestId)).unwrap();
                 toast.success("Return request cancelled successfully");
                 setSelectedReturnRequestId(null);
-                dispatch(fetchUserReturnRequest(user?._id));
+                // Refresh current page
+                dispatch(
+                    fetchUserReturnRequest({
+                        userId: user?._id,
+                        page: currentPage,
+                        limit: returnRequestsLimit || 10,
+                    })
+                );
             } catch (err) {
                 const errorMessage = err.message || (typeof err === 'string' ? err : "Failed to cancel return request");
                 toast.error(errorMessage);
             }
         }
-    };
-
-    if (returnRequests?.length === 0) {
-        return 
     }
 
     return (
         <div className="max-w-8xl mx-auto">
-            <h1 className="text-2xl font-extrabold text-gray-900 mt-10 mb-6">
-                Your Return Request
-            </h1>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <div className="rounded-lg overflow-hidden shadow-md bg-white">
                     <div className="overflow-x-auto">
@@ -218,6 +248,17 @@ const ReturnRequest = () => {
                         </Table>
                     </div>
                 </div>
+
+                {/* Pagination Controls */}
+                {returnRequestsTotalPages > 1 && (
+                    <div className="p-4 border-t bg-white flex items-center justify-between">
+                        <PaginationDemo
+                            currentPage={currentPage}
+                            totalPages={returnRequestsTotalPages}
+                            onPageChange={handlePageChange}
+                        />
+                    </div>
+                )}
 
                 <DialogContent className="sm:max-w-[800px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     {selectedReturnRequest && (
