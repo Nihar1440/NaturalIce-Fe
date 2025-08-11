@@ -20,7 +20,8 @@ import {
 } from "../../features/cart/cartSlice";
 import {
   getShippingAddresses, 
-  clearShippingAddressError, 
+  clearShippingAddressError,
+  createShippingAddress, 
 } from "../../features/shippingAddress/shippingAddressSlice"; 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -52,8 +53,7 @@ export default function CartPage() {
   const [email, setEmail] = useState("");
   const [showAddAddress, setShowAddAddress] = useState(false);
   const [promoCode, setPromoCode] = useState("");
-  const [selectedAddress, setSelectedAddress] = useState(null); 
-  const guestId = localStorage.getItem("guestId");
+  const [selectedAddress, setSelectedAddress] = useState(null);
 
   // try {
   //   const userString = localStorage.getItem("user");
@@ -131,11 +131,11 @@ export default function CartPage() {
   };
 
   const handleRemoveItem = async (productId) => {
-    if (guestId && !user) {
+    if (!user) {
       dispatch(removeItem(productId));
       return;
     }
-    if (!user || !accessToken) {
+    if (!accessToken) {
       toast.error("Please log in to remove cart items.");
       return;
     }
@@ -172,9 +172,17 @@ export default function CartPage() {
   const tax = subtotal * 0.08;
   const total = subtotal + tax;
 
-  const handleAddAddress = (address) => {
+  const handleAddAddress = async(address) => {
     setSelectedAddress(address);
     setShowAddAddress(false);
+    if(user){
+      try {
+        await dispatch(createShippingAddress(address))
+        toast.success("Address added successfully!")
+      } catch (error) {
+        toast.error("Failed to add address")
+      }
+    }
   }
 
   const handleCheckout = async () => {
@@ -227,8 +235,6 @@ export default function CartPage() {
 
       const formData = {
         userId: user?._id || null,
-        guestId,
-        isGuest: !!guestId,
         email,
         totalAmount: total,
         items: itemsForCheckout,
@@ -515,11 +521,11 @@ export default function CartPage() {
                 </div>
               </div>
 
-              <div className={`mb-6 ${guestId && !user ? "block" : "hidden"}`}>
+              <div className={`mb-6 ${!user ? "block" : "hidden"}`}>
                 <h3 className="text-md font-semibold text-gray-800 mb-3 flex items-center">
                   Email
                 </h3>
-                {guestId && !user && (
+                {!user && (
                   <input
                     type="email"
                     placeholder="Email"
@@ -537,7 +543,7 @@ export default function CartPage() {
                   Delivery Address
                 </h3>
                 {/* For Guest Users */}
-                {guestId && !user && (
+                {!user && (
                   <Button onClick={() => setShowAddAddress(true)}>
                     {selectedAddress ? "Edit Shipping Address" : "Add Shipping Address"}
                   </Button>

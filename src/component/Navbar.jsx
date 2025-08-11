@@ -103,7 +103,7 @@ const Navbar = () => {
 
   const performLogout = () => {
     dispatch(logout());
-    dispatch(clearCart());
+    // dispatch(clearCart());
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
     toast.success("Logged out successfully!");

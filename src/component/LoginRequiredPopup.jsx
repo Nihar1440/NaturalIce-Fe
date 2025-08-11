@@ -124,7 +124,7 @@ const LoginRequiredPopup = ({ isVisible, onClose }) => {
             delay="0.3s"
             className="text-gray-600 mb-6"
           >
-            You need to be logged in to add products to your cart.
+            You need to be logged in to add products to your Wishlist.
           </AnimatedElement>
 
           <AnimatedElement

@@ -9,7 +9,6 @@ export default function SuccessPage() {
   const location = useLocation();
   const dispatch = useDispatch();
   const { accessToken, user } = useSelector((state) => state.auth);
-  const guestId = localStorage.getItem("guestId");
 
   const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -34,7 +33,7 @@ export default function SuccessPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
-          body: JSON.stringify({ sessionId, userId: user?._id, guestId }),
+          body: JSON.stringify({ sessionId, userId: user?._id }),
         });
 
         if (!response.ok) {
