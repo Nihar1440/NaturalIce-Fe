@@ -27,9 +27,6 @@ const ProductCatalogue = ({ products, loading }) => {
     e.stopPropagation();
     try {
       if (!user) {
-        if (!localStorage.getItem("guestId")) {
-          localStorage.setItem("guestId", "GUEST_" + crypto.randomUUID());
-        }
         dispatch(
           addItem({
             productId: product,
