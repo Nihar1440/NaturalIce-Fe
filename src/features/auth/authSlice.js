@@ -145,6 +145,7 @@ export const getUserProfile = createAsyncThunk(
       const response = await axios.get(`${API_URL}/api/user/profile`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
+      localStorage.setItem("user", JSON.stringify(response.data.user));
       return response.data.user;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {

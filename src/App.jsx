@@ -45,7 +45,7 @@ const AppInitializer = () => {
 
   useEffect(() => {
     if (user) {
-      dispatch(fetchNotifications(user._id));
+      dispatch(fetchNotifications({userId: user._id}));
     }
   }, [dispatch, user]);
 

@@ -1,13 +1,19 @@
 // ProtectedRoute.jsx
 import { Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { getUserProfile } from "@/features/auth/authSlice";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const user = useSelector(state => state.auth.user);
+  const dispatch = useDispatch();
+  const { accessToken, user} = useSelector(state => state.auth);
 
-  if (!user) return <Navigate to="/login" />;
+  if (!accessToken) return <Navigate to="/login" />;
 
-  if (!allowedRoles.includes(user.role)) {
+  if(!user){
+    dispatch(getUserProfile());
+  }
+
+  if (!allowedRoles.includes(user?.role)) {
     return <Navigate to="/" />;
   }
 
